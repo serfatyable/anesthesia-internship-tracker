@@ -6,6 +6,12 @@ const nextConfig = {
   },
   // Disable static generation for dynamic routes
   trailingSlash: false,
+  // Disable static optimization for API routes
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
+  // Force dynamic rendering for all pages
+  output: 'standalone',
 };
 
 export default nextConfig;

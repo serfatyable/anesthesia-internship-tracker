@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   InternDashboard as InternDashboardType,
@@ -10,7 +10,7 @@ import { InternDashboard } from '@/components/site/dashboard/InternDashboard';
 import { DashboardOverview } from '@/components/site/dashboard/DashboardOverview';
 import { CardTile } from '@/components/site/CardTile';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<InternDashboardType | DashboardOverviewType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,5 +121,13 @@ export default function DashboardPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

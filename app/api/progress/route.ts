@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth/options';
 import { progressService } from '@/lib/services/progressService';
 import { ProgressQuerySchema, ProgressAccessSchema } from '@/lib/validators/progress';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
