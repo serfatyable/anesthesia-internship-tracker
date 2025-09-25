@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth/options'; // if alias fails, use "../../
 import { redirect } from 'next/navigation';
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
-  const role = (session?.user as { role?: string })?.role;
+  const role = (session as { user?: { role?: string } } | null)?.user?.role;
   if (!session || role !== 'ADMIN') redirect('/403');
   return (
     <main className="p-6">
