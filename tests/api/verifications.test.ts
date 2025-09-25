@@ -9,7 +9,7 @@ vi.mock('next-auth', () => ({
 vi.mock('@/lib/auth/options', async (importOriginal) => {
   const actual = await importOriginal();
   return {
-    ...actual,
+    ...(actual as Record<string, unknown>),
     authOptions: {} as Record<string, unknown>, // route only needs it passed into getServerSession mock
   };
 });

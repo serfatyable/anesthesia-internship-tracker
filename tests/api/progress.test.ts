@@ -29,7 +29,8 @@ describe('GET /api/progress', () => {
   it('returns 200 on success', async () => {
     // Use relative import to avoid Vitest alias edge cases
     const { GET } = await import('../../app/api/progress/route');
-    const res = await GET(new Request('http://test/api/progress'));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await GET(new Request('http://test/api/progress') as any);
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.summary.totalRequired).toBe(1);

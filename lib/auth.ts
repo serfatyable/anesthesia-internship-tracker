@@ -1,4 +1,5 @@
-import type { NextAuthOptions, User as NextAuthUser } from 'next-auth/next';
+import type { NextAuthOptions } from 'next-auth';
+import type { User as NextAuthUser } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma as db } from '@/lib/db';
@@ -36,7 +37,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({
+      token,
+      user,
+      trigger,
+      session,
+    }: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      token: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user: any;
+      trigger?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      session?: any;
+    }) {
       if (user) {
         token.id = user.id as string;
         token.role = (user as unknown as { role: string }).role ?? token.role ?? 'INTERN';
@@ -46,7 +61,16 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({
+      session,
+      token,
+    }: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      session: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      token: any;
+    }) {
       if (session.user) {
         session.user.role = (token.role as string) ?? 'INTERN';
         session.user.id = token.id as string;

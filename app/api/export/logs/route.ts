@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
   try {
     // Auth
     const rawSession = await getServerSession(authOptions);
-    const user = (rawSession as unknown as { user?: { id?: string; role?: string | null } } | null)?.user;
+    const user = (rawSession as unknown as { user?: { id?: string; role?: string | null } } | null)
+      ?.user;
     if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
     const filenameParts = ['logs'];
     if (from) filenameParts.push(`from-${from}`);
     if (to) filenameParts.push(`to-${to}`);
-    filenameParts.push(now.toISOString().split('T')[0]);
+    filenameParts.push(now.toISOString().split('T')[0] || 'unknown');
     const filename = `${filenameParts.join('_')}.csv`;
 
     return new NextResponse(csvContent, {
