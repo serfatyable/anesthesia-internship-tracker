@@ -1,9 +1,14 @@
-import React from 'react';
-
-export default function HomePage() {
+export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <h1 className="text-3xl font-bold text-center">Anesthesia Internship Tracker</h1>
+    <main className="p-6">
+      <h1>Welcome</h1>
+      <p>Debug mode (no redirects).</p>
+      <nav className="space-x-4 underline">
+        <a href="/login">Login</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/health">Health</a>
+        <a href="/debug/status">Status</a>
+      </nav>
     </main>
   );
 }

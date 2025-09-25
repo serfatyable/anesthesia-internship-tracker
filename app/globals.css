@@ -2,7 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light/dark base */
+:root {
+  color-scheme: light dark;
+}
 html,
-body {
+body,
+#__next {
   height: 100%;
+}
+
+/* RTL helper: toggled via data attribute */
+:root[dir='rtl'] * {
+  letter-spacing: 0;
 }

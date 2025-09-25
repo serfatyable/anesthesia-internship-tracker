@@ -3,5 +3,3 @@
   "*.{md,css,json}": ["prettier --write"],
   "prisma/schema.prisma": ["prisma format"]
 }
-
-

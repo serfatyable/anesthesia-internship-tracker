@@ -1,15 +1,14 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+import Header from '@/components/Header';
 
-export const metadata: Metadata = {
-  title: 'Anesthesia Internship Tracker',
-  description: 'T1 Scaffold',
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900">{children}</body>
+    <html lang="en" dir="ltr">
+      <body>
+        <Header />
+        <main className="max-w-5xl mx-auto p-4">{children}</main>
+      </body>
     </html>
   );
 }
