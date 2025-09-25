@@ -7,7 +7,8 @@ import { ExportQuerySchema, ProgressAccessSchema } from '@/lib/validators/progre
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const rawSession = await getServerSession(authOptions);
+    const session = rawSession as unknown as { user?: { id?: string } } | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
