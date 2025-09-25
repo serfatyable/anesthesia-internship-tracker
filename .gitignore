@@ -5,3 +5,8 @@ pnpm-debug.log*
 coverage/
 
 
+
+# local dev db
+prisma/dev.db
+*.db
+*.db-journal
