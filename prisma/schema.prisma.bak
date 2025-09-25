@@ -1,0 +1,196 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+}
+
+)generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Role stored as string for compatibility; can be migrated to enum on Postgres later
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  role      String   @default("INTERN")
+  password  String? // only used for Credentials provider
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // next-auth relations
+  accounts Account[]
+  sessions Session[]
+
+  // Relations
+  logs          LogEntry[]
+  verifications Verification[] @relation("VerifierVerifications")
+  audits        Audit[]        @relation("UserAudits")
+}
+
+model Rotation {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  procedures   Procedure[]
+  requirements Requirement[]
+}
+
+model Procedure {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  rotationId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rotation     Rotation      @relation(fields: [rotationId], references: [id], onDelete: Cascade)
+  requirements Requirement[]
+  logs         LogEntry[]
+
+  @@unique([rotationId, name])
+  @@index([rotationId])
+}
+
+model Requirement {
+  id            String  @id @default(cuid())
+  rotationId    String
+  procedureId   String
+  minCount      Int
+  trainingLevel String? // optional: PGY or stage
+
+  rotation  Rotation  @relation(fields: [rotationId], references: [id], onDelete: Cascade)
+  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+
+  @@unique([rotationId, procedureId])
+  @@index([rotationId])
+  @@index([procedureId])
+}
+
+model LogEntry {
+  id          String   @id @default(cuid())
+  internId    String
+  procedureId String
+  date        DateTime
+  count       Int      @default(1)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  intern       User          @relation(fields: [internId], references: [id], onDelete: Cascade)
+  procedure    Procedure     @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+  verification Verification?
+
+  @@index([internId, date])
+  @@index([procedureId, date])
+}
+
+model Verification {
+  id         String             @id @default(cuid())
+  logEntryId String             @unique
+  verifierId String?
+  status     VerificationStatus @default(PENDING)
+  reason     String?
+  timestamp  DateTime?
+
+  logEntry LogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  verifier User?    @relation("VerifierVerifications", fields: [verifierId], references: [id])
+
+  @@index([status])
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  title     String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent    Topic?     @relation("TopicChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Topic[]    @relation("TopicChildren")
+  resources Resource[]
+
+  @@unique([parentId, title])
+  @@index([parentId])
+}
+
+model Resource {
+  id        String   @id @default(cuid())
+  topicId   String
+  title     String
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId])
+}
+
+model Audit {
+  id          String   @id @default(cuid())
+  actorUserId String
+  action      String
+  entity      String
+  entityId    String
+  timestamp   DateTime @default(now())
+  details     String?
+
+  actor User @relation("UserAudits", fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([actorUserId])
+  @@index([entity, entityId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
