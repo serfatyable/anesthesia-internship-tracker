@@ -1,4 +1,4 @@
-import type { NextAuthOptions, User as NextAuthUser } from 'next-auth';
+import type { NextAuthOptions, User as NextAuthUser } from 'next-auth/next';
 import Credentials from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma as db } from '@/lib/db';

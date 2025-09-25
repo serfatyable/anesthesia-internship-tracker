@@ -6,17 +6,17 @@ import { ExportQuerySchema, ProgressAccessSchema } from '@/lib/validators/progre
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
+    // Auth
     const rawSession = await getServerSession(authOptions);
-    const session = rawSession as unknown as { user?: { id?: string } } | null;
-    if (!session?.user?.id) {
+    const user = (rawSession as unknown as { user?: { id?: string; role?: string | null } } | null)?.user;
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse and validate query parameters
+    // Parse & validate query
     const { searchParams } = new URL(request.url);
     const queryParams = {
-      userId: searchParams.get('userId') || session.user.id,
+      userId: searchParams.get('userId') || user.id,
       from: searchParams.get('from') || undefined,
       to: searchParams.get('to') || undefined,
     };
@@ -31,13 +31,12 @@ export async function GET(request: NextRequest) {
 
     const { userId, from, to } = parsedQuery.data;
 
-    // Validate access permissions
+    // RBAC check
     const accessValidation = ProgressAccessSchema.safeParse({
       userId,
-      requesterRole: session.user.role || 'INTERN',
-      requesterId: session.user.id,
+      requesterRole: user?.role ?? 'INTERN',
+      requesterId: user.id,
     });
-
     if (!accessValidation.success) {
       return NextResponse.json(
         { error: 'Access denied', details: accessValidation.error.flatten() },
@@ -45,45 +44,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Prepare export parameters
+    // Prepare export
     const exportParams = {
       userId,
       from: from ? new Date(from) : undefined,
       to: to ? new Date(to) : undefined,
     };
 
-    // Get export data
+    // Build CSV
     const exportData = await progressService.exportLogs(exportParams);
     const csvContent = progressService.generateCSVContent(exportData);
 
-    // Generate filename with date range if specified
+    // Filename
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
-    let filename = `logs_${userId}_${dateStr}.csv`;
+    const filenameParts = ['logs'];
+    if (from) filenameParts.push(`from-${from}`);
+    if (to) filenameParts.push(`to-${to}`);
+    filenameParts.push(now.toISOString().split('T')[0]);
+    const filename = `${filenameParts.join('_')}.csv`;
 
-    if (from && to) {
-      const fromStr = new Date(from).toISOString().split('T')[0];
-      const toStr = new Date(to).toISOString().split('T')[0];
-      filename = `logs_${userId}_${fromStr}_to_${toStr}.csv`;
-    }
-
-    // Return CSV file
     return new NextResponse(csvContent, {
       status: 200,
       headers: {
-        'Content-Type': 'text/csv',
+        'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-store',
       },
     });
-  } catch (error: unknown) {
-    console.error('Export logs API error:', error);
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
-    );
+  } catch (err) {
+    console.error('Export logs failed', err);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
