@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../lib/auth/options'; // use relative path to avoid alias issues
 
 function Row({ label, ok, detail }: { label: string; ok: boolean; detail?: string }) {
