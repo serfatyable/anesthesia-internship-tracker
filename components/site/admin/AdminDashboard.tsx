@@ -107,9 +107,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600">Manage users, content, and system settings</p>
         </div>
-        <div className="text-sm text-gray-500">
-          Last updated: {new Date().toLocaleString()}
-        </div>
+        <div className="text-sm text-gray-500">Last updated: {new Date().toLocaleString()}</div>
       </div>
 
       {/* Tab Navigation */}
@@ -154,8 +152,18 @@ function OverviewTab({ data }: { data: AdminData }) {
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              <svg
+                className="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                />
               </svg>
             </div>
             <div className="ml-4">
@@ -168,8 +176,18 @@ function OverviewTab({ data }: { data: AdminData }) {
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
             </div>
             <div className="ml-4">
@@ -182,8 +200,18 @@ function OverviewTab({ data }: { data: AdminData }) {
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-yellow-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div className="ml-4">
@@ -196,8 +224,18 @@ function OverviewTab({ data }: { data: AdminData }) {
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <svg
+                className="w-6 h-6 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
               </svg>
             </div>
             <div className="ml-4">
@@ -216,25 +254,27 @@ function OverviewTab({ data }: { data: AdminData }) {
             title="Add User"
             href="#"
             desc="Create new user account"
-            onClick={() => {/* TODO: Implement add user modal */}}
+            onClick={() => {
+              /* TODO: Implement add user modal */
+            }}
           />
           <CardTile
             title="Create Rotation"
             href="#"
             desc="Add new rotation"
-            onClick={() => {/* TODO: Implement add rotation modal */}}
+            onClick={() => {
+              /* TODO: Implement add rotation modal */
+            }}
           />
           <CardTile
             title="Add Procedure"
             href="#"
             desc="Create new procedure"
-            onClick={() => {/* TODO: Implement add procedure modal */}}
+            onClick={() => {
+              /* TODO: Implement add procedure modal */
+            }}
           />
-          <CardTile
-            title="Export Data"
-            href="/api/export/logs"
-            desc="Download system data"
-          />
+          <CardTile title="Export Data" href="/api/export/logs" desc="Download system data" />
         </div>
       </div>
 
@@ -253,7 +293,8 @@ function OverviewTab({ data }: { data: AdminData }) {
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-600">
-                          {activity.intern.name?.charAt(0) || activity.intern.email.charAt(0).toUpperCase()}
+                          {activity.intern.name?.charAt(0) ||
+                            activity.intern.email.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     </div>
@@ -270,20 +311,22 @@ function OverviewTab({ data }: { data: AdminData }) {
                     <p className="text-sm text-gray-500">
                       {new Date(activity.createdAt).toLocaleDateString()}
                     </p>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      activity.verification?.status === 'APPROVED' 
-                        ? 'bg-green-100 text-green-800'
-                        : activity.verification?.status === 'REJECTED'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        activity.verification?.status === 'APPROVED'
+                          ? 'bg-green-100 text-green-800'
+                          : activity.verification?.status === 'REJECTED'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
                       {activity.verification?.status || 'PENDING'}
                     </span>
                   </div>
                 </div>
                 {activity.notes && (
                   <div className="mt-2 text-sm text-gray-600">
-                    <p className="italic">"{activity.notes}"</p>
+                    <p className="italic">&ldquo;{activity.notes}&rdquo;</p>
                   </div>
                 )}
               </div>

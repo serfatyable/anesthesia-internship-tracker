@@ -6,17 +6,17 @@ type PendingItem = {
   date: string;
   count: number;
   notes: string | null;
-  intern: { 
-    id: string; 
-    name: string | null; 
+  intern: {
+    id: string;
+    name: string | null;
     email: string | null;
     _count?: {
       logs: number;
       verifications: number;
     };
   };
-  procedure: { 
-    id: string; 
+  procedure: {
+    id: string;
     name: string;
     description?: string | null;
     rotation?: {
@@ -70,12 +70,14 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
         <div className="mt-3">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">Review Log Entry</h3>
-            <button
-              onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -90,20 +92,26 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
                   <p className="text-xs text-gray-500 mt-1">{item.procedure.description}</p>
                 )}
                 {item.procedure.rotation && (
-                  <p className="text-xs text-blue-600 mt-1">Rotation: {item.procedure.rotation.name}</p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Rotation: {item.procedure.rotation.name}
+                  </p>
                 )}
               </div>
               <div>
                 <h4 className="font-medium text-gray-900">Log Details</h4>
                 <p className="text-sm text-gray-600">Count: {item.count}</p>
-                <p className="text-sm text-gray-600">Date: {new Date(item.date).toLocaleDateString()}</p>
-                <p className="text-sm text-gray-600">Submitted: {new Date(item.createdAt).toLocaleString()}</p>
+                <p className="text-sm text-gray-600">
+                  Date: {new Date(item.date).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Submitted: {new Date(item.createdAt).toLocaleString()}
+                </p>
               </div>
             </div>
             {item.notes && (
               <div className="mt-4">
                 <h4 className="font-medium text-gray-900">Notes</h4>
-                <p className="text-sm text-gray-600 italic">"{item.notes}"</p>
+                <p className="text-sm text-gray-600 italic">&ldquo;{item.notes}&rdquo;</p>
               </div>
             )}
           </div>
@@ -126,7 +134,8 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
                     <span className="font-medium">Total Logs:</span> {item.intern._count.logs}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <span className="font-medium">Verifications:</span> {item.intern._count.verifications}
+                    <span className="font-medium">Verifications:</span>{' '}
+                    {item.intern._count.verifications}
                   </p>
                 </div>
               )}
@@ -250,7 +259,7 @@ export default function VerifyQueuePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logEntryId: id, status: 'APPROVED', reason: comment }),
       });
-      
+
       if (res.ok) {
         setShowModal(false);
         setSelectedItem(null);
@@ -272,7 +281,7 @@ export default function VerifyQueuePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logEntryId: id, status: 'REJECTED', reason }),
       });
-      
+
       if (res.ok) {
         setShowModal(false);
         setSelectedItem(null);
@@ -317,8 +326,18 @@ export default function VerifyQueuePage() {
       {items.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
@@ -327,7 +346,10 @@ export default function VerifyQueuePage() {
       ) : (
         <div className="space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div
+              key={item.id}
+              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -336,22 +358,24 @@ export default function VerifyQueuePage() {
                       Pending
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-3">
                     <div>
-                      <span className="font-medium">Intern:</span> {item.intern.name || item.intern.email}
+                      <span className="font-medium">Intern:</span>{' '}
+                      {item.intern.name || item.intern.email}
                     </div>
                     <div>
                       <span className="font-medium">Count:</span> {item.count}
                     </div>
                     <div>
-                      <span className="font-medium">Date:</span> {new Date(item.date).toLocaleDateString()}
+                      <span className="font-medium">Date:</span>{' '}
+                      {new Date(item.date).toLocaleDateString()}
                     </div>
                   </div>
 
                   {item.notes && (
                     <div className="bg-gray-50 rounded-md p-3 mb-3">
-                      <p className="text-sm text-gray-700 italic">"{item.notes}"</p>
+                      <p className="text-sm text-gray-700 italic">&ldquo;{item.notes}&rdquo;</p>
                     </div>
                   )}
 

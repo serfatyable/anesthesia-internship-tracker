@@ -128,11 +128,11 @@ function RotationsTab({ rotations }: { rotations: ContentData['rotations'] }) {
                 </div>
               </div>
               <div className="ml-4">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  rotation.isActive 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    rotation.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
                   {rotation.isActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -149,15 +149,7 @@ function RotationsTab({ rotations }: { rotations: ContentData['rotations'] }) {
         ))}
       </div>
 
-      {showAddModal && (
-        <AddRotationModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            // TODO: Refresh rotations list
-          }}
-        />
-      )}
+      {showAddModal && <AddRotationModal onClose={() => setShowAddModal(false)} />}
     </div>
   );
 }
@@ -225,15 +217,7 @@ function ProceduresTab({ procedures }: { procedures: ContentData['procedures'] }
         </table>
       </div>
 
-      {showAddModal && (
-        <AddProcedureModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            // TODO: Refresh procedures list
-          }}
-        />
-      )}
+      {showAddModal && <AddProcedureModal onClose={() => setShowAddModal(false)} />}
     </div>
   );
 }
@@ -299,21 +283,13 @@ function RequirementsTab({ requirements }: { requirements: ContentData['requirem
         </table>
       </div>
 
-      {showAddModal && (
-        <AddRequirementModal
-          onClose={() => setShowAddModal(false)}
-          onSuccess={() => {
-            setShowAddModal(false);
-            // TODO: Refresh requirements list
-          }}
-        />
-      )}
+      {showAddModal && <AddRequirementModal onClose={() => setShowAddModal(false)} />}
     </div>
   );
 }
 
 // Placeholder modal components - these would be implemented with proper forms
-function AddRotationModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function AddRotationModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -334,7 +310,7 @@ function AddRotationModal({ onClose, onSuccess }: { onClose: () => void; onSucce
   );
 }
 
-function AddProcedureModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function AddProcedureModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -355,7 +331,7 @@ function AddProcedureModal({ onClose, onSuccess }: { onClose: () => void; onSucc
   );
 }
 
-function AddRequirementModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function AddRequirementModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">

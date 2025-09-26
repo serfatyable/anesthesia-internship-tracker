@@ -182,7 +182,6 @@ export default function Home() {
           </div>
         </div>
 
-
         {/* Footer */}
         <div className="text-center mt-16 text-gray-500">
           <p>© 2024 Anesthesia Internship Tracker. Built for medical education excellence.</p>

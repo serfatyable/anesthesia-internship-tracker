@@ -17,7 +17,7 @@ export default async function AdminPage() {
     requirements,
     totalLogs,
     pendingVerifications,
-    recentActivity
+    recentActivity,
   ] = await Promise.all([
     prisma.user.findMany({
       select: {
@@ -29,11 +29,11 @@ export default async function AdminPage() {
         _count: {
           select: {
             logs: true,
-            verifications: true
-          }
-        }
+            verifications: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.rotation.findMany({
       select: {
@@ -45,11 +45,11 @@ export default async function AdminPage() {
         _count: {
           select: {
             procedures: true,
-            requirements: true
-          }
-        }
+            requirements: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.procedure.findMany({
       select: {
@@ -58,16 +58,16 @@ export default async function AdminPage() {
         description: true,
         createdAt: true,
         rotation: {
-          select: { name: true }
+          select: { name: true },
         },
         _count: {
           select: {
             logs: true,
-            requirements: true
-          }
-        }
+            requirements: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.requirement.findMany({
       select: {
@@ -75,17 +75,17 @@ export default async function AdminPage() {
         minCount: true,
         trainingLevel: true,
         rotation: {
-          select: { name: true }
+          select: { name: true },
         },
         procedure: {
-          select: { name: true }
-        }
+          select: { name: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { id: 'desc' },
     }),
     prisma.logEntry.count(),
     prisma.verification.count({
-      where: { status: 'PENDING' }
+      where: { status: 'PENDING' },
     }),
     prisma.logEntry.findMany({
       take: 10,
@@ -97,16 +97,16 @@ export default async function AdminPage() {
         notes: true,
         createdAt: true,
         intern: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         procedure: {
-          select: { name: true }
+          select: { name: true },
         },
         verification: {
-          select: { status: true }
-        }
-      }
-    })
+          select: { status: true },
+        },
+      },
+    }),
   ]);
 
   const adminData = {
@@ -121,9 +121,9 @@ export default async function AdminPage() {
       totalRequirements: requirements.length,
       totalLogs,
       pendingVerifications,
-      activeRotations: rotations.filter(r => r.isActive).length
+      activeRotations: rotations.filter((r) => r.isActive).length,
     },
-    recentActivity
+    recentActivity,
   };
 
   return (

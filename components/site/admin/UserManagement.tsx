@@ -92,9 +92,12 @@ export function UserManagement({ users }: UserManagementProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      roleColors[user.role as keyof typeof roleColors] || 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        roleColors[user.role as keyof typeof roleColors] ||
+                        'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {user.role}
                     </span>
                   </td>
@@ -251,9 +254,13 @@ function AddUserModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   );
 }
 
-function EditUserModal({ user, onClose, onSuccess }: { 
-  user: User; 
-  onClose: () => void; 
+function EditUserModal({
+  user,
+  onClose,
+  onSuccess,
+}: {
+  user: User;
+  onClose: () => void;
   onSuccess: () => void;
 }) {
   const [formData, setFormData] = useState({

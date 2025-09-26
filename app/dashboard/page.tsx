@@ -110,7 +110,11 @@ function DashboardContent() {
               <>
                 <CardTile title="Log Procedures" href="/logs/new" desc="Add new procedure logs" />
                 <CardTile title="View My Logs" href="/logs" desc="Browse your procedure history" />
-                <CardTile title="View Progress" href="/dashboard" desc="Track your completion status" />
+                <CardTile
+                  title="View Progress"
+                  href="/dashboard"
+                  desc="Track your completion status"
+                />
                 <CardTile title="Rotations" href="/rotations" desc="Browse rotation requirements" />
                 <CardTile title="My Profile" href="/profile" desc="Manage your account settings" />
               </>
@@ -120,7 +124,11 @@ function DashboardContent() {
             {userRole === 'TUTOR' && (
               <>
                 <CardTile title="Verify Queue" href="/verify" desc="Review pending verifications" />
-                <CardTile title="All Interns" href="/dashboard?tab=overview" desc="View all interns progress" />
+                <CardTile
+                  title="All Interns"
+                  href="/dashboard?tab=overview"
+                  desc="View all interns progress"
+                />
                 <CardTile title="Send Messages" href="/messages" desc="Communicate with interns" />
                 <CardTile title="Schedule Reviews" href="/reviews" desc="Plan intern assessments" />
                 <CardTile title="Reports" href="/reports" desc="Generate progress reports" />
@@ -131,12 +139,32 @@ function DashboardContent() {
             {/* ADMIN Actions */}
             {userRole === 'ADMIN' && (
               <>
-                <CardTile title="User Management" href="/admin?tab=users" desc="Manage user accounts" />
-                <CardTile title="Content Management" href="/admin?tab=content" desc="Manage rotations and procedures" />
-                <CardTile title="Analytics" href="/admin?tab=analytics" desc="View system analytics" />
-                <CardTile title="System Settings" href="/admin?tab=settings" desc="Configure system settings" />
+                <CardTile
+                  title="User Management"
+                  href="/admin?tab=users"
+                  desc="Manage user accounts"
+                />
+                <CardTile
+                  title="Content Management"
+                  href="/admin?tab=content"
+                  desc="Manage rotations and procedures"
+                />
+                <CardTile
+                  title="Analytics"
+                  href="/admin?tab=analytics"
+                  desc="View system analytics"
+                />
+                <CardTile
+                  title="System Settings"
+                  href="/admin?tab=settings"
+                  desc="Configure system settings"
+                />
                 <CardTile title="Export Data" href="/api/export/logs" desc="Download system data" />
-                <CardTile title="Bulk Operations" href="/admin/bulk" desc="Perform bulk operations" />
+                <CardTile
+                  title="Bulk Operations"
+                  href="/admin/bulk"
+                  desc="Perform bulk operations"
+                />
               </>
             )}
           </div>

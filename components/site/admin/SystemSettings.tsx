@@ -19,7 +19,7 @@ export function SystemSettings() {
   const handleSave = async () => {
     setIsSaving(true);
     // TODO: Implement save settings API call
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
     setIsSaving(false);
     alert('Settings saved successfully!');
   };
@@ -71,9 +71,7 @@ export function SystemSettings() {
         </div>
         <div className="px-6 py-4 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              System Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">System Name</label>
             <input
               type="text"
               value={settings.systemName}
@@ -81,11 +79,9 @@ export function SystemSettings() {
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Timezone
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
             <select
               value={settings.timezone}
               onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
@@ -134,13 +130,17 @@ export function SystemSettings() {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Require Verification</h4>
-              <p className="text-sm text-gray-500">All log entries must be verified before counting toward requirements</p>
+              <p className="text-sm text-gray-500">
+                All log entries must be verified before counting toward requirements
+              </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={settings.requireVerification}
-                onChange={(e) => setSettings({ ...settings, requireVerification: e.target.checked })}
+                onChange={(e) =>
+                  setSettings({ ...settings, requireVerification: e.target.checked })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -150,7 +150,9 @@ export function SystemSettings() {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Auto-Verification</h4>
-              <p className="text-sm text-gray-500">Automatically approve log entries (not recommended for production)</p>
+              <p className="text-sm text-gray-500">
+                Automatically approve log entries (not recommended for production)
+              </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -172,7 +174,9 @@ export function SystemSettings() {
               <input
                 type="checkbox"
                 checked={settings.allowSelfVerification}
-                onChange={(e) => setSettings({ ...settings, allowSelfVerification: e.target.checked })}
+                onChange={(e) =>
+                  setSettings({ ...settings, allowSelfVerification: e.target.checked })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -196,10 +200,14 @@ export function SystemSettings() {
               min="30"
               max="3650"
               value={settings.logRetentionDays}
-              onChange={(e) => setSettings({ ...settings, logRetentionDays: parseInt(e.target.value) })}
+              onChange={(e) =>
+                setSettings({ ...settings, logRetentionDays: parseInt(e.target.value) })
+              }
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-sm text-gray-500 mt-1">Logs older than this will be automatically archived</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Logs older than this will be automatically archived
+            </p>
           </div>
 
           <div>
@@ -211,10 +219,14 @@ export function SystemSettings() {
               min="1"
               max="1000"
               value={settings.maxLogsPerDay}
-              onChange={(e) => setSettings({ ...settings, maxLogsPerDay: parseInt(e.target.value) })}
+              onChange={(e) =>
+                setSettings({ ...settings, maxLogsPerDay: parseInt(e.target.value) })
+              }
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-sm text-gray-500 mt-1">Maximum number of log entries a user can create per day</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Maximum number of log entries a user can create per day
+            </p>
           </div>
         </div>
       </div>

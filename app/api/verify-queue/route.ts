@@ -23,30 +23,30 @@ export async function GET() {
       count: true,
       notes: true,
       createdAt: true,
-      intern: { 
-        select: { 
-          id: true, 
-          name: true, 
+      intern: {
+        select: {
+          id: true,
+          name: true,
           email: true,
           _count: {
             select: {
               logs: true,
-              verifications: true
-            }
-          }
-        } 
+              verifications: true,
+            },
+          },
+        },
       },
-      procedure: { 
-        select: { 
-          id: true, 
+      procedure: {
+        select: {
+          id: true,
           name: true,
           description: true,
           rotation: {
             select: {
-              name: true
-            }
-          }
-        } 
+              name: true,
+            },
+          },
+        },
       },
     },
   });
