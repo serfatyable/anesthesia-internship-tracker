@@ -22,8 +22,32 @@ export async function GET() {
       date: true,
       count: true,
       notes: true,
-      intern: { select: { id: true, name: true, email: true } },
-      procedure: { select: { id: true, name: true } },
+      createdAt: true,
+      intern: { 
+        select: { 
+          id: true, 
+          name: true, 
+          email: true,
+          _count: {
+            select: {
+              logs: true,
+              verifications: true
+            }
+          }
+        } 
+      },
+      procedure: { 
+        select: { 
+          id: true, 
+          name: true,
+          description: true,
+          rotation: {
+            select: {
+              name: true
+            }
+          }
+        } 
+      },
     },
   });
   return NextResponse.json({ items });

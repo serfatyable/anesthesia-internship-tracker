@@ -11,18 +11,12 @@ export default function Home() {
             A comprehensive digital platform for tracking anesthesia procedures, managing intern
             progress, and ensuring quality training standards.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link
               href="/login"
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
             >
               Get Started
-            </Link>
-            <Link
-              href="/dashboard"
-              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
-            >
-              View Demo
             </Link>
           </div>
         </div>
@@ -188,25 +182,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Demo Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Experience the System?</h2>
-          <p className="text-xl mb-6 opacity-90">
-            Try our demo with pre-loaded data to see the full capabilities
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
-              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
-            >
-              Login to Demo
-            </Link>
-            <div className="text-sm opacity-75">
-              <p>Demo Accounts Available:</p>
-              <p>Intern • Tutor • Admin</p>
-            </div>
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="text-center mt-16 text-gray-500">
