@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
 import { prisma } from '@/lib/db';
 import { CreateLogSchema } from '@/lib/validators/logs';
+import { auditService } from '@/lib/services/auditService';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -59,6 +60,14 @@ export async function POST(req: Request) {
       },
       select: { id: true },
     });
+
+    // Log audit event
+    await auditService.logLogCreated(
+      me.id,
+      created.id,
+      `Created log entry for procedure ${procedureId} with count ${count}`,
+    );
+
     return NextResponse.json({ id: created.id }, { status: 201 });
   } catch (e: unknown) {
     return NextResponse.json(

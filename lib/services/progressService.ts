@@ -10,38 +10,26 @@ import {
   LogExportRow,
   ExportParams,
   calculateCompletionPercentage,
+  calculateOverAchievement,
+  calculateOverAchievementPercentage,
   formatDateForCSV,
 } from '@/lib/domain/progress';
+import { cacheService } from './cacheService';
+import { queryOptimizationService } from './queryOptimizationService';
 
 export class ProgressService {
   /**
    * Get progress data for a specific intern
    */
   async getInternProgress(userId: string): Promise<InternDashboard> {
-    // Get all rotations with their requirements
-    const rotations = await prisma.rotation.findMany({
-      where: { isActive: true },
-      include: {
-        requirements: {
-          include: {
-            procedure: true,
-          },
-        },
-      },
-    });
-
-    // Get all log entries for this intern with verification status
-    const logEntries = await prisma.logEntry.findMany({
-      where: { internId: userId },
-      include: {
-        procedure: {
-          include: {
-            rotation: true,
-          },
-        },
-        verification: true,
-      },
-    });
+    // Check cache first
+    const cached = await cacheService.getCachedProgressData(userId);
+    if (cached) {
+      return cached as InternDashboard;
+    }
+    // Use optimized query service
+    const { rotations, logEntries } =
+      await queryOptimizationService.getOptimizedProgressData(userId);
 
     // Calculate progress per rotation
     const rotationProgress: RotationProgress[] = rotations.map((rotation) => {
@@ -59,13 +47,17 @@ export class ProgressService {
         .filter((log) => log.verification?.status === 'PENDING')
         .reduce((sum, log) => sum + log.count, 0);
 
+      const overAchieved = calculateOverAchievement(verified, totalRequired);
+
       return {
         rotationId: rotation.id,
         rotationName: rotation.name,
         required: totalRequired,
         verified,
         pending,
+        overAchieved,
         completionPercentage: calculateCompletionPercentage(verified, totalRequired),
+        overAchievementPercentage: calculateOverAchievementPercentage(verified, totalRequired),
       };
     });
 
@@ -73,12 +65,15 @@ export class ProgressService {
     const totalRequired = rotationProgress.reduce((sum, r) => sum + r.required, 0);
     const totalVerified = rotationProgress.reduce((sum, r) => sum + r.verified, 0);
     const totalPending = rotationProgress.reduce((sum, r) => sum + r.pending, 0);
+    const totalOverAchieved = rotationProgress.reduce((sum, r) => sum + r.overAchieved, 0);
 
     const summary: ProgressSummary = {
       totalRequired,
       totalVerified,
       totalPending,
+      totalOverAchieved,
       completionPercentage: calculateCompletionPercentage(totalVerified, totalRequired),
+      overAchievementPercentage: calculateOverAchievementPercentage(totalVerified, totalRequired),
     };
 
     // Get pending verifications (latest 5)
@@ -87,46 +82,36 @@ export class ProgressService {
     // Get recent activity (latest 10)
     const recentActivity = await this.getRecentActivity(userId, 10);
 
-    return {
+    const result = {
       summary,
       rotations: rotationProgress,
       pendingVerifications,
       recentActivity,
     };
+
+    // Cache the result
+    await cacheService.cacheProgressData(userId, result);
+
+    return result;
   }
 
   /**
    * Get dashboard overview for tutors/admins
    */
   async getDashboardOverview(): Promise<DashboardOverview> {
-    // Get all interns
-    const interns = await prisma.user.findMany({
-      where: { role: 'INTERN' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-    });
+    // Check cache first
+    const cached = await cacheService.getCachedAdminData();
+    if (cached) {
+      return cached as DashboardOverview;
+    }
+    // Use optimized query service
+    const {
+      users: interns,
+      logEntryCount: last7DaysActivity,
+      pendingVerificationCount: totalPendingVerifications,
+    } = await queryOptimizationService.getOptimizedAdminData();
 
-    // Get total pending verifications
-    const totalPendingVerifications = await prisma.verification.count({
-      where: { status: 'PENDING' },
-    });
-
-    // Get last 7 days activity count
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const last7DaysActivity = await prisma.logEntry.count({
-      where: {
-        createdAt: {
-          gte: sevenDaysAgo,
-        },
-      },
-    });
-
-    // Get progress for each intern
+    // Get progress for each intern (with caching)
     const internSummaries: InternSummary[] = await Promise.all(
       interns.map(async (intern) => {
         const progress = await this.getInternProgress(intern.id);
@@ -136,17 +121,24 @@ export class ProgressService {
           email: intern.email,
           totalVerified: progress.summary.totalVerified,
           totalPending: progress.summary.totalPending,
+          totalOverAchieved: progress.summary.totalOverAchieved,
           completionPercentage: progress.summary.completionPercentage,
+          overAchievementPercentage: progress.summary.overAchievementPercentage,
         };
       }),
     );
 
-    return {
+    const result = {
       totalInterns: interns.length,
       totalPendingVerifications,
       last7DaysActivity,
       interns: internSummaries,
     };
+
+    // Cache the result
+    await cacheService.cacheAdminData(result);
+
+    return result;
   }
 
   /**

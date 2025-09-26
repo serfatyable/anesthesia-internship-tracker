@@ -6,13 +6,17 @@ See `architecture.md` and `test-checklists.md` for T1 details.
 
 ### Prerequisites
 
-1. **SQLite Database**: The application uses SQLite for local development (no external database setup required)
+1. **PostgreSQL Database**: The application uses PostgreSQL for both development and production
+   - Install PostgreSQL 15+ on your system
+   - Create a database: `createdb anesthesia_tracker_dev`
+   - Ensure PostgreSQL is running on localhost:5432
 
 2. **Environment Variables**: Create a `.env` file in the project root with:
 
    ```bash
-   # Database
-   DATABASE_URL="file:./dev.db"
+   # Database - PostgreSQL for both development and production
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/anesthesia_tracker_dev"
+   DIRECT_URL="postgresql://postgres:password@localhost:5432/anesthesia_tracker_dev"
 
    # NextAuth Configuration
    NEXTAUTH_URL="http://localhost:3000"
@@ -37,10 +41,12 @@ See `architecture.md` and `test-checklists.md` for T1 details.
 
 ### Quick Start
 
-1. Create database: `pnpm db:push`
-2. Seed database: `pnpm db:seed`
-3. Verify: `pnpm peek`
-4. Start development server: `pnpm dev`
+1. **Setup PostgreSQL**: Ensure PostgreSQL is running and create the database
+2. **Install dependencies**: `pnpm install`
+3. **Setup database**: `pnpm db:push`
+4. **Seed database**: `pnpm db:seed`
+5. **Verify setup**: `pnpm peek`
+6. **Start development**: `pnpm dev`
 
 The seed script creates demo users, ICU/PACU rotations, procedures, requirements, and sample log entries with verifications.
 

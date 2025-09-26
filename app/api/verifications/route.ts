@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth/options';
 import { prisma } from '@/lib/db';
 import { VerifyLogSchema } from '@/lib/validators/logs';
 import { canReviewLogs } from '@/lib/auth/permissions';
+import { auditService } from '@/lib/services/auditService';
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -50,6 +51,21 @@ export async function POST(req: Request) {
       timestamp: new Date(),
     },
   });
+
+  // Log audit event
+  const auditAction =
+    status === 'APPROVED'
+      ? 'VERIFICATION_APPROVED'
+      : status === 'REJECTED'
+        ? 'VERIFICATION_REJECTED'
+        : 'VERIFICATION_NEEDS_REVISION';
+
+  await auditService.logVerificationAction(
+    session.user.id,
+    logEntryId,
+    auditAction,
+    reason ? `Reason: ${reason}` : undefined,
+  );
 
   return NextResponse.json({ ok: true });
 }

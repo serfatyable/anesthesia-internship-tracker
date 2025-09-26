@@ -5,7 +5,9 @@ export interface ProgressSummary {
   totalRequired: number;
   totalVerified: number;
   totalPending: number;
+  totalOverAchieved: number;
   completionPercentage: number;
+  overAchievementPercentage: number;
 }
 
 export interface RotationProgress {
@@ -14,7 +16,9 @@ export interface RotationProgress {
   required: number;
   verified: number;
   pending: number;
+  overAchieved: number;
   completionPercentage: number;
+  overAchievementPercentage: number;
 }
 
 export interface PendingVerification {
@@ -43,7 +47,9 @@ export interface InternSummary {
   email: string;
   totalVerified: number;
   totalPending: number;
+  totalOverAchieved: number;
   completionPercentage: number;
+  overAchievementPercentage: number;
 }
 
 export interface DashboardOverview {
@@ -85,6 +91,17 @@ export interface ExportParams {
 export function calculateCompletionPercentage(verified: number, required: number): number {
   if (required === 0) return 100;
   return Math.min(Math.round((verified / required) * 100), 100);
+}
+
+export function calculateOverAchievement(verified: number, required: number): number {
+  if (required === 0) return 0;
+  return Math.max(0, verified - required);
+}
+
+export function calculateOverAchievementPercentage(verified: number, required: number): number {
+  if (required === 0) return 0;
+  const overAchieved = Math.max(0, verified - required);
+  return Math.round((overAchieved / required) * 100);
 }
 
 export function formatDateForDisplay(date: Date, timezone: string = 'Asia/Jerusalem'): string {
