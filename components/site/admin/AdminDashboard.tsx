@@ -5,6 +5,7 @@ import { CardTile } from '@/components/site/CardTile';
 import { UserManagement } from './UserManagement';
 import { ContentManagement } from './ContentManagement';
 import { Analytics } from './Analytics';
+import { AuditLogs } from './AuditLogs';
 import { SystemSettings } from './SystemSettings';
 
 interface AdminData {
@@ -86,7 +87,7 @@ interface AdminDashboardProps {
   data: AdminData;
 }
 
-type AdminTab = 'overview' | 'users' | 'content' | 'analytics' | 'settings';
+type AdminTab = 'overview' | 'users' | 'content' | 'analytics' | 'audit' | 'settings';
 
 export function AdminDashboard({ data }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -96,6 +97,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
     { id: 'users' as const, label: 'Users', icon: '👥' },
     { id: 'content' as const, label: 'Content', icon: '📚' },
     { id: 'analytics' as const, label: 'Analytics', icon: '📈' },
+    { id: 'audit' as const, label: 'Audit Logs', icon: '🔍' },
     { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
   ];
 
@@ -136,6 +138,7 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
         {activeTab === 'users' && <UserManagement users={data.users} />}
         {activeTab === 'content' && <ContentManagement data={data} />}
         {activeTab === 'analytics' && <Analytics data={data} />}
+        {activeTab === 'audit' && <AuditLogs />}
         {activeTab === 'settings' && <SystemSettings />}
       </div>
     </div>

@@ -23,6 +23,9 @@ type PendingItem = {
       name: string;
     };
   };
+  verification?: {
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
+  };
   createdAt: string;
 };
 
@@ -32,10 +35,18 @@ type VerificationModalProps = {
   onClose: () => void;
   onApprove: (id: string, comment?: string) => void;
   onReject: (id: string, reason: string) => void;
+  onNeedsRevision: (id: string, reason: string) => void;
 };
 
-function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: VerificationModalProps) {
-  const [action, setAction] = useState<'approve' | 'reject' | null>(null);
+function VerificationModal({
+  item,
+  isOpen,
+  onClose,
+  onApprove,
+  onReject,
+  onNeedsRevision,
+}: VerificationModalProps) {
+  const [action, setAction] = useState<'approve' | 'reject' | 'needs_revision' | null>(null);
   const [comment, setComment] = useState('');
   const [reason, setReason] = useState('');
 
@@ -51,6 +62,12 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
         return;
       }
       onReject(item.id, reason.trim());
+    } else if (action === 'needs_revision') {
+      if (!reason.trim()) {
+        alert('Reason for revision is required');
+        return;
+      }
+      onNeedsRevision(item.id, reason.trim());
     }
     setAction(null);
     setComment('');
@@ -152,6 +169,12 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
                 Approve
               </button>
               <button
+                onClick={() => setAction('needs_revision')}
+                className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium"
+              >
+                Needs Revision
+              </button>
+              <button
                 onClick={() => setAction('reject')}
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium"
               >
@@ -171,6 +194,41 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
                     placeholder="Add a comment for the intern..."
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                     rows={3}
+                  />
+                </div>
+              ) : action === 'needs_revision' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Revision Instructions <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 mb-3"
+                    required
+                  >
+                    <option value="">Select revision reason...</option>
+                    <option value="Please add more detailed notes">
+                      Please add more detailed notes
+                    </option>
+                    <option value="Please correct the procedure count">
+                      Please correct the procedure count
+                    </option>
+                    <option value="Please select the correct procedure">
+                      Please select the correct procedure
+                    </option>
+                    <option value="Please add missing information">
+                      Please add missing information
+                    </option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <textarea
+                    value={reason === 'Other' ? reason : ''}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Please provide specific instructions for revision..."
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    rows={3}
+                    required={reason === 'Other'}
                   />
                 </div>
               ) : (
@@ -215,10 +273,16 @@ function VerificationModal({ item, isOpen, onClose, onApprove, onReject }: Verif
                   className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
                     action === 'approve'
                       ? 'bg-green-600 hover:bg-green-700'
-                      : 'bg-red-600 hover:bg-red-700'
+                      : action === 'needs_revision'
+                        ? 'bg-yellow-600 hover:bg-yellow-700'
+                        : 'bg-red-600 hover:bg-red-700'
                   }`}
                 >
-                  {action === 'approve' ? 'Approve Entry' : 'Reject Entry'}
+                  {action === 'approve'
+                    ? 'Approve Entry'
+                    : action === 'needs_revision'
+                      ? 'Request Revision'
+                      : 'Reject Entry'}
                 </button>
               </div>
             </form>
@@ -296,6 +360,28 @@ export default function VerifyQueuePage() {
     }
   }
 
+  async function handleNeedsRevision(id: string, reason: string) {
+    try {
+      const res = await fetch('/api/verifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logEntryId: id, status: 'NEEDS_REVISION', reason }),
+      });
+
+      if (res.ok) {
+        setShowModal(false);
+        setSelectedItem(null);
+        load();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error ? JSON.stringify(errorData.error) : 'Needs revision failed');
+      }
+    } catch (error) {
+      console.error('Needs revision failed:', error);
+      alert('Needs revision failed');
+    }
+  }
+
   const openModal = (item: PendingItem) => {
     setSelectedItem(item);
     setShowModal(true);
@@ -354,8 +440,18 @@ export default function VerifyQueuePage() {
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-lg font-medium text-gray-900">{item.procedure.name}</h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Pending
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        item.verification?.status === 'APPROVED'
+                          ? 'bg-green-100 text-green-800'
+                          : item.verification?.status === 'REJECTED'
+                            ? 'bg-red-100 text-red-800'
+                            : item.verification?.status === 'NEEDS_REVISION'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {item.verification?.status || 'PENDING'}
                     </span>
                   </div>
 
@@ -409,6 +505,7 @@ export default function VerifyQueuePage() {
         }}
         onApprove={handleApprove}
         onReject={handleReject}
+        onNeedsRevision={handleNeedsRevision}
       />
     </div>
   );

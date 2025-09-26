@@ -26,12 +26,12 @@ export function InternDashboard({ dashboard, userId, className }: InternDashboar
           label="Total Completion"
           className="mb-4"
         />
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
               {summary.totalRequired}
             </div>
-            <div className="text-sm text-zinc-500">Total Required</div>
+            <div className="text-sm text-zinc-500">Required</div>
           </div>
           <div>
             <div className="text-3xl font-bold text-green-600">{summary.totalVerified}</div>
@@ -41,7 +41,35 @@ export function InternDashboard({ dashboard, userId, className }: InternDashboar
             <div className="text-3xl font-bold text-amber-600">{summary.totalPending}</div>
             <div className="text-sm text-zinc-500">Pending</div>
           </div>
+          <div>
+            <div className="text-3xl font-bold text-purple-600">{summary.totalOverAchieved}</div>
+            <div className="text-sm text-zinc-500">Over-Achieved</div>
+          </div>
         </div>
+
+        {summary.totalOverAchieved > 0 && (
+          <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div className="flex items-center justify-center space-x-2">
+              <svg
+                className="w-5 h-5 text-purple-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                Excellent work! You&apos;ve exceeded requirements by{' '}
+                {summary.overAchievementPercentage}%
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Export Button */}

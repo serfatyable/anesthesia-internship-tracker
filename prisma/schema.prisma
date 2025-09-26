@@ -106,6 +106,7 @@ enum VerificationStatus {
   PENDING
   APPROVED
   REJECTED
+  NEEDS_REVISION
 }
 
 model Topic {

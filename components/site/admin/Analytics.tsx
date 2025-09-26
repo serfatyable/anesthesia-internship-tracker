@@ -179,6 +179,9 @@ export function Analytics({ data }: AnalyticsProps) {
                   Verifications
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Over-Achieved
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Active
                 </th>
               </tr>
@@ -222,6 +225,7 @@ export function Analytics({ data }: AnalyticsProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user._count.verifications}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>

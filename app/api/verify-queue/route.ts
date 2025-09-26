@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const items = await prisma.logEntry.findMany({
-    where: { verification: { status: 'PENDING' } },
+    where: { verification: { status: { in: ['PENDING', 'NEEDS_REVISION'] } } },
     orderBy: { date: 'desc' },
     select: {
       id: true,
@@ -46,6 +46,11 @@ export async function GET() {
               name: true,
             },
           },
+        },
+      },
+      verification: {
+        select: {
+          status: true,
         },
       },
     },

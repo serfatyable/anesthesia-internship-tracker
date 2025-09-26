@@ -10,6 +10,8 @@ import {
   LogExportRow,
   ExportParams,
   calculateCompletionPercentage,
+  calculateOverAchievement,
+  calculateOverAchievementPercentage,
   formatDateForCSV,
 } from '@/lib/domain/progress';
 
@@ -59,13 +61,17 @@ export class ProgressService {
         .filter((log) => log.verification?.status === 'PENDING')
         .reduce((sum, log) => sum + log.count, 0);
 
+      const overAchieved = calculateOverAchievement(verified, totalRequired);
+
       return {
         rotationId: rotation.id,
         rotationName: rotation.name,
         required: totalRequired,
         verified,
         pending,
+        overAchieved,
         completionPercentage: calculateCompletionPercentage(verified, totalRequired),
+        overAchievementPercentage: calculateOverAchievementPercentage(verified, totalRequired),
       };
     });
 
@@ -73,12 +79,15 @@ export class ProgressService {
     const totalRequired = rotationProgress.reduce((sum, r) => sum + r.required, 0);
     const totalVerified = rotationProgress.reduce((sum, r) => sum + r.verified, 0);
     const totalPending = rotationProgress.reduce((sum, r) => sum + r.pending, 0);
+    const totalOverAchieved = rotationProgress.reduce((sum, r) => sum + r.overAchieved, 0);
 
     const summary: ProgressSummary = {
       totalRequired,
       totalVerified,
       totalPending,
+      totalOverAchieved,
       completionPercentage: calculateCompletionPercentage(totalVerified, totalRequired),
+      overAchievementPercentage: calculateOverAchievementPercentage(totalVerified, totalRequired),
     };
 
     // Get pending verifications (latest 5)
@@ -136,7 +145,9 @@ export class ProgressService {
           email: intern.email,
           totalVerified: progress.summary.totalVerified,
           totalPending: progress.summary.totalPending,
+          totalOverAchieved: progress.summary.totalOverAchieved,
           completionPercentage: progress.summary.completionPercentage,
+          overAchievementPercentage: progress.summary.overAchievementPercentage,
         };
       }),
     );
