@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
 import { progressService } from '@/lib/services/progressService';
 import { ProgressQuerySchema, ProgressAccessSchema } from '@/lib/validators/progress';
+import { addPerformanceHeaders } from '@/lib/middleware/compression';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,11 +57,11 @@ export async function GET(request: NextRequest) {
       }
 
       const overview = await progressService.getDashboardOverview();
-      return NextResponse.json(overview);
+      return addPerformanceHeaders(NextResponse.json(overview));
     } else {
       // Get intern-specific progress
       const progress = await progressService.getInternProgress(userId);
-      return NextResponse.json(progress);
+      return addPerformanceHeaders(NextResponse.json(progress));
     }
   } catch (error: unknown) {
     console.error('Progress API error:', error);

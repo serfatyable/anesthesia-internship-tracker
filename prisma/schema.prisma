@@ -25,6 +25,11 @@ model User {
   logs          LogEntry[]
   verifications Verification[] @relation("VerifierVerifications")
   audits        Audit[]        @relation("UserAudits")
+
+  // Indexes for performance
+  @@index([role])
+  @@index([createdAt])
+  @@index([email])
 }
 
 model Rotation {
@@ -37,6 +42,10 @@ model Rotation {
 
   procedures   Procedure[]
   requirements Requirement[]
+
+  // Indexes for performance
+  @@index([isActive])
+  @@index([createdAt])
 }
 
 model Procedure {
@@ -86,6 +95,9 @@ model LogEntry {
 
   @@index([internId, date])
   @@index([procedureId, date])
+  @@index([createdAt])
+  @@index([internId, createdAt])
+  @@index([date])
 }
 
 model Verification {
@@ -100,6 +112,9 @@ model Verification {
   verifier User?    @relation("VerifierVerifications", fields: [verifierId], references: [id])
 
   @@index([status])
+  @@index([verifierId])
+  @@index([timestamp])
+  @@index([status, timestamp])
 }
 
 enum VerificationStatus {
@@ -151,6 +166,10 @@ model Audit {
 
   @@index([actorUserId])
   @@index([entity, entityId])
+  @@index([timestamp])
+  @@index([action])
+  @@index([entity])
+  @@index([timestamp, action])
 }
 
 model Account {
