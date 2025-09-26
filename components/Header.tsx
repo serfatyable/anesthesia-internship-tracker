@@ -17,19 +17,11 @@ export default function Header() {
   }, []);
   return (
     <header className="w-full border-b">
-      <div className="mx-auto max-w-5xl p-3 flex items-center gap-4">
+      <div className="mx-auto max-w-5xl p-3 flex items-center justify-between">
         <a href="/" className="font-semibold">
           Anesthesia Tracker
         </a>
-        <a href="/logs" className="underline">
-          Logs
-        </a>
-        {user?.role === 'TUTOR' || user?.role === 'ADMIN' ? (
-          <a href="/verify" className="underline">
-            Verify
-          </a>
-        ) : null}
-        <div className="ml-auto text-sm text-gray-600">{user?.email ?? ''}</div>
+        <div className="text-sm text-gray-600">{user?.email ?? ''}</div>
       </div>
     </header>
   );

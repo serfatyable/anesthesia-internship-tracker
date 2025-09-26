@@ -66,6 +66,7 @@ export class ProgressService {
         verified,
         pending,
         completionPercentage: calculateCompletionPercentage(verified, totalRequired),
+        state: rotation.state,
       };
     });
 

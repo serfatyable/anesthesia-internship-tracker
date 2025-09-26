@@ -9,61 +9,56 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  role      String   @default("INTERN")
-  password  String? // only used for Credentials provider
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // next-auth relations
-  accounts Account[]
-  sessions Session[]
-
-  // Relations
-  logs          LogEntry[]
-  verifications Verification[] @relation("VerifierVerifications")
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  role          String         @default("INTERN")
+  password      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  idNumber      String?        @unique
+  accounts      Account[]
   audits        Audit[]        @relation("UserAudits")
+  logs          LogEntry[]
+  sessions      Session[]
+  verifications Verification[] @relation("VerifierVerifications")
 }
 
 model Rotation {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  state        String        @default("NOT_STARTED")
   procedures   Procedure[]
   requirements Requirement[]
 }
 
 model Procedure {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  rotationId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  rotationId   String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  logs         LogEntry[]
   rotation     Rotation      @relation(fields: [rotationId], references: [id], onDelete: Cascade)
   requirements Requirement[]
-  logs         LogEntry[]
 
   @@unique([rotationId, name])
   @@index([rotationId])
 }
 
 model Requirement {
-  id            String  @id @default(cuid())
+  id            String    @id @default(cuid())
   rotationId    String
   procedureId   String
   minCount      Int
-  trainingLevel String? // optional: PGY or stage
-
-  rotation  Rotation  @relation(fields: [rotationId], references: [id], onDelete: Cascade)
-  procedure Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+  trainingLevel String?
+  procedure     Procedure @relation(fields: [procedureId], references: [id], onDelete: Cascade)
+  rotation      Rotation  @relation(fields: [rotationId], references: [id], onDelete: Cascade)
 
   @@unique([rotationId, procedureId])
   @@index([rotationId])
@@ -71,15 +66,14 @@ model Requirement {
 }
 
 model LogEntry {
-  id          String   @id @default(cuid())
-  internId    String
-  procedureId String
-  date        DateTime
-  count       Int      @default(1)
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id           String        @id @default(cuid())
+  internId     String
+  procedureId  String
+  date         DateTime
+  count        Int           @default(1)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   intern       User          @relation(fields: [internId], references: [id], onDelete: Cascade)
   procedure    Procedure     @relation(fields: [procedureId], references: [id], onDelete: Cascade)
   verification Verification?
@@ -92,32 +86,24 @@ model Verification {
   id         String             @id @default(cuid())
   logEntryId String             @unique
   verifierId String?
-  status     VerificationStatus @default(PENDING)
   reason     String?
   timestamp  DateTime?
-
-  logEntry LogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
-  verifier User?    @relation("VerifierVerifications", fields: [verifierId], references: [id])
+  status     VerificationStatus @default(PENDING)
+  logEntry   LogEntry           @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  verifier   User?              @relation("VerifierVerifications", fields: [verifierId], references: [id])
 
   @@index([status])
 }
 
-enum VerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 model Topic {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   title     String
   parentId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  parent    Topic?     @relation("TopicChildren", fields: [parentId], references: [id], onDelete: SetNull)
-  children  Topic[]    @relation("TopicChildren")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   resources Resource[]
+  parent    Topic?     @relation("TopicChildren", fields: [parentId], references: [id])
+  children  Topic[]    @relation("TopicChildren")
 
   @@unique([parentId, title])
   @@index([parentId])
@@ -131,8 +117,7 @@ model Resource {
   type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@index([topicId])
 }
@@ -145,8 +130,7 @@ model Audit {
   entityId    String
   timestamp   DateTime @default(now())
   details     String?
-
-  actor User @relation("UserAudits", fields: [actorUserId], references: [id], onDelete: Cascade)
+  actor       User     @relation("UserAudits", fields: [actorUserId], references: [id], onDelete: Cascade)
 
   @@index([actorUserId])
   @@index([entity, entityId])
@@ -165,8 +149,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -176,8 +159,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -186,4 +168,10 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

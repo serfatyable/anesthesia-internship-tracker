@@ -10,7 +10,7 @@ export default function RtlToggle() {
 
   return (
     <button
-      className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+      className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 "
       onClick={() => setRtl((v) => !v)}
       aria-pressed={rtl}
       title="Toggle RTL/LTR"

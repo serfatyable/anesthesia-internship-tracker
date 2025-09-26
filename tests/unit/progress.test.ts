@@ -3,19 +3,19 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 vi.mock('@/lib/db', () => ({
   prisma: {
     rotation: {
-      findMany: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     logEntry: {
-      findMany: vi.fn(),
-      count: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
     },
     verification: {
-      findMany: vi.fn(),
-      count: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
     },
     user: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
+      findUnique: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
     },
   },
 }));
@@ -50,6 +50,7 @@ describe('ProgressService', () => {
           name: 'ICU',
           description: 'Intensive Care Unit',
           isActive: true,
+          state: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
           requirements: [
@@ -113,6 +114,7 @@ describe('ProgressService', () => {
           name: 'ICU',
           description: 'Intensive Care Unit',
           isActive: true,
+          state: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
           requirements: [{ minCount: 10, procedure: { id: 'proc-1', name: 'Intubation' } }],
@@ -122,6 +124,7 @@ describe('ProgressService', () => {
           name: 'OR',
           description: 'Operating Room',
           isActive: true,
+          state: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
           requirements: [{ minCount: 5, procedure: { id: 'proc-2', name: 'Surgery' } }],
@@ -195,6 +198,7 @@ describe('ProgressService', () => {
           id: 'user-1',
           name: 'John Doe',
           email: 'john@example.com',
+          idNumber: '123456789',
           createdAt: new Date(),
           updatedAt: new Date(),
           role: 'INTERN',
@@ -204,6 +208,7 @@ describe('ProgressService', () => {
           id: 'user-2',
           name: 'Jane Smith',
           email: 'jane@example.com',
+          idNumber: '987654321',
           createdAt: new Date(),
           updatedAt: new Date(),
           role: 'INTERN',

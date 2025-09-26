@@ -19,7 +19,7 @@ vi.mock('@/lib/services/progressService', () => ({
 }));
 
 // Mock NextAuth
-vi.mock('next-auth', () => ({
+vi.mock('next-auth/next', () => ({
   getServerSession: vi.fn().mockResolvedValue({
     user: { id: 'user-1', role: 'INTERN' },
   }),

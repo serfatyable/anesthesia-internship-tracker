@@ -1,68 +1,26 @@
 import { InternDashboard as InternDashboardType } from '@/lib/domain/progress';
-import { ProgressBar } from './ProgressBar';
-import { RotationCard } from './RotationCard';
-import { PendingVerifications } from './PendingVerifications';
-import { RecentActivity } from './RecentActivity';
-import { ExportButton } from './ExportButton';
+import { OverallProgressCard } from './OverallProgressCard';
+import { RotationGroups } from './RotationGroups';
 import { cn } from '@/lib/ui/cn';
 
 interface InternDashboardProps {
   dashboard: InternDashboardType;
-  userId: string;
   className?: string;
 }
 
-export function InternDashboard({ dashboard, userId, className }: InternDashboardProps) {
-  const { summary, rotations, pendingVerifications, recentActivity } = dashboard;
+export function InternDashboard({ dashboard, className }: InternDashboardProps) {
+  const { summary, rotations } = dashboard;
 
   return (
     <div className={cn('space-y-6', className)}>
-      {/* Overall Progress */}
-      <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-        <h2 className="text-xl font-semibold mb-4">Overall Progress</h2>
-        <ProgressBar
-          value={summary.totalVerified}
-          max={summary.totalRequired}
-          label="Total Completion"
-          className="mb-4"
-        />
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-              {summary.totalRequired}
-            </div>
-            <div className="text-sm text-zinc-500">Total Required</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-green-600">{summary.totalVerified}</div>
-            <div className="text-sm text-zinc-500">Verified</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-amber-600">{summary.totalPending}</div>
-            <div className="text-sm text-zinc-500">Pending</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Export Button */}
-      <div className="flex justify-end">
-        <ExportButton userId={userId} />
-      </div>
+      {/* Overall Progress Card */}
+      <OverallProgressCard summary={summary} rotations={rotations} />
 
       {/* Rotation Progress Cards */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Rotation Progress</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rotations.map((rotation) => (
-            <RotationCard key={rotation.rotationId} rotation={rotation} />
-          ))}
+      <div className="flex justify-center">
+        <div className="w-full max-w-7xl">
+          <RotationGroups rotations={rotations} />
         </div>
-      </div>
-
-      {/* Pending Verifications and Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <PendingVerifications verifications={pendingVerifications} />
-        <RecentActivity activities={recentActivity} />
       </div>
     </div>
   );

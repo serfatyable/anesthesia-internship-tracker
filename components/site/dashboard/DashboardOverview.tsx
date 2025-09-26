@@ -14,7 +14,7 @@ export function DashboardOverview({ overview, className }: DashboardOverviewProp
     <div className={cn('space-y-6', className)}>
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 p-6 bg-blue-50 dark:bg-blue-900/20">
+        <div className="rounded-2xl border border-zinc-200/60  p-6 bg-blue-50 ">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -34,13 +34,13 @@ export function DashboardOverview({ overview, className }: DashboardOverviewProp
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Interns</p>
-              <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{totalInterns}</p>
+              <p className="text-sm font-medium text-zinc-600 ">Total Interns</p>
+              <p className="text-2xl font-bold text-zinc-900 ">{totalInterns}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 p-6 bg-amber-50 dark:bg-amber-900/20">
+        <div className="rounded-2xl border border-zinc-200/60  p-6 bg-amber-50 ">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center">
@@ -60,17 +60,13 @@ export function DashboardOverview({ overview, className }: DashboardOverviewProp
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Pending Verifications
-              </p>
-              <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                {totalPendingVerifications}
-              </p>
+              <p className="text-sm font-medium text-zinc-600 ">Pending Verifications</p>
+              <p className="text-2xl font-bold text-zinc-900 ">{totalPendingVerifications}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 p-6 bg-green-50 dark:bg-green-900/20">
+        <div className="rounded-2xl border border-zinc-200/60  p-6 bg-green-50 ">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
@@ -90,12 +86,8 @@ export function DashboardOverview({ overview, className }: DashboardOverviewProp
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Last 7 Days Activity
-              </p>
-              <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                {last7DaysActivity}
-              </p>
+              <p className="text-sm font-medium text-zinc-600 ">Last 7 Days Activity</p>
+              <p className="text-2xl font-bold text-zinc-900 ">{last7DaysActivity}</p>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/options';
+import { authOptions } from '@/lib/auth';
 import { progressService } from '@/lib/services/progressService';
 import { ProgressQuerySchema, ProgressAccessSchema } from '@/lib/validators/progress';
 

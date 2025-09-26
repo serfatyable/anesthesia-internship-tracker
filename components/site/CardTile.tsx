@@ -6,7 +6,7 @@ export function CardTile({ title, href, desc }: { title: string; href: string; d
     <Link
       href={href}
       className={cn(
-        'block rounded-2xl border border-zinc-200/60 dark:border-zinc-800',
+        'block rounded-2xl border border-zinc-200/60 ',
         'p-6 shadow-sm hover:shadow-md transition',
       )}
     >

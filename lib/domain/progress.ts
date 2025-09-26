@@ -15,6 +15,7 @@ export interface RotationProgress {
   verified: number;
   pending: number;
   completionPercentage: number;
+  state: string;
 }
 
 export interface PendingVerification {

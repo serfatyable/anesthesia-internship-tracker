@@ -1,133 +1,130 @@
-'use client';
-
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import {
-  InternDashboard as InternDashboardType,
-  DashboardOverview as DashboardOverviewType,
-} from '@/lib/domain/progress';
+import { Suspense } from 'react';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { progressService } from '@/lib/services/progressService';
+import { prisma } from '@/lib/db';
 import { InternDashboard } from '@/components/site/dashboard/InternDashboard';
-import { DashboardOverview } from '@/components/site/dashboard/DashboardOverview';
-import { CardTile } from '@/components/site/CardTile';
+import { InternSelector } from '@/components/site/dashboard/InternSelector';
+import { redirect } from 'next/navigation';
+import { InternDashboard as InternDashboardType } from '@/lib/domain/progress';
 
-function DashboardContent() {
-  const searchParams = useSearchParams();
-  const [data, setData] = useState<InternDashboardType | DashboardOverviewType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string>('INTERN');
+type ExtendedInternDashboard = InternDashboardType & {
+  selectedInternId?: string;
+  selectedInternName?: string;
+};
 
-  const userId = searchParams.get('userId');
-  const tab = searchParams.get('tab') || 'intern';
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const params = new URLSearchParams({
-          ...(userId && { userId }),
-          tab,
-        });
-
-        const response = await fetch(`/api/progress?${params}`);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch data');
-        }
-
-        const result = await response.json();
-        setData(result);
-
-        // Try to get user role from session (this is a simplified approach)
-        // In a real app, you might want to pass this from the server or get it from a context
-        const roleResponse = await fetch('/api/session');
-        if (roleResponse.ok) {
-          const sessionData = await roleResponse.json();
-          setUserRole(sessionData.user?.role || 'INTERN');
-        }
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [userId, tab]);
-
-  if (loading) {
-    return (
-      <main className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="p-6">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
-          <p className="text-red-600">{error}</p>
-        </div>
-      </main>
-    );
-  }
-
-  return (
-    <main className="p-6">
-      <section className="space-y-6">
-        <header>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-zinc-500">
-            {tab === 'overview' ? 'Overview' : 'Progress Tracking'}
-            {userId && userId !== 'current' && ' - User View'}
-          </p>
-        </header>
-
-        {/* Main Dashboard Content */}
-        {data && (
-          <>
-            {tab === 'overview' && 'interns' in data ? (
-              <DashboardOverview overview={data} />
-            ) : 'summary' in data ? (
-              <InternDashboard dashboard={data} userId={userId || 'current'} />
-            ) : null}
-          </>
-        )}
-
-        {/* Quick Actions */}
-        <div className="mt-8">
-          <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <CardTile title="Log Procedures" href="/logs/new" desc="Add new procedure logs" />
-            <CardTile title="View All Logs" href="/logs" desc="Browse your procedure history" />
-            <CardTile title="Verify Queue" href="/verify" desc="Review pending verifications" />
-            {userRole === 'TUTOR' || userRole === 'ADMIN' ? (
-              <CardTile
-                title="Overview Dashboard"
-                href="/dashboard?tab=overview"
-                desc="View all interns progress"
-              />
-            ) : null}
-            <CardTile title="Rotations" href="/rotations" desc="Browse rotation requirements" />
-            <CardTile title="Settings" href="/admin" desc="Manage your account" />
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+interface DashboardPageProps {
+  searchParams: {
+    internId?: string;
+  };
 }
 
-export default function DashboardPage() {
+async function DashboardContent({ searchParams }: { searchParams: { internId?: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
+  const { user } = session;
+  const { internId } = searchParams;
+
+  // Determine if user is a tutor/admin
+  const isTutor = user.role === 'TUTOR' || user.role === 'ADMIN';
+
+  try {
+    let dashboardData: ExtendedInternDashboard;
+    let interns: Array<{ id: string; name: string | null; email: string }> = [];
+
+    if (isTutor) {
+      // For tutors, get progress for selected intern or first intern
+      const targetInternId =
+        internId || (await prisma.user.findFirst({ where: { role: 'INTERN' } }))?.id;
+      if (!targetInternId) {
+        throw new Error('No interns found');
+      }
+
+      const progress = await progressService.getInternProgress(targetInternId);
+      const selectedIntern = await prisma.user.findUnique({
+        where: { id: targetInternId },
+        select: { id: true, name: true },
+      });
+
+      dashboardData = {
+        ...progress,
+        selectedInternId: targetInternId,
+        selectedInternName: selectedIntern?.name || 'Unknown',
+      };
+
+      interns = await prisma.user.findMany({
+        where: { role: 'INTERN' },
+        select: { id: true, name: true, email: true },
+      });
+    } else {
+      // For interns, get their own progress
+      dashboardData = await progressService.getInternProgress(user.id);
+    }
+
+    return (
+      <main className="max-w-5xl mx-auto p-4">
+        <section className="space-y-6">
+          {/* Intern Selector for Tutors */}
+          {isTutor && (
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h2 className="text-lg font-medium mb-3">Select Intern</h2>
+              <InternSelector
+                interns={interns}
+                selectedInternId={dashboardData.selectedInternId || undefined}
+              />
+              {dashboardData.selectedInternName && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Viewing progress for:{' '}
+                  <span className="font-medium">{dashboardData.selectedInternName}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Main Dashboard Content */}
+          <InternDashboard dashboard={dashboardData} />
+        </section>
+      </main>
+    );
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    return (
+      <main className="max-w-5xl mx-auto p-4">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+          <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
+          <p className="text-red-600">
+            {error instanceof Error
+              ? error.message
+              : 'An error occurred while loading the dashboard'}
+          </p>
+          <details className="mt-4">
+            <summary className="cursor-pointer text-sm font-medium">Error Details</summary>
+            <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto">
+              {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
+            </pre>
+          </details>
+        </div>
+      </main>
+    );
+  }
+}
+
+export default function DashboardPage({ searchParams }: DashboardPageProps) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
+    <Suspense
+      fallback={
+        <main className="max-w-5xl mx-auto p-4">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </main>
+      }
+    >
+      <DashboardContent searchParams={searchParams} />
     </Suspense>
   );
 }

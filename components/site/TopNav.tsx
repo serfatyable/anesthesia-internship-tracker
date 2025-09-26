@@ -21,7 +21,7 @@ export default function TopNav() {
   }, [session]);
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-zinc-200/60 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/70 backdrop-blur">
+    <nav className="sticky top-0 z-40 border-b border-zinc-200/60 bg-white/70 backdrop-blur">
       <Container className="flex items-center justify-between h-14">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="font-semibold">
@@ -41,7 +41,7 @@ export default function TopNav() {
                 Verify
               </Link>
             ) : null}
-            <Link href="/rotations/icu" className="hover:underline">
+            <Link href="/rotations" className="hover:underline">
               Rotations
             </Link>
             <Link href="/admin" className="hover:underline">
@@ -53,21 +53,16 @@ export default function TopNav() {
           <RtlToggle />
           {session ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                {session.user?.email}
-              </span>
+              <span className="text-sm text-zinc-600">{session.user?.email}</span>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
-                className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50"
               >
                 Logout
               </button>
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-900"
-            >
+            <Link href="/login" className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50">
               Login
             </Link>
           )}

@@ -12,15 +12,9 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/403', req.url));
     }
   }
-  // protect /tutor
-  if (pathname.startsWith('/tutor')) {
-    if (!token?.role || token.role !== 'TUTOR') {
-      return NextResponse.redirect(new URL('/403', req.url));
-    }
-  }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/tutor/:path*'],
+  matcher: ['/admin/:path*'],
 };

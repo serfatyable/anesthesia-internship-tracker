@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/options'; // if alias fails, use "../../lib/auth/options"
+import { authOptions } from '@/lib/auth'; // if alias fails, use "../../lib/auth/options"
 import { redirect } from 'next/navigation';
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);

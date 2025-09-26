@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock next-auth session to be a TUTOR
-vi.mock('next-auth', () => ({
+vi.mock('next-auth/next', () => ({
   getServerSession: vi.fn().mockResolvedValue({ user: { id: 'T1', role: 'TUTOR' } }),
 }));
 
 // Provide an authOptions export for the route to import
-vi.mock('@/lib/auth/options', async (importOriginal) => {
+vi.mock('@/lib/auth', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...(actual as Record<string, unknown>),
