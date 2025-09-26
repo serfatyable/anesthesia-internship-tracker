@@ -27,7 +27,8 @@
     "postinstall": "prisma generate",
     "peek": "tsx scripts/peek.ts",
     "integration-test": "tsx scripts/integration-test.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "doctor": "tsx scripts/doctor.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

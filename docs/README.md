@@ -6,13 +6,16 @@ See `architecture.md` and `test-checklists.md` for T1 details.
 
 ### Prerequisites
 
-1. **SQLite Database**: The application uses SQLite for local development (no external database setup required)
+1. **PostgreSQL (Dev)**: Local development uses PostgreSQL. A ready-to-use Docker setup is included.
+   - Start DB: `docker compose up -d db`
+   - Default credentials are defined in `docker-compose.yml`.
 
 2. **Environment Variables**: Create a `.env` file in the project root with:
 
    ```bash
-   # Database
-   DATABASE_URL="file:./dev.db"
+   # Database (local Postgres)
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/anesthesia_tracker?schema=public"
+   DIRECT_URL="postgresql://postgres:postgres@localhost:5432/anesthesia_tracker?schema=public"
 
    # NextAuth Configuration
    NEXTAUTH_URL="http://localhost:3000"
@@ -24,7 +27,7 @@ See `architecture.md` and `test-checklists.md` for T1 details.
 
    > Generate a strong secret (e.g., `openssl rand -base64 32`).
    >
-   > **Important**: The NEXTAUTH_SECRET is required for secure session management.
+   > For production (Vercel), set env vars in the Vercel project: `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `AUTH_PROVIDER`.
 
 ### Database Commands
 
@@ -37,16 +40,23 @@ See `architecture.md` and `test-checklists.md` for T1 details.
 
 ### Quick Start
 
-1. Create database: `pnpm db:push`
-2. Seed database: `pnpm db:seed`
-3. Verify: `pnpm peek`
-4. Start development server: `pnpm dev`
+- One-command setup and checks (recommended):
+  - `pnpm doctor`
+  - Or start and serve at the end: `pnpm doctor --serve`
+
+- Manual alternative:
+  1. Start Postgres: `docker compose up -d db`
+  2. Generate Prisma client: `pnpm db:generate`
+  3. Create database schema: `pnpm db:push`
+  4. Seed database: `pnpm db:seed`
+  5. Verify counts: `pnpm peek`
+  6. Start dev server: `pnpm dev`
 
 The seed script creates demo users, ICU/PACU rotations, procedures, requirements, and sample log entries with verifications.
 
 ## Auth (T6) & RBAC (T7)
 
-The application uses NextAuth v4 with database sessions and credentials-based authentication, plus role-based access control.
+The application uses NextAuth v4 with credentials-based authentication and JWT sessions, plus role-based access control.
 
 ### Demo Users
 
@@ -74,9 +84,9 @@ After running `pnpm db:seed`, you can sign in using these demo accounts:
 
 - **Credentials Provider**: Email + password authentication
 - **Password Hashing**: Uses bcryptjs for secure password storage
-- **Database Sessions**: Sessions stored in SQLite database via PrismaAdapter
+- **JWT Sessions**: Sessions are JWT-based (signed; not stored in DB). User role and ID are included.
 - **Role-based Access**: User roles (ADMIN, TUTOR, INTERN) included in sessions
-- **Protected Routes**: Middleware automatically redirects unauthenticated users to `/login`
+- **Protected Routes**: Middleware automatically redirects unauthenticated users to `/login` (and `/admin` is role-guarded)
 - **API Protection**: API routes enforce role-based permissions
 
 ### Protected Routes
@@ -94,10 +104,10 @@ After running `pnpm db:seed`, you can sign in using these demo accounts:
 
 ### Session Management
 
-- Sessions are stored in the database (Session table)
-- Sessions include user role and ID information
+- Sessions use JWT strategy (not the Prisma Session table)
+- JWT includes user role and ID
 - Middleware automatically redirects unauthenticated users to `/login`
-- Logout clears session from database
+- Logout clears the browser session; JWT no longer used
 - Timezone: Asia/Jerusalem
 
 ### Manual Test Checklist
