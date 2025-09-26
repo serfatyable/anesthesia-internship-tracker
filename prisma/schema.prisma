@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -83,14 +82,14 @@ model LogEntry {
 }
 
 model Verification {
-  id         String             @id @default(cuid())
-  logEntryId String             @unique
+  id         String    @id @default(cuid())
+  logEntryId String    @unique
   verifierId String?
   reason     String?
   timestamp  DateTime?
-  status     VerificationStatus @default(PENDING)
-  logEntry   LogEntry           @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
-  verifier   User?              @relation("VerifierVerifications", fields: [verifierId], references: [id])
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  logEntry   LogEntry  @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  verifier   User?     @relation("VerifierVerifications", fields: [verifierId], references: [id])
 
   @@index([status])
 }
@@ -168,10 +167,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-enum VerificationStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
