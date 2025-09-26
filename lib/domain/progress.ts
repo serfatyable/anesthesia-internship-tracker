@@ -1,4 +1,5 @@
-import { VerificationStatus } from '@prisma/client';
+// Verification status type (matches database schema)
+export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 // Core progress tracking types
 export interface ProgressSummary {

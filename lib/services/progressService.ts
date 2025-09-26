@@ -8,6 +8,7 @@ import {
   DashboardOverview,
   InternDashboard,
   LogExportRow,
+  VerificationStatus,
   ExportParams,
   calculateCompletionPercentage,
   formatDateForCSV,
@@ -272,7 +273,7 @@ export class ProgressService {
       date: formatDateForCSV(log.date),
       count: log.count,
       notes: log.notes ?? undefined,
-      status: log.verification?.status || 'PENDING',
+      status: (log.verification?.status || 'PENDING') as VerificationStatus,
       verifiedBy: log.verification?.verifier?.name ?? undefined,
       verifiedAt: log.verification?.timestamp
         ? formatDateForCSV(log.verification.timestamp)

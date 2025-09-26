@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/options';
 
 export const isRole = (role?: string | null, target?: string) => role === target;
 export const isAdmin = (role?: string | null) => isRole(role, 'ADMIN');
