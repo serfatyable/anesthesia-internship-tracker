@@ -1,9 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
+import { getServerSession } from 'next-auth/next';
 
-// Mock next-auth session to be a TUTOR
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn().mockResolvedValue({ user: { id: 'T1', role: 'TUTOR' } }),
-}));
+// Mock getServerSession
+const mockGetServerSession = vi.mocked(getServerSession);
 
 // Provide an authOptions export for the route to import
 vi.mock('@/lib/auth/options', async (importOriginal) => {
@@ -37,7 +36,13 @@ vi.mock('@/lib/db', () => ({
 import { POST } from '../../app/api/verifications/route';
 
 describe('POST /api/verifications', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should approve a log entry successfully', async () => {
+    mockGetServerSession.mockResolvedValue({ user: { id: 'T1', role: 'TUTOR' } });
+
     const req = new Request('http://test/api/verifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

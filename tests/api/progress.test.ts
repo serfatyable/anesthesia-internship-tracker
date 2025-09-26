@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { getServerSession } from 'next-auth/next';
 
 // Mock the service used by the route
 vi.mock('@/lib/services/progressService', () => ({
@@ -18,15 +19,19 @@ vi.mock('@/lib/services/progressService', () => ({
   },
 }));
 
-// Mock NextAuth
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn().mockResolvedValue({
-    user: { id: 'user-1', role: 'INTERN' },
-  }),
-}));
+// Mock getServerSession
+const mockGetServerSession = vi.mocked(getServerSession);
 
 describe('GET /api/progress', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('returns 200 on success', async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: { id: 'user-1', role: 'INTERN' },
+    });
+
     // Use relative import to avoid Vitest alias edge cases
     const { GET } = await import('../../app/api/progress/route');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
