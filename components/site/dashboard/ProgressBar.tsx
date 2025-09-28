@@ -1,4 +1,5 @@
 import { cn } from '@/lib/ui/cn';
+import { memo } from 'react';
 
 interface ProgressBarProps {
   value: number;
@@ -8,7 +9,7 @@ interface ProgressBarProps {
   showPercentage?: boolean;
 }
 
-export function ProgressBar({
+export const ProgressBar = memo(function ProgressBar({
   value,
   max,
   label,
@@ -37,4 +38,4 @@ export function ProgressBar({
       </div>
     </div>
   );
-}
+});

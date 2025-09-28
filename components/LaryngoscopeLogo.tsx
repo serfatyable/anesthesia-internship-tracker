@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 interface LaryngoscopeLogoProps {
   onAnimationComplete?: () => void;
   className?: string;
 }
 
-export function LaryngoscopeLogo({ onAnimationComplete, className = '' }: LaryngoscopeLogoProps) {
+export const LaryngoscopeLogo = memo(function LaryngoscopeLogo({
+  onAnimationComplete,
+  className = '',
+}: LaryngoscopeLogoProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [showGlow, setShowGlow] = useState(false);
 
@@ -19,7 +22,8 @@ export function LaryngoscopeLogo({ onAnimationComplete, className = '' }: Laryng
     const fadeTimer = setTimeout(() => {
       setIsVisible(false);
       // Call completion callback after fade out
-      setTimeout(() => onAnimationComplete?.(), 1000);
+      const completionTimer = setTimeout(() => onAnimationComplete?.(), 1000);
+      return () => clearTimeout(completionTimer);
     }, 2000);
 
     return () => {
@@ -89,4 +93,4 @@ export function LaryngoscopeLogo({ onAnimationComplete, className = '' }: Laryng
       </div>
     </div>
   );
-}
+});

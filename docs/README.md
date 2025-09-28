@@ -2,6 +2,25 @@
 
 See `architecture.md` and `test-checklists.md` for T1 details.
 
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start with automatic database setup
+pnpm dev:auto
+```
+
+This will automatically check and fix your database, then start the development server.
+
+**Demo Login:**
+
+- Admin: `admin@demo.local` / `admin123`
+- Intern: `intern@demo.local` / `intern123`
+
+See [database-workflow.md](./database-workflow.md) for troubleshooting.
+
 ## Database Setup
 
 ### Prerequisites

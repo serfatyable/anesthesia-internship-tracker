@@ -36,40 +36,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({
-      token,
-      user,
-      trigger,
-      session,
-    }: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      token: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user: any;
-      trigger?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      session?: any;
-    }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id as string;
-        token.role = (user as unknown as { role: string }).role ?? token.role ?? 'INTERN';
+        token.role = (user as { role: string }).role ?? 'INTERN';
       }
       if (trigger === 'update' && session?.user?.role) {
         token.role = session.user.role;
       }
       return token;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({
-      session,
-      token,
-    }: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      session: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      token: any;
-    }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.role = (token.role as string) ?? 'INTERN';
         session.user.id = token.id as string;

@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
-import { z } from 'zod';
-
-const signupSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  idNumber: z.string().min(6, 'ID number must be at least 6 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['INTERN', 'TUTOR'], {
-    message: 'Please select a role',
-  }),
-});
+import { authRateLimit } from '@/lib/middleware/rateLimit';
+import { createUserSchema, validateInput } from '@/lib/utils/validation';
+import { AppError, createApiError } from '@/lib/utils/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResponse = authRateLimit(request);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
 
-    // Validate input
-    const validatedData = signupSchema.parse(body);
+    // Validate input using the new validation system
+    const validatedData = validateInput(createUserSchema, body);
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -27,7 +22,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
+      throw new AppError('User with this email already exists', 400);
     }
 
     // Check if ID number already exists
@@ -36,14 +31,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingId) {
-      return NextResponse.json(
-        { message: 'User with this ID number already exists' },
-        { status: 400 },
-      );
+      throw new AppError('User with this ID number already exists', 400);
     }
 
-    // Hash password
-    const hashedPassword = await hash(validatedData.password, 12);
+    // Hash password with higher salt rounds for better security
+    const hashedPassword = await hash(validatedData.password, 14);
 
     // Create user
     const user = await prisma.user.create({
@@ -70,16 +62,16 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Signup error:', error);
 
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        {
-          message: 'Validation error',
-          errors: error.issues,
-        },
-        { status: 400 },
-      );
+    if (error instanceof AppError) {
+      return NextResponse.json(createApiError(error.message, error.statusCode), {
+        status: error.statusCode,
+      });
     }
 
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    if (error instanceof Error) {
+      return NextResponse.json(createApiError(error.message, 400), { status: 400 });
+    }
+
+    return NextResponse.json(createApiError('Internal server error', 500), { status: 500 });
   }
 }

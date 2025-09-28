@@ -8,19 +8,29 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String         @unique
-  role          String         @default("INTERN")
-  password      String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  idNumber      String?        @unique
-  accounts      Account[]
-  audits        Audit[]        @relation("UserAudits")
-  logs          LogEntry[]
-  sessions      Session[]
-  verifications Verification[] @relation("VerifierVerifications")
+  id                          String                       @id @default(cuid())
+  name                        String?
+  email                       String                       @unique
+  role                        String                       @default("INTERN")
+  password                    String?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  idNumber                    String?                      @unique
+  accounts                    Account[]
+  audits                      Audit[]                      @relation("UserAudits")
+  logs                        LogEntry[]
+  sessions                    Session[]
+  verifications               Verification[]               @relation("VerifierVerifications")
+  quizResults                 QuizResult[]
+  reflections                 Reflection[]
+  cases                       Case[]
+  comments                    Comment[]
+  favorites                   Favorite[]
+  procedureKnowledgeFavorites ProcedureKnowledgeFavorite[]
+  internFeedback              MentorFeedback[]             @relation("InternFeedback")
+  mentorFeedback              MentorFeedback[]             @relation("MentorFeedback")
+  favoriteInterns             TutorFavoriteIntern[]        @relation("TutorFavoriteInterns")
+  favoritedByTutors           TutorFavoriteIntern[]        @relation("FavoritedInterns")
 }
 
 model Rotation {
@@ -167,4 +177,132 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model QuizResult {
+  id        String   @id @default(cuid())
+  internId  String
+  itemId    String // Can be procedureId or knowledgeTopicId
+  itemType  String // "PROCEDURE" or "KNOWLEDGE"
+  passed    Boolean
+  score     Int? // Optional score if needed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  intern    User     @relation(fields: [internId], references: [id], onDelete: Cascade)
+
+  @@unique([internId, itemId, itemType])
+  @@index([internId])
+  @@index([itemId, itemType])
+}
+
+model Reflection {
+  id        String   @id @default(cuid())
+  internId  String
+  itemId    String // Can be procedureId or knowledgeTopicId
+  itemType  String // "PROCEDURE" or "KNOWLEDGE"
+  content   String
+  image1Url String?
+  image2Url String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  intern    User     @relation(fields: [internId], references: [id], onDelete: Cascade)
+
+  @@unique([internId, itemId, itemType])
+  @@index([internId])
+  @@index([itemId, itemType])
+}
+
+model Case {
+  id          String     @id @default(cuid())
+  title       String
+  category    String // Cardiac Arrest, Difficult Intubation, etc.
+  description String
+  image1Url   String?
+  image2Url   String?
+  image3Url   String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  authorId    String // Anonymous but we track for edit/delete permissions
+  author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  favorites   Favorite[]
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  caseId    String
+  authorId  String // Anonymous but we track for edit/delete permissions
+  parentId  String? // For threaded comments
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  case      Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([caseId])
+  @@index([parentId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  caseId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, caseId])
+  @@index([userId])
+  @@index([caseId])
+}
+
+model ProcedureKnowledgeFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String // Can be procedureId or knowledgeTopicId
+  itemType  String // "PROCEDURE" or "KNOWLEDGE"
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId, itemType])
+  @@index([userId])
+  @@index([itemId, itemType])
+}
+
+model MentorFeedback {
+  id        String   @id @default(cuid())
+  internId  String // The intern who performed the task
+  mentorId  String // The mentor providing feedback
+  itemId    String // Can be procedureId or knowledgeTopicId
+  itemType  String // "PROCEDURE" or "KNOWLEDGE"
+  content   String // The feedback text
+  isRead    Boolean  @default(false) // Whether the intern has seen it
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  intern User @relation("InternFeedback", fields: [internId], references: [id], onDelete: Cascade)
+  mentor User @relation("MentorFeedback", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([internId])
+  @@index([mentorId])
+  @@index([itemId, itemType])
+  @@index([internId, itemId, itemType])
+}
+
+model TutorFavoriteIntern {
+  id        String   @id @default(cuid())
+  tutorId   String
+  internId  String
+  createdAt DateTime @default(now())
+  tutor     User     @relation("TutorFavoriteInterns", fields: [tutorId], references: [id], onDelete: Cascade)
+  intern    User     @relation("FavoritedInterns", fields: [internId], references: [id], onDelete: Cascade)
+
+  @@unique([tutorId, internId])
+  @@index([tutorId])
+  @@index([internId])
 }

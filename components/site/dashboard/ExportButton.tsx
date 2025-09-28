@@ -47,7 +47,10 @@ export function ExportButton({ userId, from, to, className }: ExportButtonProps)
       document.body.removeChild(a);
     } catch (error) {
       console.error('Export failed:', error);
-      alert('Export failed. Please try again.');
+      // More user-friendly error handling
+      const errorMessage =
+        error instanceof Error ? error.message : 'Export failed. Please try again.';
+      alert(`Export failed: ${errorMessage}`);
     } finally {
       setIsExporting(false);
     }

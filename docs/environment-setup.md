@@ -2,44 +2,22 @@
 
 ## Prerequisites
 
-### PostgreSQL Setup
+### SQLite Database (Development)
 
-1. **Install PostgreSQL** (if not already installed):
-
-   ```bash
-   # macOS with Homebrew
-   brew install postgresql@15
-   brew services start postgresql@15
-
-   # Or use PostgreSQL.app for macOS
-   # Download from https://postgresapp.com/
-   ```
-
-2. **Create the database**:
-
-   ```bash
-   # Connect to PostgreSQL
-   psql postgres
-
-   # Create database and user
-   CREATE DATABASE anesthesia_tracker;
-   CREATE USER postgres WITH PASSWORD 'postgres';
-   GRANT ALL PRIVILEGES ON DATABASE anesthesia_tracker TO postgres;
-   \q
-   ```
+The application uses SQLite for development, which requires no additional setup. The database file will be created automatically in `prisma/dev.db`.
 
 ## Database Configuration
 
 The `.env` file is already configured with:
 
 ```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/anesthesia_tracker?schema=public"
+DATABASE_URL="file:./prisma/dev.db"
 ```
 
-For production, create a `.env.local` file with your actual values:
+For production, you can use PostgreSQL by updating the schema and environment:
 
 ```bash
-# .env.local
+# .env.production
 DATABASE_URL="postgresql://your_user:your_password@localhost:5432/anesthesia_tracker?schema=public"
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"

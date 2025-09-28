@@ -53,7 +53,7 @@ function writeEnvFile(file: string, changes: Record<string, string>) {
   const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
   const map = new Map<string, number>();
   for (let i = 0; i < lines.length; i++) {
-    const s = lines[i].trim();
+    const s = lines[i]?.trim();
     if (!s || s.startsWith('#')) continue;
     const idx = s.indexOf('=');
     if (idx > -1) map.set(s.slice(0, idx).trim(), i);
@@ -108,7 +108,7 @@ function checkNode() {
   if (fs.existsSync(nvmrc)) {
     const wanted = fs.readFileSync(nvmrc, 'utf8').trim().replace(/^v/, '');
     const current = process.versions.node;
-    if (!current.startsWith(wanted.split('.')[0])) {
+    if (!current.startsWith(wanted.split('.')[0] || '')) {
       warn(
         `Node version differs from .nvmrc (wanted v${wanted}, current v${current}). Use: nvm use`,
       );
@@ -120,9 +120,10 @@ function checkNode() {
 
 function checkPrismaVersions() {
   const pkg = readJSON<Record<string, unknown>>('package.json');
-  const prismaDev = pkg?.devDependencies?.prisma || pkg?.dependencies?.prisma;
-  const prismaClient =
-    pkg?.dependencies?.['@prisma/client'] || pkg?.devDependencies?.['@prisma/client'];
+  const devDeps = pkg?.devDependencies as Record<string, string> | undefined;
+  const deps = pkg?.dependencies as Record<string, string> | undefined;
+  const prismaDev = devDeps?.prisma || deps?.prisma;
+  const prismaClient = deps?.['@prisma/client'] || devDeps?.['@prisma/client'];
   if (prismaDev && prismaClient) {
     const strip = (s: string) => s.replace(/^[^\d]*/, '');
     const d = strip(prismaDev);
@@ -164,13 +165,20 @@ function summarizeAndFixEnv() {
 
   const schema = fs.readFileSync('prisma/schema.prisma', 'utf8');
   const isPostgres = /datasource db\s*{\s*provider\s*=\s*"postgresql"/m.test(schema);
-  if (!isPostgres)
-    issues.push('Prisma datasource provider is not "postgresql". This project expects Postgres.');
+  const isSqlite = /datasource db\s*{\s*provider\s*=\s*"sqlite"/m.test(schema);
 
-  if (dbUrl && !/^postgresql:\/\//i.test(dbUrl)) {
+  if (isPostgres && dbUrl && !/^postgresql:\/\//i.test(dbUrl)) {
+    issues.push('DATABASE_URL must be a PostgreSQL URL when using PostgreSQL provider.');
+  }
+
+  if (isSqlite && dbUrl && !/^file:/.test(dbUrl)) {
     issues.push(
-      'DATABASE_URL must be a PostgreSQL URL. SQLite is not supported with current schema.',
+      'DATABASE_URL must be a file:// URL when using SQLite provider (e.g., "file:./prisma/dev.db").',
     );
+  }
+
+  if (!isPostgres && !isSqlite) {
+    issues.push('Prisma datasource provider must be either "postgresql" or "sqlite".');
   }
   if (secret && secret.length < 32) {
     issues.push('NEXTAUTH_SECRET should be at least 32 characters.');
@@ -202,8 +210,8 @@ function summarizeAndFixEnv() {
   }
 
   const pkg = readJSON<Record<string, unknown>>('package.json');
-  if (pkg?.scripts?.postinstall?.includes('prisma generate'))
-    ok('postinstall runs prisma generate');
+  const scripts = pkg?.scripts as Record<string, string> | undefined;
+  if (scripts?.postinstall?.includes('prisma generate')) ok('postinstall runs prisma generate');
   else issues.push('Add "postinstall": "prisma generate" to package.json scripts.');
 
   return { env, issues, envLocalPath, envProdPath };

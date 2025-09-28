@@ -1,32 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
 import { RotationProgress } from '@/lib/domain/progress';
 import { cn } from '@/lib/ui/cn';
+import { mockProcedures } from '@/lib/data/mockProcedures';
+import type { ProcedureCategory } from '@/lib/data/mockProcedures';
 
 interface RotationDetailProps {
   rotationName: string;
   userId: string;
+  className?: string;
 }
 
 interface RotationData {
   rotation: RotationProgress;
   procedures: ProcedureCategory[];
   knowledge: KnowledgeCategory[];
-}
-
-interface ProcedureCategory {
-  id: string;
-  name: string;
-  procedures: ProcedureItem[];
-}
-
-interface ProcedureItem {
-  id: string;
-  name: string;
-  completed: boolean;
-  pending: boolean;
 }
 
 interface KnowledgeCategory {
@@ -40,81 +30,100 @@ interface KnowledgeTopic {
   name: string;
   completed: boolean;
   pending: boolean;
+  textbookResource?: string;
 }
 
-export function RotationDetail({ rotationName }: RotationDetailProps) {
+export const RotationDetail = memo(function RotationDetail({
+  rotationName,
+  className,
+}: RotationDetailProps) {
   const [rotationData, setRotationData] = useState<RotationData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for now - will be replaced with real data later
-  const mockProcedures: ProcedureCategory[] = [
-    {
-      id: 'airway',
-      name: 'Airway Management',
-      procedures: [
-        { id: 'intubation', name: 'Endotracheal Intubation', completed: false, pending: false },
-        { id: 'lma', name: 'LMA Insertion', completed: false, pending: false },
-        { id: 'mask-ventilation', name: 'Mask Ventilation', completed: true, pending: false },
-      ],
-    },
-    {
-      id: 'iv-access',
-      name: 'IV Access',
-      procedures: [
-        { id: 'peripheral-iv', name: 'Peripheral IV Placement', completed: false, pending: false },
-        { id: 'central-line', name: 'Central Line Placement', completed: false, pending: true },
-      ],
-    },
-    {
-      id: 'induction',
-      name: 'Induction & Maintenance',
-      procedures: [
-        { id: 'induction', name: 'General Anesthesia Induction', completed: false, pending: false },
-        { id: 'emergence', name: 'Emergence from Anesthesia', completed: false, pending: false },
-      ],
-    },
-  ];
+  // Use mock data from external file - will be replaced with real API data later
+  const procedures: ProcedureCategory[] = useMemo(() => mockProcedures, []);
 
-  const mockKnowledge: KnowledgeCategory[] = [
-    {
-      id: 'respiratory',
-      name: 'Respiratory System',
-      topics: [
-        { id: 'bronchospasm', name: 'Bronchospasm Management', completed: false, pending: false },
-        { id: 'asthma', name: 'Asthma Attack Treatment', completed: true, pending: false },
-        { id: 'pneumonia', name: 'Post-op Pneumonia Prevention', completed: false, pending: true },
-      ],
-    },
-    {
-      id: 'cardiovascular',
-      name: 'Cardiovascular System',
-      topics: [
-        { id: 'hypotension', name: 'Hypotension Management', completed: false, pending: false },
-        { id: 'arrhythmia', name: 'Arrhythmia Recognition', completed: false, pending: false },
-      ],
-    },
-  ];
+  const mockKnowledge: KnowledgeCategory[] = useMemo(
+    () => [
+      {
+        id: 'respiratory',
+        name: 'Respiratory System',
+        topics: [
+          {
+            id: 'bronchospasm',
+            name: 'Bronchospasm Management',
+            completed: true,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Respiratory Effects of Inhaled Anesthetics",
+          },
+          {
+            id: 'asthma',
+            name: 'Asthma Attack Treatment',
+            completed: true,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Asthma and COPD",
+          },
+          {
+            id: 'pneumonia',
+            name: 'Post-op Pneumonia Prevention',
+            completed: true,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Postoperative Pulmonary Complications",
+          },
+        ],
+      },
+      {
+        id: 'cardiovascular',
+        name: 'Cardiovascular System',
+        topics: [
+          {
+            id: 'hypotension',
+            name: 'Hypotension Management',
+            completed: true,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiovascular Effects of Anesthetics",
+          },
+          {
+            id: 'arrhythmia',
+            name: 'Arrhythmia Recognition',
+            completed: true,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiac Arrhythmias",
+          },
+        ],
+      },
+    ],
+    [],
+  );
 
-  const mockRotation: RotationProgress = {
-    rotationId: '1',
-    rotationName: rotationName,
-    required: 15,
-    verified: 8,
-    pending: 3,
-    completionPercentage: 53,
-    state: 'ACTIVE',
-  };
+  const mockRotation: RotationProgress = useMemo(
+    () => ({
+      rotationId: '1',
+      rotationName: rotationName,
+      required: 30,
+      verified: 30,
+      pending: 0,
+      completionPercentage: 100,
+      state: 'FINISHED',
+    }),
+    [rotationName],
+  );
 
   useEffect(() => {
     // Simulate loading
-    setTimeout(() => {
+    const loadingTimer = setTimeout(() => {
       setRotationData({
         rotation: mockRotation,
-        procedures: mockProcedures,
+        procedures: procedures,
         knowledge: mockKnowledge,
       });
       setLoading(false);
     }, 500);
+
+    return () => clearTimeout(loadingTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rotationName]);
 
@@ -157,17 +166,11 @@ export function RotationDetail({ rotationName }: RotationDetailProps) {
     setRotationData((prev) => {
       if (!prev) return null;
 
-      const states = ['NOT_STARTED', 'ACTIVE', 'FINISHED'] as const;
-      const currentIndex = states.indexOf(
-        (prev.rotation.state || 'NOT_STARTED') as 'NOT_STARTED' | 'ACTIVE' | 'FINISHED',
-      );
-      const nextIndex = (currentIndex + 1) % states.length;
-
       return {
         ...prev,
         rotation: {
           ...prev.rotation,
-          state: states[nextIndex] as 'NOT_STARTED' | 'ACTIVE' | 'FINISHED',
+          state: prev.rotation.state === 'ACTIVE' ? 'COMPLETED' : 'ACTIVE',
         },
       };
     });
@@ -175,166 +178,156 @@ export function RotationDetail({ rotationName }: RotationDetailProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">Loading rotation details...</span>
       </div>
     );
   }
 
   if (!rotationData) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Rotation Not Found</h2>
-        <p className="text-gray-600">The requested rotation could not be found.</p>
-        <Link href="/dashboard" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
-          ← Back to Dashboard
-        </Link>
+      <div className="text-center p-8">
+        <p className="text-gray-600">No rotation data available</p>
       </div>
     );
   }
 
-  const { rotation, procedures, knowledge } = rotationData;
+  const { rotation, procedures: rotationProcedures, knowledge } = rotationData;
 
   return (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
-      >
-        ← Back to Dashboard
-      </Link>
-
+    <div className={cn('space-y-6', className)}>
       {/* Rotation Header */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">{rotation.rotationName}</h1>
-          <button
-            onClick={toggleRotationState}
-            className={cn(
-              'px-4 py-2 rounded-lg font-medium transition-colors',
-              rotation.state === 'ACTIVE' && 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-              rotation.state === 'FINISHED' && 'bg-green-100 text-green-800 hover:bg-green-200',
-              rotation.state === 'NOT_STARTED' && 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-            )}
-          >
-            {rotation.state === 'ACTIVE' && 'Active'}
-            {rotation.state === 'FINISHED' && 'Finished'}
-            {rotation.state === 'NOT_STARTED' && 'Not Started'}
-          </button>
-        </div>
-
-        {/* Progress Information */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{rotation.completionPercentage}%</div>
-            <div className="text-sm text-gray-600">Overall Progress</div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{rotation.rotationName}</h1>
+            <p className="text-gray-600 mt-1">
+              Progress: {rotation.verified}/{rotation.required} procedures completed
+            </p>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{rotation.verified}</div>
-            <div className="text-sm text-gray-600">Completed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">{rotation.pending}</div>
-            <div className="text-sm text-gray-600">Pending</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600">{rotation.required}</div>
-            <div className="text-sm text-gray-600">Total Required</div>
+          <div className="flex items-center space-x-4">
+            <span
+              className={cn(
+                'px-3 py-1 rounded-full text-sm font-medium',
+                rotation.state === 'ACTIVE'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-blue-100 text-blue-800',
+              )}
+            >
+              {rotation.state}
+            </span>
+            <button
+              onClick={toggleRotationState}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {rotation.state === 'ACTIVE' ? 'Mark Complete' : 'Mark Active'}
+            </button>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div
-            className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-300"
-            style={{ width: `${rotation.completionPercentage}%` }}
-          />
+        <div className="mt-4">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Progress</span>
+            <span>{rotation.completionPercentage}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${rotation.completionPercentage}%` }}
+            ></div>
+          </div>
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Procedures Column */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Procedures</h2>
-          <div className="space-y-4">
-            {procedures.map((category) => (
-              <div key={category.id} className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
-                <div className="space-y-2">
-                  {category.procedures.map((procedure) => (
-                    <button
-                      key={procedure.id}
-                      onClick={() => handleProcedureClick(category.id, procedure.id)}
-                      className={cn(
-                        'w-full text-left p-3 rounded-lg border transition-colors',
-                        procedure.completed &&
-                          procedure.pending &&
-                          'bg-yellow-50 border-yellow-300 text-yellow-800',
-                        procedure.completed &&
-                          !procedure.pending &&
-                          'bg-green-50 border-green-300 text-green-800',
-                        !procedure.completed &&
-                          'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100',
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{procedure.name}</span>
-                        <span className="text-sm">
-                          {procedure.completed && procedure.pending && 'Pending for approval'}
-                          {procedure.completed && !procedure.pending && 'Completed'}
-                          {!procedure.completed && 'Click to complete'}
-                        </span>
+      {/* Procedures Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Procedures</h2>
+        <div className="space-y-4">
+          {rotationProcedures.map((category) => (
+            <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {category.procedures.map((procedure) => (
+                  <div
+                    key={procedure.id}
+                    className={cn(
+                      'p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md',
+                      procedure.completed
+                        ? 'bg-green-50 border-green-200'
+                        : procedure.pending
+                          ? 'bg-yellow-50 border-yellow-200'
+                          : 'bg-gray-50 border-gray-200',
+                    )}
+                    onClick={() => handleProcedureClick(category.id, procedure.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">{procedure.name}</span>
+                      <div className="flex items-center space-x-2">
+                        {procedure.completed && <span className="text-green-600 text-sm">✓</span>}
+                        {procedure.pending && <span className="text-yellow-600 text-sm">⏳</span>}
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                    {procedure.textbookResource && (
+                      <p className="text-xs text-gray-500 mt-1">{procedure.textbookResource}</p>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Knowledge Column */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Knowledge</h2>
-          <div className="space-y-4">
-            {knowledge.map((category) => (
-              <div key={category.id} className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
-                <div className="space-y-2">
-                  {category.topics.map((topic) => (
-                    <button
-                      key={topic.id}
-                      onClick={() => handleKnowledgeClick(category.id, topic.id)}
-                      className={cn(
-                        'w-full text-left p-3 rounded-lg border transition-colors',
-                        topic.completed &&
-                          topic.pending &&
-                          'bg-yellow-50 border-yellow-300 text-yellow-800',
-                        topic.completed &&
-                          !topic.pending &&
-                          'bg-green-50 border-green-300 text-green-800',
-                        !topic.completed &&
-                          'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100',
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{topic.name}</span>
-                        <span className="text-sm">
-                          {topic.completed && topic.pending && 'Pending for approval'}
-                          {topic.completed && !topic.pending && 'Completed'}
-                          {!topic.completed && 'Take test'}
-                        </span>
+      {/* Knowledge Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Knowledge Topics</h2>
+        <div className="space-y-4">
+          {knowledge.map((category) => (
+            <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {category.topics.map((topic) => (
+                  <div
+                    key={topic.id}
+                    className={cn(
+                      'p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md',
+                      topic.completed
+                        ? 'bg-green-50 border-green-200'
+                        : topic.pending
+                          ? 'bg-yellow-50 border-yellow-200'
+                          : 'bg-gray-50 border-gray-200',
+                    )}
+                    onClick={() => handleKnowledgeClick(category.id, topic.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900">{topic.name}</span>
+                      <div className="flex items-center space-x-2">
+                        {topic.completed && <span className="text-green-600 text-sm">✓</span>}
+                        {topic.pending && <span className="text-yellow-600 text-sm">⏳</span>}
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                    {topic.textbookResource && (
+                      <p className="text-xs text-gray-500 mt-1">{topic.textbookResource}</p>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* Back Button */}
+      <div className="flex justify-start">
+        <Link
+          href="/rotations"
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          ← Back to Rotations
+        </Link>
       </div>
     </div>
   );
-}
+});

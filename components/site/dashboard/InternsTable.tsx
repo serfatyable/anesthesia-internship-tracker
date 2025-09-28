@@ -1,13 +1,14 @@
 import { InternSummary } from '@/lib/domain/progress';
 import { cn } from '@/lib/ui/cn';
 import Link from 'next/link';
+import { memo } from 'react';
 
 interface InternsTableProps {
   interns: InternSummary[];
   className?: string;
 }
 
-export function InternsTable({ interns, className }: InternsTableProps) {
+export const InternsTable = memo(function InternsTable({ interns, className }: InternsTableProps) {
   if (interns.length === 0) {
     return (
       <div className={cn('rounded-2xl border border-zinc-200/60 p-6', className)}>
@@ -77,4 +78,4 @@ export function InternsTable({ interns, className }: InternsTableProps) {
       </div>
     </div>
   );
-}
+});

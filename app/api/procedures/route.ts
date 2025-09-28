@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { listProceduresActive } from '@/lib/services/logs';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const procedures = await prisma.procedure.findMany({
-    where: { rotation: { isActive: true } },
-    select: { id: true, name: true },
-    orderBy: { name: 'asc' },
-  });
-  return NextResponse.json({ procedures });
+  try {
+    const procedures = await listProceduresActive();
+    return NextResponse.json({ procedures });
+  } catch (error) {
+    console.error('Error fetching procedures:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

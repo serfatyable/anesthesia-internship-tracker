@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 
-export default function RtlToggle() {
+export const RtlToggle = memo(function RtlToggle() {
   const [rtl, setRtl] = useState(false);
 
   useEffect(() => {
@@ -18,4 +18,4 @@ export default function RtlToggle() {
       {rtl ? 'RTL' : 'LTR'}
     </button>
   );
-}
+});

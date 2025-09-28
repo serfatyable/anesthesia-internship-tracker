@@ -1,12 +1,16 @@
 import { RotationProgress as OldRotationProgress } from '@/lib/domain/progress';
 import Link from 'next/link';
+import { memo } from 'react';
 
 interface RotationCardProps {
   rotation: OldRotationProgress;
   className?: string;
 }
 
-export function RotationCard({ rotation, className = '' }: RotationCardProps) {
+export const RotationCard = memo(function RotationCard({
+  rotation,
+  className = '',
+}: RotationCardProps) {
   const { rotationName, required, verified, pending, completionPercentage, state } = rotation;
 
   // Calculate progress bar width (0-100%)
@@ -66,9 +70,8 @@ export function RotationCard({ rotation, className = '' }: RotationCardProps) {
     return borderColors[rotationName] || 'border-gray-400';
   };
 
-  // For now, we'll use a placeholder for intern count
-  // This would need to be calculated from the database in a real implementation
-  const internCount = 1; // Placeholder - would need to query actual intern count per rotation
+  // Use the actual intern count from the rotation data
+  const internCount = rotation.currentInterns || 0;
 
   return (
     <Link href={`/rotations/${encodeURIComponent(rotationName)}`}>
@@ -134,4 +137,4 @@ export function RotationCard({ rotation, className = '' }: RotationCardProps) {
       </div>
     </Link>
   );
-}
+});

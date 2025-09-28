@@ -1,0 +1,446 @@
+'use client';
+
+import { useState, useEffect, useMemo, memo } from 'react';
+import Link from 'next/link';
+import { RotationProgress } from '@/lib/domain/progress';
+import { cn } from '@/lib/ui/cn';
+import { mockProcedures } from '@/lib/data/mockProcedures';
+
+interface RotationDetailProps {
+  rotationName: string;
+  userId: string;
+}
+
+interface RotationData {
+  rotation: RotationProgress;
+  procedures: ProcedureCategory[];
+  knowledge: KnowledgeCategory[];
+}
+
+interface ProcedureCategory {
+  id: string;
+  name: string;
+  procedures: ProcedureItem[];
+}
+
+interface ProcedureItem {
+  id: string;
+  name: string;
+  completed: boolean;
+  pending: boolean;
+  textbookResource?: string;
+}
+
+interface KnowledgeCategory {
+  id: string;
+  name: string;
+  topics: KnowledgeTopic[];
+}
+
+interface KnowledgeTopic {
+  id: string;
+  name: string;
+  completed: boolean;
+  pending: boolean;
+  textbookResource?: string;
+}
+
+export const RotationDetail = memo(function RotationDetail({ rotationName }: RotationDetailProps) {
+  const [rotationData, setRotationData] = useState<RotationData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Use mock data from external file - will be replaced with real API data later
+  const procedures: ProcedureCategory[] = useMemo(
+    () => mockProcedures,
+    [rotationName]
+  );
+        procedures: [
+          {
+            id: 'intubation',
+            name: 'Endotracheal Intubation',
+            completed: false,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Airway Management",
+          },
+          {
+            id: 'lma',
+            name: 'LMA Insertion',
+            completed: false,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Supraglottic Airways",
+          },
+          {
+            id: 'mask-ventilation',
+            name: 'Mask Ventilation',
+            completed: true,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Mask Ventilation",
+          },
+        ],
+      },
+      {
+        id: 'iv-access',
+        name: 'IV Access',
+        procedures: [
+          {
+            id: 'peripheral-iv',
+            name: 'Peripheral IV Placement',
+            completed: false,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 20, Peripheral Venous Access",
+          },
+          {
+            id: 'central-line',
+            name: 'Central Line Placement',
+            completed: false,
+            pending: true,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 20, Central Venous Access",
+          },
+        ],
+      },
+      {
+        id: 'induction',
+        name: 'Induction & Maintenance',
+        procedures: [
+          {
+            id: 'induction',
+            name: 'General Anesthesia Induction',
+            completed: false,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 13, Induction of Anesthesia",
+          },
+          {
+            id: 'emergence',
+            name: 'Emergence from Anesthesia',
+            completed: false,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 13, Emergence from Anesthesia",
+          },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const mockKnowledge: KnowledgeCategory[] = useMemo(
+    () => [
+      {
+        id: 'respiratory',
+        name: 'Respiratory System',
+        topics: [
+          {
+            id: 'bronchospasm',
+            name: 'Bronchospasm Management',
+            completed: false,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Respiratory Effects of Inhaled Anesthetics",
+          },
+          {
+            id: 'asthma',
+            name: 'Asthma Attack Treatment',
+            completed: true,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Asthma and COPD",
+          },
+          {
+            id: 'pneumonia',
+            name: 'Post-op Pneumonia Prevention',
+            completed: false,
+            pending: true,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Postoperative Pulmonary Complications",
+          },
+        ],
+      },
+      {
+        id: 'cardiovascular',
+        name: 'Cardiovascular System',
+        topics: [
+          {
+            id: 'hypotension',
+            name: 'Hypotension Management',
+            completed: false,
+            pending: false,
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiovascular Effects of Anesthetics",
+          },
+          {
+            id: 'arrhythmia',
+            name: 'Arrhythmia Recognition',
+            completed: false,
+            pending: false,
+            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiac Arrhythmias",
+          },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const mockRotation: RotationProgress = useMemo(
+    () => ({
+      rotationId: '1',
+      rotationName: rotationName,
+      required: 15,
+      verified: 8,
+      pending: 3,
+      completionPercentage: 53,
+      state: 'ACTIVE',
+    }),
+    [rotationName],
+  );
+
+  useEffect(() => {
+    // Simulate loading
+    const loadingTimer = setTimeout(() => {
+      setRotationData({
+        rotation: mockRotation,
+        procedures: procedures,
+        knowledge: mockKnowledge,
+      });
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(loadingTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rotationName]);
+
+  const handleProcedureClick = (categoryId: string, procedureId: string) => {
+    setRotationData((prev) => {
+      if (!prev) return null;
+
+      return {
+        ...prev,
+        procedures: prev.procedures.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              procedures: category.procedures.map((procedure) => {
+                if (procedure.id === procedureId) {
+                  return {
+                    ...procedure,
+                    completed: !procedure.completed,
+                    pending: !procedure.completed, // If completing, mark as pending
+                  };
+                }
+                return procedure;
+              }),
+            };
+          }
+          return category;
+        }),
+      };
+    });
+  };
+
+  const handleKnowledgeClick = (categoryId: string, topicId: string) => {
+    // For now, just open a placeholder for the quiz interface
+    alert(
+      `Opening quiz for: ${mockKnowledge.find((c) => c.id === categoryId)?.topics.find((t) => t.id === topicId)?.name}`,
+    );
+  };
+
+  const toggleRotationState = () => {
+    setRotationData((prev) => {
+      if (!prev) return null;
+
+      const states = ['NOT_STARTED', 'ACTIVE', 'FINISHED'] as const;
+      const currentIndex = states.indexOf(
+        (prev.rotation.state || 'NOT_STARTED') as 'NOT_STARTED' | 'ACTIVE' | 'FINISHED',
+      );
+      const nextIndex = (currentIndex + 1) % states.length;
+
+      return {
+        ...prev,
+        rotation: {
+          ...prev.rotation,
+          state: states[nextIndex] as 'NOT_STARTED' | 'ACTIVE' | 'FINISHED',
+        },
+      };
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!rotationData) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Rotation Not Found</h2>
+        <p className="text-gray-600">The requested rotation could not be found.</p>
+        <Link href="/dashboard" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
+          ← Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  const { rotation, procedures, knowledge } = rotationData;
+
+  return (
+    <div className="space-y-6">
+      {/* Back Button */}
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+      >
+        ← Back to Dashboard
+      </Link>
+
+      {/* Rotation Header */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">{rotation.rotationName}</h1>
+          <button
+            onClick={toggleRotationState}
+            className={cn(
+              'px-4 py-2 rounded-lg font-medium transition-colors',
+              rotation.state === 'ACTIVE' && 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+              rotation.state === 'FINISHED' && 'bg-green-100 text-green-800 hover:bg-green-200',
+              rotation.state === 'NOT_STARTED' && 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+            )}
+          >
+            {rotation.state === 'ACTIVE' && 'Active'}
+            {rotation.state === 'FINISHED' && 'Finished'}
+            {rotation.state === 'NOT_STARTED' && 'Not Started'}
+          </button>
+        </div>
+
+        {/* Progress Information */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">{rotation.completionPercentage}%</div>
+            <div className="text-sm text-gray-600">Overall Progress</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{rotation.verified}</div>
+            <div className="text-sm text-gray-600">Completed</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-yellow-600">{rotation.pending}</div>
+            <div className="text-sm text-gray-600">Pending</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-600">{rotation.required}</div>
+            <div className="text-sm text-gray-600">Total Required</div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 rounded-full h-4">
+          <div
+            className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-300"
+            style={{ width: `${rotation.completionPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Procedures Column */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Procedures</h2>
+          <div className="space-y-4">
+            {procedures.map((category) => (
+              <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
+                <div className="space-y-2">
+                  {category.procedures.map((procedure) => (
+                    <button
+                      key={procedure.id}
+                      onClick={() => handleProcedureClick(category.id, procedure.id)}
+                      className={cn(
+                        'w-full text-left p-3 rounded-lg border transition-colors',
+                        procedure.completed &&
+                          procedure.pending &&
+                          'bg-yellow-50 border-yellow-300 text-yellow-800',
+                        procedure.completed &&
+                          !procedure.pending &&
+                          'bg-green-50 border-green-300 text-green-800',
+                        !procedure.completed &&
+                          'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100',
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <span className="font-medium">{procedure.name}</span>
+                          {procedure.textbookResource && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {procedure.textbookResource}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm">
+                          {procedure.completed && procedure.pending && 'Pending for approval'}
+                          {procedure.completed && !procedure.pending && 'Completed'}
+                          {!procedure.completed && 'Click to complete'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Knowledge Column */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Knowledge</h2>
+          <div className="space-y-4">
+            {knowledge.map((category) => (
+              <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+                <h3 className="font-medium text-gray-900 mb-3">{category.name}</h3>
+                <div className="space-y-2">
+                  {category.topics.map((topic) => (
+                    <button
+                      key={topic.id}
+                      onClick={() => handleKnowledgeClick(category.id, topic.id)}
+                      className={cn(
+                        'w-full text-left p-3 rounded-lg border transition-colors',
+                        topic.completed &&
+                          topic.pending &&
+                          'bg-yellow-50 border-yellow-300 text-yellow-800',
+                        topic.completed &&
+                          !topic.pending &&
+                          'bg-green-50 border-green-300 text-green-800',
+                        !topic.completed &&
+                          'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100',
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <span className="font-medium">{topic.name}</span>
+                          {topic.textbookResource && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {topic.textbookResource}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm">
+                          {topic.completed && topic.pending && 'Pending for approval'}
+                          {topic.completed && !topic.pending && 'Completed'}
+                          {!topic.completed && 'Take test'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});

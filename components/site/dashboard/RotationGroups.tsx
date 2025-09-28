@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { RotationProgress } from '@/lib/domain/progress';
 import { RotationCard } from './RotationCard';
 import { cn } from '@/lib/ui/cn';
@@ -19,37 +19,63 @@ interface RotationGroup {
 }
 
 export function RotationGroups({ rotations, className }: RotationGroupsProps) {
-  const [groups, setGroups] = useState<RotationGroup[]>([
-    {
-      title: 'Currently Active',
-      rotations: rotations.filter((r) => r.state === 'ACTIVE'),
-      isCollapsed: false,
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-    },
-    {
-      title: 'Not Yet Activated',
-      rotations: rotations.filter((r) => r.state === 'NOT_STARTED'),
-      isCollapsed: false,
-      bgColor: 'bg-gray-50',
-      borderColor: 'border-gray-200',
-    },
-    {
-      title: 'Finished',
-      rotations: rotations.filter((r) => r.state === 'FINISHED'),
-      isCollapsed: false,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-    },
-  ]);
+  const [groups, setGroups] = useState<RotationGroup[]>([]);
 
-  const toggleGroup = (groupIndex: number) => {
+  // Memoize the group creation to avoid unnecessary recalculations
+  const groupedRotations = useMemo(() => {
+    return {
+      active: rotations.filter((r) => r.state === 'ACTIVE'),
+      notStarted: rotations.filter((r) => r.state === 'NOT_STARTED'),
+      finished: rotations.filter((r) => r.state === 'FINISHED'),
+    };
+  }, [rotations]);
+
+  // Initialize groups when rotations data is available
+  useEffect(() => {
+    setGroups([
+      {
+        title: 'Currently Active',
+        rotations: groupedRotations.active,
+        isCollapsed: false, // Show active rotations by default
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200',
+      },
+      {
+        title: 'Not Yet Activated',
+        rotations: groupedRotations.notStarted,
+        isCollapsed: true,
+        bgColor: 'bg-gray-50',
+        borderColor: 'border-gray-200',
+      },
+      {
+        title: 'Finished',
+        rotations: groupedRotations.finished,
+        isCollapsed: true,
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+      },
+    ]);
+  }, [groupedRotations]);
+
+  const toggleGroup = useCallback((groupIndex: number) => {
     setGroups((prev) =>
       prev.map((group, index) =>
         index === groupIndex ? { ...group, isCollapsed: !group.isCollapsed } : group,
       ),
     );
-  };
+  }, []);
+
+  // Show loading state if groups haven't been initialized yet
+  if (groups.length === 0) {
+    return (
+      <div className={cn('space-y-4', className)}>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading rotations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('space-y-4', className)}>

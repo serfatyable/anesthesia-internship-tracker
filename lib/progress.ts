@@ -1,3 +1,6 @@
+// This file is deprecated. Use lib/services/progressService.ts instead.
+// Keeping for backward compatibility during migration.
+
 import { prisma } from '@/lib/db';
 import {
   ProgressSummary as OldProgressSummary,

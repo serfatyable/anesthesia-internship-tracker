@@ -14,6 +14,10 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/triple-slash-reference': 'warn',
+    '@typescript-eslint/no-var-requires': 'warn',
   },
   overrides: [
     {

@@ -75,21 +75,54 @@ async function main() {
   let icu = await prisma.rotation.findFirst({ where: { name: 'ICU' } });
   if (!icu) {
     icu = await prisma.rotation.create({
-      data: { name: 'ICU', description: 'Intensive Care Unit rotation', isActive: true },
+      data: {
+        name: 'ICU',
+        description: 'Intensive Care Unit rotation',
+        isActive: true,
+        state: 'FINISHED',
+      },
+    });
+  } else {
+    // Update existing ICU rotation to FINISHED state
+    await prisma.rotation.update({
+      where: { id: icu.id },
+      data: { state: 'FINISHED' },
     });
   }
 
   let pacu = await prisma.rotation.findFirst({ where: { name: 'PACU' } });
   if (!pacu) {
     pacu = await prisma.rotation.create({
-      data: { name: 'PACU', description: 'Post-Anesthesia Care Unit rotation', isActive: true },
+      data: {
+        name: 'PACU',
+        description: 'Post-Anesthesia Care Unit rotation',
+        isActive: true,
+        state: 'FINISHED',
+      },
+    });
+  } else {
+    // Update existing PACU rotation to FINISHED state
+    await prisma.rotation.update({
+      where: { id: pacu.id },
+      data: { state: 'FINISHED' },
     });
   }
 
   let or = await prisma.rotation.findFirst({ where: { name: 'Operating Room' } });
   if (!or) {
     or = await prisma.rotation.create({
-      data: { name: 'Operating Room', description: 'Main OR rotation', isActive: true },
+      data: {
+        name: 'Operating Room',
+        description: 'Main OR rotation',
+        isActive: true,
+        state: 'ACTIVE',
+      },
+    });
+  } else {
+    // Update existing Operating Room rotation to ACTIVE state
+    await prisma.rotation.update({
+      where: { id: or.id },
+      data: { state: 'ACTIVE' },
     });
   }
 
@@ -101,8 +134,14 @@ async function main() {
         name: 'OBGYN',
         description: 'Obstetrics and Gynecology rotation',
         isActive: true,
-        state: 'NOT_STARTED',
+        state: 'ACTIVE',
       },
+    });
+  } else {
+    // Update existing OBGYN rotation to ACTIVE state
+    await prisma.rotation.update({
+      where: { id: obgyn.id },
+      data: { state: 'ACTIVE' },
     });
   }
 
@@ -603,14 +642,118 @@ async function main() {
     { procedure: spinalAnesthesia, count: 2, notes: 'Successful subarachnoid block' },
   ];
 
-  // Create logs for first intern (Itai) - mix of approved, pending, and rejected
-  for (let i = 0; i < allProcedures.length; i++) {
-    const item = allProcedures[i];
-    if (!item) continue;
-    const { procedure, count, notes } = item;
-    const status = i % 3 === 0 ? 'PENDING' : i % 3 === 1 ? 'REJECTED' : 'APPROVED';
-    await createLogWithVerification(interns[0]?.id || '', procedure.id, count, notes, status, i);
-  }
+  // Create logs for first intern (Itai) - realistic progress showing finished ICU/PACU, active OR/OBGYN
+  // ICU procedures (finished) - all approved
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    arterialLine.id,
+    5,
+    'ICU arterial line placement, US-guided',
+    'APPROVED',
+    30,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    centralLine.id,
+    4,
+    'ICU central line, IJ approach',
+    'APPROVED',
+    28,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    dlIntubation.id,
+    6,
+    'ICU intubation, difficult airway',
+    'APPROVED',
+    25,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    vlIntubation.id,
+    3,
+    'ICU VL intubation, grade I view',
+    'APPROVED',
+    22,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    extubation.id,
+    5,
+    'ICU extubation, safe emergence',
+    'APPROVED',
+    20,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    sbt.id,
+    8,
+    'ICU SBT protocol, successful weaning',
+    'APPROVED',
+    18,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    ventConnect.id,
+    6,
+    'ICU ventilator management',
+    'APPROVED',
+    15,
+  );
+
+  // PACU procedures (finished) - all approved
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    pacuExtubation.id,
+    4,
+    'PACU extubation, criteria met',
+    'APPROVED',
+    12,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    painAssessment.id,
+    7,
+    'PACU pain assessment, multimodal approach',
+    'APPROVED',
+    10,
+  );
+
+  // OR procedures (active) - mix of approved and pending
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    generalAnesthesia.id,
+    3,
+    'OR general anesthesia, complex case',
+    'APPROVED',
+    5,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    spinalAnesthesia.id,
+    2,
+    'OR spinal anesthesia, orthopedic case',
+    'PENDING',
+    3,
+  );
+
+  // OBGYN procedures (active) - mix of approved and pending
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    generalAnesthesia.id,
+    2,
+    'OBGYN GA, cesarean section',
+    'APPROVED',
+    2,
+  );
+  await createLogWithVerification(
+    interns[0]?.id || '',
+    spinalAnesthesia.id,
+    1,
+    'OBGYN spinal, labor analgesia',
+    'PENDING',
+    1,
+  );
 
   // Create logs for second intern (Sarah) - mostly approved
   for (let i = 0; i < allProcedures.length; i++) {

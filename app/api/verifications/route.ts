@@ -1,11 +1,23 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { VerifyLogSchema } from '@/lib/validators/logs';
 import { canReviewLogs } from '@/lib/auth/permissions';
+import { logger } from '@/lib/utils/logger';
+import { strictRateLimit } from '@/lib/middleware/rateLimit';
+import { sanitizeNotes } from '@/lib/utils/sanitize';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  // Apply strict rate limiting for verification endpoint
+  const rateLimitResponse = strictRateLimit(req as NextRequest);
+  if (rateLimitResponse) return rateLimitResponse;
+
+  const startTime = Date.now();
+  logger.request('POST', '/api/verifications');
+
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const u = session?.user;
@@ -15,9 +27,24 @@ export async function POST(req: Request) {
   if (!canReviewLogs({ id: u.id, role: u.role }))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const body = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch (error) {
+    logger.warn('Invalid JSON in verification request', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+  }
+
+  // Sanitize reason if provided
+  if (body.reason) {
+    body.reason = sanitizeNotes(body.reason);
+  }
+
   const parsed = VerifyLogSchema.safeParse(body);
   if (!parsed.success) {
+    logger.warn('Invalid verification request', { errors: parsed.error.flatten() });
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
@@ -50,6 +77,10 @@ export async function POST(req: Request) {
       timestamp: new Date(),
     },
   });
+
+  // Log the verification decision
+  logger.verificationDecision(status === 'APPROVED' ? 'APPROVE' : 'REJECT', logEntryId, reason);
+  logger.request('POST', '/api/verifications', Date.now() - startTime);
 
   return NextResponse.json({ ok: true });
 }

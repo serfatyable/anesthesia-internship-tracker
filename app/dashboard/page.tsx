@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { progressService } from '@/lib/services/progressService';
 import { prisma } from '@/lib/db';
 import { InternDashboard } from '@/components/site/dashboard/InternDashboard';
-import { InternSelector } from '@/components/site/dashboard/InternSelector';
+import { TutorDashboard } from '@/components/site/dashboard/TutorDashboard';
 import { redirect } from 'next/navigation';
 import { InternDashboard as InternDashboardType } from '@/lib/domain/progress';
 
@@ -14,9 +14,9 @@ type ExtendedInternDashboard = InternDashboardType & {
 };
 
 interface DashboardPageProps {
-  searchParams: {
+  searchParams: Promise<{
     internId?: string;
-  };
+  }>;
 }
 
 async function DashboardContent({ searchParams }: { searchParams: { internId?: string } }) {
@@ -27,7 +27,7 @@ async function DashboardContent({ searchParams }: { searchParams: { internId?: s
   }
 
   const { user } = session;
-  const { internId } = searchParams;
+  // const { internId } = searchParams;
 
   // Determine if user is a tutor/admin
   const isTutor = user.role === 'TUTOR' || user.role === 'ADMIN';
@@ -36,57 +36,31 @@ async function DashboardContent({ searchParams }: { searchParams: { internId?: s
     let dashboardData: ExtendedInternDashboard;
     let interns: Array<{ id: string; name: string | null; email: string }> = [];
 
+    // Get all interns for search functionality
+    interns = await prisma.user.findMany({
+      where: { role: 'INTERN' },
+      select: { id: true, name: true, email: true },
+    });
+
     if (isTutor) {
-      // For tutors, get progress for selected intern or first intern
-      const targetInternId =
-        internId || (await prisma.user.findFirst({ where: { role: 'INTERN' } }))?.id;
-      if (!targetInternId) {
-        throw new Error('No interns found');
-      }
-
-      const progress = await progressService.getInternProgress(targetInternId);
-      const selectedIntern = await prisma.user.findUnique({
-        where: { id: targetInternId },
-        select: { id: true, name: true },
-      });
-
-      dashboardData = {
-        ...progress,
-        selectedInternId: targetInternId,
-        selectedInternName: selectedIntern?.name || 'Unknown',
-      };
-
-      interns = await prisma.user.findMany({
-        where: { role: 'INTERN' },
-        select: { id: true, name: true, email: true },
-      });
+      // For tutors, we don't need specific intern data for the main dashboard
+      // The TutorDashboard component will handle displaying favorite interns
+      dashboardData = {} as ExtendedInternDashboard; // Empty object since we're not using it
     } else {
       // For interns, get their own progress
       dashboardData = await progressService.getInternProgress(user.id);
     }
 
     return (
-      <main className="max-w-5xl mx-auto p-4">
+      <main className="max-w-7xl mx-auto p-4">
         <section className="space-y-6">
-          {/* Intern Selector for Tutors */}
-          {isTutor && (
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h2 className="text-lg font-medium mb-3">Select Intern</h2>
-              <InternSelector
-                interns={interns}
-                selectedInternId={dashboardData.selectedInternId || undefined}
-              />
-              {dashboardData.selectedInternName && (
-                <p className="text-sm text-gray-600 mt-2">
-                  Viewing progress for:{' '}
-                  <span className="font-medium">{dashboardData.selectedInternName}</span>
-                </p>
-              )}
-            </div>
+          {isTutor ? (
+            /* New Tutor Dashboard */
+            <TutorDashboard interns={interns} />
+          ) : (
+            /* Intern Dashboard */
+            <InternDashboard dashboard={dashboardData} />
           )}
-
-          {/* Main Dashboard Content */}
-          <InternDashboard dashboard={dashboardData} />
         </section>
       </main>
     );
@@ -113,7 +87,9 @@ async function DashboardContent({ searchParams }: { searchParams: { internId?: s
   }
 }
 
-export default function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const resolvedSearchParams = await searchParams;
+
   return (
     <Suspense
       fallback={
@@ -124,7 +100,7 @@ export default function DashboardPage({ searchParams }: DashboardPageProps) {
         </main>
       }
     >
-      <DashboardContent searchParams={searchParams} />
+      <DashboardContent searchParams={resolvedSearchParams} />
     </Suspense>
   );
 }

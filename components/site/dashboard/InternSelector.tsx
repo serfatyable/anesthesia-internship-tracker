@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Intern {
@@ -15,19 +15,29 @@ interface InternSelectorProps {
   className?: string;
 }
 
-export function InternSelector({ interns, selectedInternId, className = '' }: InternSelectorProps) {
+export const InternSelector = memo(function InternSelector({
+  interns,
+  selectedInternId,
+  className = '',
+}: InternSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedIntern = interns.find((intern) => intern.id === selectedInternId);
+  const selectedIntern = useMemo(
+    () => interns.find((intern) => intern.id === selectedInternId),
+    [interns, selectedInternId],
+  );
 
-  const handleInternChange = (internId: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('internId', internId);
-    router.push(`/dashboard?${params.toString()}`);
-    setIsOpen(false);
-  };
+  const handleInternChange = useCallback(
+    (internId: string) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('internId', internId);
+      router.push(`/dashboard?${params.toString()}`);
+      setIsOpen(false);
+    },
+    [router, searchParams],
+  );
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -91,4 +101,4 @@ export function InternSelector({ interns, selectedInternId, className = '' }: In
       )}
     </div>
   );
-}
+});

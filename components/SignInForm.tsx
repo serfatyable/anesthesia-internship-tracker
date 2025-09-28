@@ -74,6 +74,7 @@ export function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
           <input
             {...register('email')}
             type="email"
+            autoComplete="off"
             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             placeholder="Enter your email"
           />
@@ -87,6 +88,7 @@ export function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
             <input
               {...register('password')}
               type={showPassword ? 'text' : 'password'}
+              autoComplete="off"
               className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               placeholder="Enter your password"
             />

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
 import { canReviewLogs } from '@/lib/auth/permissions';
+import { listPendingLogsForTutor } from '@/lib/services/logs';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -14,17 +16,6 @@ export async function GET() {
   if (!canReviewLogs({ id: u.id, role: u.role }))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const items = await prisma.logEntry.findMany({
-    where: { verification: { status: 'PENDING' } },
-    orderBy: { date: 'desc' },
-    select: {
-      id: true,
-      date: true,
-      count: true,
-      notes: true,
-      intern: { select: { id: true, name: true, email: true } },
-      procedure: { select: { id: true, name: true } },
-    },
-  });
+  const items = await listPendingLogsForTutor();
   return NextResponse.json({ items });
 }

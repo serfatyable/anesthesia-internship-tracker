@@ -1,4 +1,5 @@
-import { VerificationStatus } from '@prisma/client';
+// Verification status type for SQLite (no enum support)
+export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 // Core progress tracking types
 export interface ProgressSummary {
@@ -16,6 +17,7 @@ export interface RotationProgress {
   pending: number;
   completionPercentage: number;
   state: string;
+  currentInterns: number;
 }
 
 export interface PendingVerification {
@@ -59,6 +61,13 @@ export interface InternDashboard {
   rotations: RotationProgress[];
   pendingVerifications: PendingVerification[];
   recentActivity: RecentActivity[];
+  userInfo?:
+    | {
+        name: string | null;
+        email: string;
+        createdAt: Date;
+      }
+    | undefined;
 }
 
 // CSV export types

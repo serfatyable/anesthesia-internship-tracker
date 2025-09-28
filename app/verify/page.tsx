@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { BackButton } from '@/components/ui/BackButton';
 
 type PendingItem = {
   id: string;
@@ -44,6 +45,9 @@ export default function VerifyQueuePage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      <BackButton href="/dashboard" className="mb-4">
+        Back to Dashboard
+      </BackButton>
       <h1 className="text-2xl font-semibold mb-4">Pending Verifications</h1>
       <div className="space-y-3">
         {items.map((it) => (
