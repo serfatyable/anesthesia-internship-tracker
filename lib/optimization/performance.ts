@@ -1,7 +1,7 @@
 /**
  * Advanced performance optimization utilities
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
 // import { analytics } from '@/lib/monitoring/analytics';
@@ -294,7 +294,7 @@ setInterval(() => {
 }, CACHE_TTL);
 
 // Performance monitoring middleware
-export function performanceMiddleware(_request: NextRequest): NextResponse | null {
+export function performanceMiddleware(): NextResponse | null {
   const start = performance.now();
   const startMemory = process.memoryUsage();
 
