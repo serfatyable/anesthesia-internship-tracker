@@ -12,16 +12,38 @@ const createRequirementSchema = z.object({
   trainingLevel: z.string().optional(),
 });
 
+export async function GET() {
+  try {
+    const requirements = await prisma.requirement.findMany({
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    return NextResponse.json({ requirements });
+  } catch (error) {
+    console.error('Get requirements error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: Request) {
   const gate = await requireRole('ADMIN');
-  if (!gate.ok) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!gate.ok)
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
     let body;
     try {
       body = await req.json();
     } catch (error) {
-      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
     }
 
     const validatedData = createRequirementSchema.parse(body);
@@ -33,10 +55,16 @@ export async function POST(req: Request) {
     ]);
 
     if (!rotation) {
-      return NextResponse.json({ error: 'Rotation not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Rotation not found' },
+        { status: 404 }
+      );
     }
     if (!procedure) {
-      return NextResponse.json({ error: 'Procedure not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Procedure not found' },
+        { status: 404 }
+      );
     }
 
     const created = await prisma.requirement.create({
@@ -50,9 +78,15 @@ export async function POST(req: Request) {
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.issues },
+        { status: 400 }
+      );
     }
     console.error('Create requirement error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

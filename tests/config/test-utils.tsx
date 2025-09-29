@@ -117,7 +117,7 @@ export const createMockRotation = (overrides = {}) => ({
 });
 
 // Mock API responses
-export const mockApiResponse = <T>(data: T, status = 200) => ({
+export const mockApiResponse = <T,>(data: T, status = 200) => ({
   ok: status >= 200 && status < 300,
   status,
   json: async () => data,
@@ -132,7 +132,7 @@ export const mockFetch = (response: any, status = 200) => {
 // Mock localStorage
 export const mockLocalStorage = () => {
   const store: Record<string, string> = {};
-  
+
   return {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -150,7 +150,7 @@ export const mockLocalStorage = () => {
 // Mock session storage
 export const mockSessionStorage = () => {
   const store: Record<string, string> = {};
-  
+
   return {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {

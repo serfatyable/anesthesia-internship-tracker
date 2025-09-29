@@ -11,7 +11,14 @@ export const RotationCard = memo(function RotationCard({
   rotation,
   className = '',
 }: RotationCardProps) {
-  const { rotationName, required, verified, pending, completionPercentage, state } = rotation;
+  const {
+    rotationName,
+    required,
+    verified,
+    pending,
+    completionPercentage,
+    state,
+  } = rotation;
 
   // Calculate progress bar width (0-100%)
   const progressWidth = completionPercentage;
@@ -76,24 +83,26 @@ export const RotationCard = memo(function RotationCard({
   return (
     <Link href={`/rotations/${encodeURIComponent(rotationName)}`}>
       <div
-        className={`${getRotationBackgroundColor()} rounded-lg ${getCardBorderColor()} p-6 ${className} transition-all duration-300 hover:shadow-lg hover:${getRotationBorderColor()} hover:border-2 hover:scale-105 cursor-pointer`}
+        className={`${getRotationBackgroundColor()} rounded-lg ${getCardBorderColor()} p-4 sm:p-6 ${className} transition-all duration-300 hover:shadow-lg hover:${getRotationBorderColor()} hover:border-2 hover:scale-105 cursor-pointer`}
       >
         {/* Rotation Name */}
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{rotationName}</h3>
+        <h3 className='text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4'>
+          {rotationName}
+        </h3>
 
         {/* Progress Bar with Percentage */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">Progress</span>
-            <span className="text-sm font-semibold text-gray-900">
+        <div className='mb-3 sm:mb-4'>
+          <div className='flex items-center justify-between mb-2'>
+            <span className='text-xs sm:text-sm text-gray-600'>Progress</span>
+            <span className='text-xs sm:text-sm font-semibold text-gray-900'>
               {required === 0 ? 'N/A' : `${progressWidth}%`}
             </span>
           </div>
-          <div className="relative w-full bg-gray-200 rounded-full h-3">
+          <div className='relative w-full bg-gray-200 rounded-full h-2 sm:h-3'>
             <div
-              className={`h-3 rounded-full transition-all duration-300 ${getProgressColor()}`}
+              className={`h-2 sm:h-3 rounded-full transition-all duration-300 ${getProgressColor()}`}
               style={{ width: `${progressWidth}%` }}
-              role="progressbar"
+              role='progressbar'
               aria-valuenow={progressWidth}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -102,34 +111,37 @@ export const RotationCard = memo(function RotationCard({
           </div>
         </div>
 
-        {/* Details Grid */}
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Procedures:</span>
-            <span className="font-medium text-gray-900">
-              {verified} / {required}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Knowledge:</span>
-            <span className="font-medium text-gray-900">
-              {verified} / {required}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Pending for approval:</span>
-            <span className="font-medium text-yellow-600">{pending}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Interns in rotation:</span>
-            <span className="font-medium text-blue-600">{internCount}</span>
+        {/* Details Grid - Responsive Layout */}
+        <div className='space-y-2 text-xs sm:text-sm'>
+          {/* Mobile: 2x2 grid, Desktop: single column */}
+          <div className='grid grid-cols-2 gap-2 sm:grid-cols-1 sm:gap-0 sm:space-y-2'>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Procedures:</span>
+              <span className='font-medium text-gray-900'>
+                {verified} / {required}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Knowledge:</span>
+              <span className='font-medium text-gray-900'>
+                {verified} / {required}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Pending:</span>
+              <span className='font-medium text-yellow-600'>{pending}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Interns:</span>
+              <span className='font-medium text-blue-600'>{internCount}</span>
+            </div>
           </div>
         </div>
 
         {/* No Requirements Notice */}
         {required === 0 && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600">
+          <div className='mt-3 sm:mt-4 p-2 sm:p-3 bg-gray-50 rounded-md'>
+            <p className='text-xs sm:text-sm text-gray-600'>
               No specific requirements defined for this rotation.
             </p>
           </div>

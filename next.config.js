@@ -4,7 +4,7 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
   compress: true,
-  
+
   // Image optimization
   images: {
     domains: ['localhost'],
@@ -13,7 +13,7 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   // Experimental features for performance
   experimental: {
     optimizeCss: true,
@@ -27,7 +27,7 @@ const nextConfig = {
       },
     },
   },
-  
+
   // Webpack optimizations
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Bundle analyzer
@@ -41,7 +41,7 @@ const nextConfig = {
         })
       );
     }
-    
+
     // Optimize chunks
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
@@ -67,10 +67,10 @@ const nextConfig = {
         },
       };
     }
-    
+
     return config;
   },
-  
+
   // Headers for security and performance
   async headers() {
     return [
@@ -79,55 +79,55 @@ const nextConfig = {
         headers: [
           {
             key: 'X-DNS-Prefetch-Control',
-            value: 'on'
+            value: 'on',
           },
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            value: 'nosniff',
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
-            value: '1; mode=block'
+            value: '1; mode=block',
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
+            value: 'origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
       },
       {
         source: '/api/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate'
-          }
-        ]
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
       },
       {
         source: '/_next/static/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      }
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
   },
-  
+
   // Redirects
   async redirects() {
     return [
@@ -138,37 +138,37 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // Output configuration for Docker
   output: process.env.DOCKER === 'true' ? 'standalone' : undefined,
-  
+
   // TypeScript configuration
   typescript: {
     // Dangerously allow production builds to successfully complete even if
     // your project has type errors.
     ignoreBuildErrors: false,
   },
-  
+
   // ESLint configuration
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
     ignoreDuringBuilds: false,
   },
-  
+
   // Trailing slash configuration
   trailingSlash: false,
-  
+
   // Base path for deployment
   basePath: process.env.BASE_PATH || '',
-  
+
   // Asset prefix for CDN
   assetPrefix: process.env.ASSET_PREFIX || '',
 };
 
-module.exports = nextConfig;
+export default nextConfig;

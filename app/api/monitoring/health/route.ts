@@ -3,21 +3,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { monitoring } from '@/lib/monitoring';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const healthStatus = await monitoring.getHealthStatus();
-    
+
     return NextResponse.json(healthStatus, {
       status: healthStatus.status === 'healthy' ? 200 : 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
   } catch (error) {
     console.error('Health check failed:', error);
-    
+
     return NextResponse.json(
       {
         status: 'unhealthy',
