@@ -26,7 +26,10 @@ export function sanitizeIdNumber(idNumber: string): string {
   return newSanitizeIdNumber(idNumber);
 }
 
-export function validatePassword(password: string): { valid: boolean; errors: string[] } {
+export function validatePassword(password: string): {
+  valid: boolean;
+  errors: string[];
+} {
   try {
     passwordSchema.parse(password);
     return { valid: true, errors: [] };

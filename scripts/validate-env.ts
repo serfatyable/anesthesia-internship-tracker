@@ -2,7 +2,7 @@
 
 /**
  * Environment Validation Script
- * 
+ *
  * This script validates the environment configuration for production deployment
  * and provides recommendations for missing or incorrect settings.
  */
@@ -52,11 +52,7 @@ class EnvironmentValidator {
   }
 
   private validateRequiredVariables() {
-    const required = [
-      'DATABASE_URL',
-      'NEXTAUTH_SECRET',
-      'NEXTAUTH_URL',
-    ];
+    const required = ['DATABASE_URL', 'NEXTAUTH_SECRET', 'NEXTAUTH_URL'];
 
     for (const variable of required) {
       if (!process.env[variable]) {
@@ -70,17 +66,28 @@ class EnvironmentValidator {
     if (!databaseUrl) return;
 
     // Check if it's a valid database URL
-    if (!databaseUrl.startsWith('postgresql://') && !databaseUrl.startsWith('file:')) {
+    if (
+      !databaseUrl.startsWith('postgresql://') &&
+      !databaseUrl.startsWith('file:')
+    ) {
       this.errors.push('DATABASE_URL must be a valid PostgreSQL or SQLite URL');
     }
 
     // Check for production database
-    if (databaseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
-      this.warnings.push('Using localhost database in production is not recommended');
+    if (
+      databaseUrl.includes('localhost') &&
+      process.env.NODE_ENV === 'production'
+    ) {
+      this.warnings.push(
+        'Using localhost database in production is not recommended'
+      );
     }
 
     // Check for SQLite in production
-    if (databaseUrl.startsWith('file:') && process.env.NODE_ENV === 'production') {
+    if (
+      databaseUrl.startsWith('file:') &&
+      process.env.NODE_ENV === 'production'
+    ) {
       this.warnings.push('SQLite is not recommended for production use');
     }
   }
@@ -103,11 +110,17 @@ class EnvironmentValidator {
     // Check URL format
     const nextAuthUrl = process.env.NEXTAUTH_URL;
     if (nextAuthUrl && !nextAuthUrl.startsWith('http')) {
-      this.errors.push('NEXTAUTH_URL must be a valid URL starting with http:// or https://');
+      this.errors.push(
+        'NEXTAUTH_URL must be a valid URL starting with http:// or https://'
+      );
     }
 
     // Check for HTTPS in production
-    if (nextAuthUrl && nextAuthUrl.startsWith('http://') && process.env.NODE_ENV === 'production') {
+    if (
+      nextAuthUrl &&
+      nextAuthUrl.startsWith('http://') &&
+      process.env.NODE_ENV === 'production'
+    ) {
       this.warnings.push('NEXTAUTH_URL should use HTTPS in production');
     }
   }
@@ -129,7 +142,9 @@ class EnvironmentValidator {
     const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
     const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
     if ((upstashUrl && !upstashToken) || (!upstashUrl && upstashToken)) {
-      this.warnings.push('Both UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set together');
+      this.warnings.push(
+        'Both UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must be set together'
+      );
     }
   }
 
@@ -143,9 +158,11 @@ class EnvironmentValidator {
     if (emailHost || emailPort || emailUser || emailPassword) {
       const emailVars = [emailHost, emailPort, emailUser, emailPassword];
       const missingEmailVars = emailVars.filter(v => !v);
-      
+
       if (missingEmailVars.length > 0) {
-        this.warnings.push('Incomplete email configuration - all email variables should be set together');
+        this.warnings.push(
+          'Incomplete email configuration - all email variables should be set together'
+        );
       }
     }
 
@@ -159,7 +176,9 @@ class EnvironmentValidator {
 
       for (const { key, value } of devValues) {
         if (process.env[key]?.toLowerCase().includes(value)) {
-          this.warnings.push(`${key} appears to contain development values in production`);
+          this.warnings.push(
+            `${key} appears to contain development values in production`
+          );
         }
       }
     }
@@ -181,8 +200,10 @@ class EnvironmentValidator {
 
     // Check for environment files
     const envFiles = ['.env.local', '.env.production', '.env'];
-    const existingEnvFiles = envFiles.filter(file => existsSync(join(process.cwd(), file)));
-    
+    const existingEnvFiles = envFiles.filter(file =>
+      existsSync(join(process.cwd(), file))
+    );
+
     if (existingEnvFiles.length === 0) {
       this.warnings.push('No environment files found');
     }
@@ -193,7 +214,9 @@ class EnvironmentValidator {
       if (existsSync(join(process.cwd(), file))) {
         const content = readFileSync(join(process.cwd(), file), 'utf8');
         if (content.includes('password') || content.includes('secret')) {
-          this.recommendations.push(`Ensure ${file} is not committed to version control`);
+          this.recommendations.push(
+            `Ensure ${file} is not committed to version control`
+          );
         }
       }
     }
@@ -202,32 +225,32 @@ class EnvironmentValidator {
 
 async function main() {
   log('🔍 Validating environment configuration...', 'blue');
-  
+
   const validator = new EnvironmentValidator();
   const result = validator.validate();
-  
+
   if (result.errors.length > 0) {
     log('\n❌ Validation failed with errors:', 'red');
     result.errors.forEach(error => log(`  • ${error}`, 'red'));
   }
-  
+
   if (result.warnings.length > 0) {
     log('\n⚠️  Warnings:', 'yellow');
     result.warnings.forEach(warning => log(`  • ${warning}`, 'yellow'));
   }
-  
+
   if (result.recommendations.length > 0) {
     log('\n💡 Recommendations:', 'blue');
     result.recommendations.forEach(rec => log(`  • ${rec}`, 'blue'));
   }
-  
+
   if (result.isValid) {
     log('\n✅ Environment validation passed!', 'green');
   } else {
     log('\n❌ Environment validation failed!', 'red');
     process.exit(1);
   }
-  
+
   // Additional production checks
   if (process.env.NODE_ENV === 'production') {
     log('\n🚀 Production deployment checklist:', 'blue');

@@ -20,7 +20,9 @@ export function useLazyImport<T = unknown>(importFn: () => Promise<T>) {
       const moduleResult = await importFn();
       setComponent(moduleResult);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to load component'));
+      setError(
+        err instanceof Error ? err : new Error('Failed to load component')
+      );
     } finally {
       setLoading(false);
     }

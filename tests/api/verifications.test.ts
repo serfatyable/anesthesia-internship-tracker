@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Mock next-auth session to be a TUTOR
 vi.mock('next-auth/next', () => ({
-  getServerSession: vi.fn().mockResolvedValue({ user: { id: 'T1', role: 'TUTOR' } }),
+  getServerSession: vi
+    .fn()
+    .mockResolvedValue({ user: { id: 'T1', role: 'TUTOR' } }),
 }));
 
 // Provide an authOptions export for the route to import
@@ -18,7 +20,9 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn().mockResolvedValue({ id: 'V1', status: 'APPROVED' }),
     },
     logEntry: {
-      findFirst: vi.fn().mockResolvedValue({ id: 'L1', internId: 'I1', procedureId: 'P1' }),
+      findFirst: vi
+        .fn()
+        .mockResolvedValue({ id: 'L1', internId: 'I1', procedureId: 'P1' }),
       findUnique: vi.fn().mockResolvedValue({
         id: 'L1',
         internId: 'I1',
@@ -37,7 +41,11 @@ describe('POST /api/verifications', () => {
     const req = new Request('http://test/api/verifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ logEntryId: 'L1', status: 'APPROVED', reason: 'ok' }),
+      body: JSON.stringify({
+        logEntryId: 'L1',
+        status: 'APPROVED',
+        reason: 'ok',
+      }),
     });
     const res = await POST(req);
     expect(res.status).toBe(200);

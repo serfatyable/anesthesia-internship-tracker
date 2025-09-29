@@ -4,7 +4,10 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // POST /api/cases/[id]/favorite - Add or remove favorite
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -56,12 +59,18 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
   } catch (error) {
     console.error('Error toggling favorite:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 // GET /api/cases/[id]/favorite - Check if case is favorited
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -82,6 +91,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ favorited: !!favorite });
   } catch (error) {
     console.error('Error checking favorite:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

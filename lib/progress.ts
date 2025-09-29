@@ -46,7 +46,9 @@ export interface TutorProgress extends InternProgress {
  * Get progress data for a specific intern
  * Returns overall totals and per-rotation breakdown
  */
-export async function getInternProgress(userId: string): Promise<InternProgress> {
+export async function getInternProgress(
+  userId: string
+): Promise<InternProgress> {
   // Get all rotations with their requirements
   const rotations = await prisma.rotation.findMany({
     include: {
@@ -72,19 +74,24 @@ export async function getInternProgress(userId: string): Promise<InternProgress>
   });
 
   // Calculate progress per rotation
-  const rotationProgress: RotationProgress[] = rotations.map((rotation) => {
+  const rotationProgress: RotationProgress[] = rotations.map(rotation => {
     const requirements = rotation.requirements;
-    const totalRequired = requirements.reduce((sum, req) => sum + req.minCount, 0);
+    const totalRequired = requirements.reduce(
+      (sum, req) => sum + req.minCount,
+      0
+    );
 
     // Get logs for this rotation
-    const rotationLogs = logEntries.filter((log) => log.procedure.rotationId === rotation.id);
+    const rotationLogs = logEntries.filter(
+      log => log.procedure.rotationId === rotation.id
+    );
 
     const logged = rotationLogs.reduce((sum, log) => sum + log.count, 0);
     const approved = rotationLogs
-      .filter((log) => log.verification?.status === 'APPROVED')
+      .filter(log => log.verification?.status === 'APPROVED')
       .reduce((sum, log) => sum + log.count, 0);
     const pending = rotationLogs
-      .filter((log) => log.verification?.status === 'PENDING')
+      .filter(log => log.verification?.status === 'PENDING')
       .reduce((sum, log) => sum + log.count, 0);
 
     // Calculate completion percentage
@@ -140,7 +147,9 @@ export async function getInternProgress(userId: string): Promise<InternProgress>
  * Get progress data for tutors with optional intern selection
  * Same shape as getInternProgress, but for selected intern
  */
-export async function getTutorProgress(internId?: string): Promise<TutorProgress> {
+export async function getTutorProgress(
+  internId?: string
+): Promise<TutorProgress> {
   // If no internId provided, get the first intern
   if (!internId) {
     const firstIntern = await prisma.user.findFirst({
@@ -195,7 +204,7 @@ export async function getInternsList() {
  */
 async function getPendingVerifications(
   userId: string,
-  limit: number = 5,
+  limit: number = 5
 ): Promise<PendingVerification[]> {
   const verifications = await prisma.verification.findMany({
     where: {
@@ -214,7 +223,7 @@ async function getPendingVerifications(
     take: limit,
   });
 
-  return verifications.map((v) => ({
+  return verifications.map(v => ({
     id: v.id,
     logEntryId: v.logEntryId,
     procedureName: v.logEntry.procedure.name,
@@ -229,7 +238,10 @@ async function getPendingVerifications(
 /**
  * Get recent activity for a specific intern
  */
-async function getRecentActivity(userId: string, limit: number = 10): Promise<RecentActivity[]> {
+async function getRecentActivity(
+  userId: string,
+  limit: number = 10
+): Promise<RecentActivity[]> {
   const recentLogs = await prisma.logEntry.findMany({
     where: { internId: userId },
     include: {
@@ -240,7 +252,7 @@ async function getRecentActivity(userId: string, limit: number = 10): Promise<Re
     take: limit,
   });
 
-  return recentLogs.map((log) => {
+  return recentLogs.map(log => {
     let type: RecentActivity['type'];
     let description: string;
 
@@ -269,7 +281,9 @@ async function getRecentActivity(userId: string, limit: number = 10): Promise<Re
 /**
  * Get intern progress in the old format for the polished dashboard
  */
-export async function getInternProgressOld(userId: string): Promise<OldInternDashboard> {
+export async function getInternProgressOld(
+  userId: string
+): Promise<OldInternDashboard> {
   const progress = await getInternProgress(userId);
   const pendingVerifications = await getPendingVerifications(userId, 5);
   const recentActivity = await getRecentActivity(userId, 10);
@@ -281,13 +295,20 @@ export async function getInternProgressOld(userId: string): Promise<OldInternDas
     totalPending: progress.totals.pending,
     completionPercentage:
       progress.totals.required > 0
-        ? Math.min(Math.round((progress.totals.approved / progress.totals.required) * 100), 100)
+        ? Math.min(
+            Math.round(
+              (progress.totals.approved / progress.totals.required) * 100
+            ),
+            100
+          )
         : 0,
   };
 
-  const rotations: OldRotationProgress[] = progress.rotations.map((r) => {
+  const rotations: OldRotationProgress[] = progress.rotations.map(r => {
     const completionPercentage =
-      r.required > 0 ? Math.min(Math.round((r.approved / r.required) * 100), 100) : 0;
+      r.required > 0
+        ? Math.min(Math.round((r.approved / r.required) * 100), 100)
+        : 0;
 
     // Determine state based on completion percentage
     let state = r.state;
@@ -320,13 +341,19 @@ export async function getInternProgressOld(userId: string): Promise<OldInternDas
 /**
  * Get tutor progress in the old format for the polished dashboard
  */
-export async function getTutorProgressOld(
-  internId?: string,
-): Promise<OldInternDashboard & { selectedInternId?: string; selectedInternName?: string }> {
+export async function getTutorProgressOld(internId?: string): Promise<
+  OldInternDashboard & {
+    selectedInternId?: string;
+    selectedInternName?: string;
+  }
+> {
   const progress = await getTutorProgress(internId);
   const oldProgress = await getInternProgressOld(progress.selectedInternId!);
 
-  const result: OldInternDashboard & { selectedInternId?: string; selectedInternName?: string } = {
+  const result: OldInternDashboard & {
+    selectedInternId?: string;
+    selectedInternName?: string;
+  } = {
     ...oldProgress,
   };
 
@@ -363,7 +390,7 @@ export async function getDashboardOverviewOld(): Promise<OldDashboardOverview> {
   });
 
   const internSummaries: InternSummary[] = await Promise.all(
-    interns.map(async (intern) => {
+    interns.map(async intern => {
       const progress = await getInternProgress(intern.id);
       return {
         id: intern.id,
@@ -373,10 +400,15 @@ export async function getDashboardOverviewOld(): Promise<OldDashboardOverview> {
         totalPending: progress.totals.pending,
         completionPercentage:
           progress.totals.required > 0
-            ? Math.min(Math.round((progress.totals.approved / progress.totals.required) * 100), 100)
+            ? Math.min(
+                Math.round(
+                  (progress.totals.approved / progress.totals.required) * 100
+                ),
+                100
+              )
             : 0,
       };
-    }),
+    })
   );
 
   return {

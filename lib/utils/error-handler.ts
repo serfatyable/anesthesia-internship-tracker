@@ -20,7 +20,7 @@ export class AppError extends Error {
     message: string,
     statusCode: number = 500,
     isOperational: boolean = true,
-    details?: unknown,
+    details?: unknown
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -35,7 +35,7 @@ export class AppError extends Error {
 export function createApiError(
   message: string,
   statusCode: number = 500,
-  details?: unknown,
+  details?: unknown
 ): ApiError {
   return {
     message,
@@ -65,7 +65,9 @@ export function logError(error: unknown, context?: string): void {
   });
 }
 
-export function handleAsyncError<T extends unknown[], R>(fn: (...args: T) => Promise<R>) {
+export function handleAsyncError<T extends unknown[], R>(
+  fn: (...args: T) => Promise<R>
+) {
   return async (...args: T): Promise<R> => {
     try {
       return await fn(...args);

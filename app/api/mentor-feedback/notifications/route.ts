@@ -25,10 +25,13 @@ export async function GET() {
     });
 
     // Calculate total unread count
-    const unreadCount = unreadByItem.reduce((total, item) => total + item._count.id, 0);
+    const unreadCount = unreadByItem.reduce(
+      (total, item) => total + item._count.id,
+      0
+    );
 
     // Transform to a more usable format
-    const itemNotifications = unreadByItem.map((item) => ({
+    const itemNotifications = unreadByItem.map(item => ({
       itemId: item.itemId,
       itemType: item.itemType,
       unreadCount: item._count.id,
@@ -39,10 +42,16 @@ export async function GET() {
       itemNotifications,
     });
 
-    response.headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+    response.headers.set(
+      'Cache-Control',
+      'private, max-age=30, stale-while-revalidate=60'
+    );
     return response;
   } catch (error) {
     console.error('Error fetching feedback notifications:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

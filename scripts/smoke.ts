@@ -11,9 +11,13 @@ async function smokeTest() {
 
     if (sessionResponse.status === 200) {
       const sessionData = await sessionResponse.json();
-      console.log(`✅ Session endpoint working (user: ${sessionData?.user?.email || 'anonymous'})`);
+      console.log(
+        `✅ Session endpoint working (user: ${sessionData?.user?.email || 'anonymous'})`
+      );
     } else {
-      console.log(`❌ Session endpoint failed with status ${sessionResponse.status}`);
+      console.log(
+        `❌ Session endpoint failed with status ${sessionResponse.status}`
+      );
     }
 
     // Test health endpoint

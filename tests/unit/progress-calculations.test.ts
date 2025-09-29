@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getInternProgress, getTutorProgress, getInternsList } from '@/lib/progress';
+import {
+  getInternProgress,
+  getTutorProgress,
+  getInternsList,
+} from '@/lib/progress';
 import { prisma } from '@/lib/db';
 
 // Mock Prisma client
@@ -43,7 +47,9 @@ describe('Progress Calculations', () => {
           id: 'rotation2',
           name: 'PACU',
           isActive: true,
-          requirements: [{ minCount: 4, procedure: { id: 'proc3', name: 'Extubation' } }],
+          requirements: [
+            { minCount: 4, procedure: { id: 'proc3', name: 'Extubation' } },
+          ],
         },
       ];
 
@@ -77,14 +83,22 @@ describe('Progress Calculations', () => {
       ];
 
       (
-        mockPrisma.rotation.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.rotation.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockRotations as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockRotations as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
       (
-        mockPrisma.logEntry.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.logEntry.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockLogEntries as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockLogEntries as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
 
       const result = await getInternProgress('intern1');
@@ -98,7 +112,9 @@ describe('Progress Calculations', () => {
       // Check rotation progress
       expect(result.rotations).toHaveLength(2);
 
-      const icuRotation = result.rotations.find((r) => r.rotationId === 'rotation1');
+      const icuRotation = result.rotations.find(
+        r => r.rotationId === 'rotation1'
+      );
       expect(icuRotation).toBeDefined();
       expect(icuRotation?.required).toBe(8); // 5 + 3
       expect(icuRotation?.logged).toBe(6); // 3 + 2 + 1
@@ -107,7 +123,9 @@ describe('Progress Calculations', () => {
       expect(icuRotation?.completionPct).toBe(0.5); // 4/8
       expect(icuRotation?.noRequirement).toBe(false);
 
-      const pacuRotation = result.rotations.find((r) => r.rotationId === 'rotation2');
+      const pacuRotation = result.rotations.find(
+        r => r.rotationId === 'rotation2'
+      );
       expect(pacuRotation).toBeDefined();
       expect(pacuRotation?.required).toBe(4);
       expect(pacuRotation?.logged).toBe(2);
@@ -136,19 +154,29 @@ describe('Progress Calculations', () => {
       ];
 
       (
-        mockPrisma.rotation.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.rotation.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockRotations as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockRotations as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
       (
-        mockPrisma.logEntry.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.logEntry.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockLogEntries as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockLogEntries as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
 
       const result = await getInternProgress('intern1');
 
-      const emptyRotation = result.rotations.find((r) => r.rotationId === 'rotation1');
+      const emptyRotation = result.rotations.find(
+        r => r.rotationId === 'rotation1'
+      );
       expect(emptyRotation).toBeDefined();
       expect(emptyRotation?.required).toBe(0);
       expect(emptyRotation?.completionPct).toBe(0);
@@ -161,7 +189,9 @@ describe('Progress Calculations', () => {
           id: 'rotation1',
           name: 'ICU',
           isActive: true,
-          requirements: [{ minCount: 5, procedure: { id: 'proc1', name: 'Arterial Line' } }],
+          requirements: [
+            { minCount: 5, procedure: { id: 'proc1', name: 'Arterial Line' } },
+          ],
         },
       ];
 
@@ -175,19 +205,27 @@ describe('Progress Calculations', () => {
       ];
 
       (
-        mockPrisma.rotation.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.rotation.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockRotations as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockRotations as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
       (
-        mockPrisma.logEntry.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.logEntry.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockLogEntries as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockLogEntries as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
 
       const result = await getInternProgress('intern1');
 
-      const rotation = result.rotations.find((r) => r.rotationId === 'rotation1');
+      const rotation = result.rotations.find(r => r.rotationId === 'rotation1');
       expect(rotation?.completionPct).toBe(1); // Capped at 100%
     });
   });
@@ -206,7 +244,9 @@ describe('Progress Calculations', () => {
           id: 'rotation1',
           name: 'ICU',
           isActive: true,
-          requirements: [{ minCount: 5, procedure: { id: 'proc1', name: 'Arterial Line' } }],
+          requirements: [
+            { minCount: 5, procedure: { id: 'proc1', name: 'Arterial Line' } },
+          ],
         },
       ];
 
@@ -220,17 +260,29 @@ describe('Progress Calculations', () => {
       ];
 
       (
-        mockPrisma.user.findUnique as unknown as { mockResolvedValue: (value: unknown) => void }
-      ).mockResolvedValue(mockIntern as unknown as { mockResolvedValue: (value: unknown) => void });
-      (
-        mockPrisma.rotation.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findUnique as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockRotations as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockIntern as unknown as { mockResolvedValue: (value: unknown) => void }
       );
       (
-        mockPrisma.logEntry.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.rotation.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockLogEntries as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockRotations as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
+      );
+      (
+        mockPrisma.logEntry.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
+      ).mockResolvedValue(
+        mockLogEntries as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
 
       const result = await getTutorProgress('intern1');
@@ -250,20 +302,32 @@ describe('Progress Calculations', () => {
       };
 
       (
-        mockPrisma.user.findFirst as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findFirst as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockFirstIntern as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockFirstIntern as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
       (
-        mockPrisma.user.findUnique as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findUnique as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockFirstIntern as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockFirstIntern as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
       (
-        mockPrisma.rotation.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.rotation.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue([]);
       (
-        mockPrisma.logEntry.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.logEntry.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue([]);
 
       const result = await getTutorProgress();
@@ -274,10 +338,14 @@ describe('Progress Calculations', () => {
 
     it('should throw error when intern not found', async () => {
       (
-        mockPrisma.user.findUnique as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findUnique as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(null);
 
-      await expect(getTutorProgress('nonexistent')).rejects.toThrow('Intern not found');
+      await expect(getTutorProgress('nonexistent')).rejects.toThrow(
+        'Intern not found'
+      );
     });
   });
 
@@ -291,9 +359,13 @@ describe('Progress Calculations', () => {
       ];
 
       (
-        mockPrisma.user.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue(
-        mockInterns as unknown as { mockResolvedValue: (value: unknown) => void },
+        mockInterns as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       );
 
       const result = await getInternsList();
@@ -306,7 +378,9 @@ describe('Progress Calculations', () => {
 
     it('should return empty array when no interns found', async () => {
       (
-        mockPrisma.user.findMany as unknown as { mockResolvedValue: (value: unknown) => void }
+        mockPrisma.user.findMany as unknown as {
+          mockResolvedValue: (value: unknown) => void;
+        }
       ).mockResolvedValue([]);
 
       const result = await getInternsList();

@@ -2,12 +2,12 @@
 
 /**
  * Production Optimization Script
- * 
+ *
  * This script optimizes the application for production deployment
  * including bundle analysis, performance checks, and security validation.
  */
 
-import { execSync } from 'child_process';
+import { execSync, exec } from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -24,9 +24,12 @@ function log(message: string, color: keyof typeof colors = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
-function exec(command: string, options: { cwd?: string; stdio?: 'inherit' | 'pipe' } = {}) {
+function executeCommand(
+  command: string,
+  options: { cwd?: string; stdio?: 'inherit' | 'pipe' } = {}
+) {
   try {
-    return execSync(command, { 
+    return execSync(command, {
       stdio: options.stdio || 'inherit',
       cwd: options.cwd || process.cwd(),
     });
@@ -38,14 +41,14 @@ function exec(command: string, options: { cwd?: string; stdio?: 'inherit' | 'pip
 
 async function analyzeBundleSize() {
   log('📊 Analyzing bundle size...', 'blue');
-  
+
   try {
     // Build the application
-    exec('pnpm build');
-    
+    executeCommand('pnpm build');
+
     // Analyze bundle
-    exec('pnpm analyze');
-    
+    executeCommand('pnpm analyze');
+
     log('✅ Bundle analysis completed', 'green');
   } catch (error) {
     log('❌ Bundle analysis failed', 'red');
@@ -55,22 +58,25 @@ async function analyzeBundleSize() {
 
 async function optimizeImages() {
   log('🖼️  Optimizing images...', 'blue');
-  
+
   try {
     // Check if images exist
     const publicDir = join(process.cwd(), 'public');
     if (!existsSync(publicDir)) {
-      log('⚠️  No public directory found, skipping image optimization', 'yellow');
+      log(
+        '⚠️  No public directory found, skipping image optimization',
+        'yellow'
+      );
       return;
     }
-    
+
     // Install sharp if not already installed
     try {
-      exec('pnpm add sharp', { stdio: 'pipe' });
+      executeCommand('pnpm add sharp', { stdio: 'pipe' });
     } catch {
       // Sharp might already be installed
     }
-    
+
     log('✅ Image optimization completed', 'green');
   } catch (error) {
     log('⚠️  Image optimization failed', 'yellow');
@@ -79,24 +85,24 @@ async function optimizeImages() {
 
 async function validateSecurity() {
   log('🔒 Validating security configuration...', 'blue');
-  
+
   try {
     // Check for security vulnerabilities
-    exec('pnpm audit --audit-level moderate');
-    
+    executeCommand('pnpm audit --audit-level moderate');
+
     // Check for exposed secrets
     const envFile = join(process.cwd(), '.env.local');
     if (existsSync(envFile)) {
       const envContent = readFileSync(envFile, 'utf8');
       const secrets = ['password', 'secret', 'key', 'token'];
-      
+
       for (const secret of secrets) {
         if (envContent.toLowerCase().includes(secret)) {
           log(`⚠️  Potential secret found in .env.local: ${secret}`, 'yellow');
         }
       }
     }
-    
+
     log('✅ Security validation completed', 'green');
   } catch (error) {
     log('❌ Security validation failed', 'red');
@@ -106,17 +112,17 @@ async function validateSecurity() {
 
 async function optimizeDatabase() {
   log('🗄️  Optimizing database configuration...', 'blue');
-  
+
   try {
     // Generate Prisma client
-    exec('pnpm db:generate');
-    
+    executeCommand('pnpm db:generate');
+
     // Check for missing indexes
     log('📝 Database optimization recommendations:', 'blue');
     log('• Ensure proper indexes on frequently queried columns', 'yellow');
     log('• Consider connection pooling for high traffic', 'yellow');
     log('• Monitor query performance in production', 'yellow');
-    
+
     log('✅ Database optimization completed', 'green');
   } catch (error) {
     log('❌ Database optimization failed', 'red');
@@ -126,7 +132,7 @@ async function optimizeDatabase() {
 
 async function configureCaching() {
   log('⚡ Configuring caching...', 'blue');
-  
+
   try {
     // Check if Redis is configured
     if (process.env.REDIS_URL) {
@@ -134,7 +140,7 @@ async function configureCaching() {
     } else {
       log('⚠️  Redis not configured, using in-memory caching', 'yellow');
     }
-    
+
     // Check Next.js caching configuration
     const nextConfigPath = join(process.cwd(), 'next.config.js');
     if (existsSync(nextConfigPath)) {
@@ -143,7 +149,7 @@ async function configureCaching() {
         log('✅ Next.js experimental features configured', 'green');
       }
     }
-    
+
     log('✅ Caching configuration completed', 'green');
   } catch (error) {
     log('⚠️  Caching configuration failed', 'yellow');
@@ -152,7 +158,7 @@ async function configureCaching() {
 
 async function generateProductionConfig() {
   log('⚙️  Generating production configuration...', 'blue');
-  
+
   try {
     const config = {
       production: {
@@ -187,10 +193,10 @@ async function generateProductionConfig() {
         monitoring: true,
       },
     };
-    
+
     const configPath = join(process.cwd(), 'production-config.json');
     writeFileSync(configPath, JSON.stringify(config, null, 2));
-    
+
     log('✅ Production configuration generated', 'green');
   } catch (error) {
     log('❌ Production configuration generation failed', 'red');
@@ -200,26 +206,28 @@ async function generateProductionConfig() {
 
 async function runPerformanceTests() {
   log('🚀 Running performance tests...', 'blue');
-  
+
   try {
     // Start the application in production mode
     const startCommand = 'pnpm start';
-    const child = exec(startCommand, { stdio: 'pipe' });
-    
+    const child = exec(startCommand);
+
     // Wait for application to start
     await new Promise(resolve => setTimeout(resolve, 5000));
-    
+
     // Run basic performance checks
     try {
-      exec('curl -f http://localhost:3000/api/health', { stdio: 'pipe' });
+      executeCommand('curl -f http://localhost:3000/api/health', {
+        stdio: 'pipe',
+      });
       log('✅ Health check passed', 'green');
     } catch {
       log('⚠️  Health check failed', 'yellow');
     }
-    
+
     // Kill the application
     child.kill();
-    
+
     log('✅ Performance tests completed', 'green');
   } catch (error) {
     log('⚠️  Performance tests failed', 'yellow');
@@ -228,7 +236,7 @@ async function runPerformanceTests() {
 
 async function generateDeploymentReport() {
   log('📋 Generating deployment report...', 'blue');
-  
+
   try {
     const report = {
       timestamp: new Date().toISOString(),
@@ -250,10 +258,10 @@ async function generateDeploymentReport() {
         'Configure SSL/TLS certificates',
       ],
     };
-    
+
     const reportPath = join(process.cwd(), 'deployment-report.json');
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     log('✅ Deployment report generated', 'green');
   } catch (error) {
     log('❌ Deployment report generation failed', 'red');
@@ -263,7 +271,7 @@ async function generateDeploymentReport() {
 
 async function main() {
   log('🚀 Starting production optimization...', 'bold');
-  
+
   try {
     await analyzeBundleSize();
     await optimizeImages();
@@ -273,7 +281,7 @@ async function main() {
     await generateProductionConfig();
     await runPerformanceTests();
     await generateDeploymentReport();
-    
+
     log('\n🎉 Production optimization completed!', 'green');
     log('\nOptimization summary:', 'blue');
     log('• Bundle size analyzed and optimized', 'yellow');
@@ -284,13 +292,12 @@ async function main() {
     log('• Production configuration generated', 'yellow');
     log('• Performance tests completed', 'yellow');
     log('• Deployment report generated', 'yellow');
-    
+
     log('\nNext steps:', 'blue');
     log('1. Review the deployment report', 'yellow');
     log('2. Deploy to your chosen platform', 'yellow');
     log('3. Monitor performance in production', 'yellow');
     log('4. Set up monitoring and alerts', 'yellow');
-    
   } catch (error) {
     log('\n❌ Production optimization failed:', 'red');
     log(error instanceof Error ? error.message : 'Unknown error', 'red');

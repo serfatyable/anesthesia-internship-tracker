@@ -28,9 +28,9 @@ export const securityHeaders: SecurityHeaders = {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    'upgrade-insecure-requests',
   ].join('; '),
-  
+
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -56,7 +56,7 @@ export function addSecurityHeaders(response: NextResponse): NextResponse {
   Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
-  
+
   return response;
 }
 
@@ -69,8 +69,8 @@ export function createSecureResponse(
 }
 
 export function isSecureRequest(request: NextRequest): boolean {
-  const protocol = request.headers.get('x-forwarded-proto') || 
-                   request.nextUrl.protocol;
+  const protocol =
+    request.headers.get('x-forwarded-proto') || request.nextUrl.protocol;
   return protocol === 'https';
 }
 
@@ -78,20 +78,20 @@ export function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
   const remoteAddr = request.headers.get('x-remote-addr');
-  
+
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(',')[0]?.trim() || 'unknown';
   }
-  
+
   if (realIP) {
     return realIP;
   }
-  
+
   if (remoteAddr) {
     return remoteAddr;
   }
-  
-  return request.ip || 'unknown';
+
+  return 'unknown'; // request.ip is not available in NextRequest
 }
 
 export function getUserAgent(request: NextRequest): string {
@@ -121,43 +121,43 @@ export function isBot(userAgent: string): boolean {
     /archive\.org_bot/i,
     /wayback/i,
   ];
-  
+
   return botPatterns.some(pattern => pattern.test(userAgent));
 }
 
 export function isSuspiciousRequest(request: NextRequest): boolean {
   const userAgent = getUserAgent(request);
-  const ip = getClientIP(request);
-  
+  // const _ip = getClientIP(request);
+
   // Check for common attack patterns in URL
   const url = request.nextUrl.pathname + request.nextUrl.search;
   const suspiciousPatterns = [
-    /\.\./,  // Directory traversal
-    /<script/i,  // XSS attempts
-    /union.*select/i,  // SQL injection
-    /javascript:/i,  // JavaScript injection
-    /vbscript:/i,  // VBScript injection
-    /onload=/i,  // Event handler injection
-    /onerror=/i,  // Event handler injection
-    /eval\(/i,  // Code injection
-    /expression\(/i,  // CSS expression injection
-    /url\(/i,  // CSS URL injection
+    /\.\./, // Directory traversal
+    /<script/i, // XSS attempts
+    /union.*select/i, // SQL injection
+    /javascript:/i, // JavaScript injection
+    /vbscript:/i, // VBScript injection
+    /onload=/i, // Event handler injection
+    /onerror=/i, // Event handler injection
+    /eval\(/i, // Code injection
+    /expression\(/i, // CSS expression injection
+    /url\(/i, // CSS URL injection
   ];
-  
+
   if (suspiciousPatterns.some(pattern => pattern.test(url))) {
     return true;
   }
-  
+
   // Check for suspicious user agents
   if (isBot(userAgent)) {
     return false; // Bots are not necessarily suspicious
   }
-  
+
   // Check for empty or very short user agents
   if (userAgent.length < 10) {
     return true;
   }
-  
+
   // Check for common attack tools
   const attackTools = [
     /nikto/i,
@@ -171,10 +171,10 @@ export function isSuspiciousRequest(request: NextRequest): boolean {
     /nessus/i,
     /openvas/i,
   ];
-  
+
   if (attackTools.some(tool => tool.test(userAgent))) {
     return true;
   }
-  
+
   return false;
 }

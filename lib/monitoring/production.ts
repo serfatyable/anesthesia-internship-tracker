@@ -28,7 +28,7 @@ class ProductionMonitor {
     this.requestCount++;
     if (isError) this.errorCount++;
     this.responseTimes.push(responseTime);
-    
+
     // Keep only last 1000 response times for memory efficiency
     if (this.responseTimes.length > 1000) {
       this.responseTimes = this.responseTimes.slice(-1000);
@@ -42,10 +42,13 @@ class ProductionMonitor {
     const uptime = Date.now() - this.startTime;
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
-    const avgResponseTime = this.responseTimes.length > 0 
-      ? this.responseTimes.reduce((a, b) => a + b, 0) / this.responseTimes.length 
-      : 0;
-    const errorRate = this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0;
+    const avgResponseTime =
+      this.responseTimes.length > 0
+        ? this.responseTimes.reduce((a, b) => a + b, 0) /
+          this.responseTimes.length
+        : 0;
+    const errorRate =
+      this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0;
 
     return {
       uptime,
@@ -62,33 +65,34 @@ class ProductionMonitor {
    */
   isHealthy(): boolean {
     const metrics = this.getMetrics();
-    
+
     // Check memory usage (alert if over 80%)
-    const memoryUsagePercent = (metrics.memoryUsage.heapUsed / metrics.memoryUsage.heapTotal) * 100;
+    const memoryUsagePercent =
+      (metrics.memoryUsage.heapUsed / metrics.memoryUsage.heapTotal) * 100;
     if (memoryUsagePercent > 80) {
-      logger.warn('High memory usage detected', { 
-        memoryUsagePercent, 
+      logger.warn('High memory usage detected', {
+        memoryUsagePercent,
         heapUsed: metrics.memoryUsage.heapUsed,
-        heapTotal: metrics.memoryUsage.heapTotal 
+        heapTotal: metrics.memoryUsage.heapTotal,
       });
       return false;
     }
 
     // Check error rate (alert if over 5%)
     if (metrics.errorRate > 5) {
-      logger.warn('High error rate detected', { 
+      logger.warn('High error rate detected', {
         errorRate: metrics.errorRate,
         requestCount: metrics.requestCount,
-        errorCount: this.errorCount 
+        errorCount: this.errorCount,
       });
       return false;
     }
 
     // Check response time (alert if over 5 seconds)
     if (metrics.responseTime > 5000) {
-      logger.warn('High response time detected', { 
+      logger.warn('High response time detected', {
         responseTime: metrics.responseTime,
-        requestCount: metrics.requestCount 
+        requestCount: metrics.requestCount,
       });
       return false;
     }
@@ -103,22 +107,32 @@ class ProductionMonitor {
     const metrics = this.getMetrics();
     const recommendations: string[] = [];
 
-    const memoryUsagePercent = (metrics.memoryUsage.heapUsed / metrics.memoryUsage.heapTotal) * 100;
-    
+    const memoryUsagePercent =
+      (metrics.memoryUsage.heapUsed / metrics.memoryUsage.heapTotal) * 100;
+
     if (memoryUsagePercent > 70) {
-      recommendations.push('Consider increasing memory allocation or optimizing memory usage');
+      recommendations.push(
+        'Consider increasing memory allocation or optimizing memory usage'
+      );
     }
 
     if (metrics.errorRate > 2) {
-      recommendations.push('Investigate and fix error sources to reduce error rate');
+      recommendations.push(
+        'Investigate and fix error sources to reduce error rate'
+      );
     }
 
     if (metrics.responseTime > 2000) {
-      recommendations.push('Optimize database queries and API responses to improve performance');
+      recommendations.push(
+        'Optimize database queries and API responses to improve performance'
+      );
     }
 
-    if (metrics.requestCount > 10000 && metrics.uptime < 3600000) { // 1 hour
-      recommendations.push('Consider implementing rate limiting for high traffic');
+    if (metrics.requestCount > 10000 && metrics.uptime < 3600000) {
+      // 1 hour
+      recommendations.push(
+        'Consider implementing rate limiting for high traffic'
+      );
     }
 
     return recommendations;
@@ -133,16 +147,16 @@ export const productionMonitor = new ProductionMonitor();
  */
 export function trackProductionMetrics(req: any, res: any, next: any) {
   const startTime = Date.now();
-  
+
   res.on('finish', () => {
     const responseTime = Date.now() - startTime;
     const isError = res.statusCode >= 400;
-    
+
     productionMonitor.trackRequest(responseTime, isError);
-    
+
     // Track in monitoring system
     monitoring.trackAPICall(req.path, req.method, res.statusCode, responseTime);
-    
+
     if (isError) {
       monitoring.trackError(new Error(`HTTP ${res.statusCode}`), {
         path: req.path,
@@ -152,7 +166,7 @@ export function trackProductionMetrics(req: any, res: any, next: any) {
       });
     }
   });
-  
+
   next();
 }
 
@@ -163,7 +177,7 @@ export function getProductionHealthCheck() {
   const metrics = productionMonitor.getMetrics();
   const isHealthy = productionMonitor.isHealthy();
   const recommendations = productionMonitor.getRecommendations();
-  
+
   return {
     status: isHealthy ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
@@ -190,13 +204,13 @@ export class PerformanceTracker {
       logger.warn(`Timer not found for operation: ${operation}`);
       return 0;
     }
-    
+
     const duration = Date.now() - startTime;
     this.timers.delete(operation);
-    
+
     // Track in monitoring system
     monitoring.recordMetric(`operation.${operation}`, duration);
-    
+
     return duration;
   }
 
@@ -223,17 +237,18 @@ export class MemoryMonitor {
 
   static checkMemoryUsage(): void {
     const memoryUsage = process.memoryUsage();
-    const memoryUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
-    
+    const memoryUsagePercent =
+      (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+
     if (memoryUsagePercent > 80) {
-      logger.warn('High memory usage detected', { 
+      logger.warn('High memory usage detected', {
         memoryUsagePercent,
         heapUsed: memoryUsage.heapUsed,
         heapTotal: memoryUsage.heapTotal,
         external: memoryUsage.external,
         rss: memoryUsage.rss,
       });
-      
+
       // Force garbage collection if available
       if (global.gc && Date.now() - this.lastGC > this.gcThreshold) {
         global.gc();

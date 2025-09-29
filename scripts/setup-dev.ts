@@ -2,7 +2,7 @@
 
 /**
  * Development Environment Setup Script
- * 
+ *
  * This script sets up the development environment with all necessary
  * configurations, dependencies, and database setup.
  */
@@ -24,9 +24,12 @@ function log(message: string, color: keyof typeof colors = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
-function exec(command: string, options: { cwd?: string; stdio?: 'inherit' | 'pipe' } = {}) {
+function exec(
+  command: string,
+  options: { cwd?: string; stdio?: 'inherit' | 'pipe' } = {}
+) {
   try {
-    return execSync(command, { 
+    return execSync(command, {
       stdio: options.stdio || 'inherit',
       cwd: options.cwd || process.cwd(),
     });
@@ -38,10 +41,10 @@ function exec(command: string, options: { cwd?: string; stdio?: 'inherit' | 'pip
 
 async function checkPrerequisites() {
   log('🔍 Checking prerequisites...', 'blue');
-  
+
   const requiredCommands = ['node', 'pnpm', 'git'];
   const missingCommands: string[] = [];
-  
+
   for (const cmd of requiredCommands) {
     try {
       exec(`${cmd} --version`, { stdio: 'pipe' });
@@ -49,19 +52,19 @@ async function checkPrerequisites() {
       missingCommands.push(cmd);
     }
   }
-  
+
   if (missingCommands.length > 0) {
     log(`❌ Missing required commands: ${missingCommands.join(', ')}`, 'red');
     log('Please install the missing commands and try again.', 'yellow');
     process.exit(1);
   }
-  
+
   log('✅ All prerequisites found', 'green');
 }
 
 async function installDependencies() {
   log('📦 Installing dependencies...', 'blue');
-  
+
   try {
     exec('pnpm install');
     log('✅ Dependencies installed successfully', 'green');
@@ -73,13 +76,16 @@ async function installDependencies() {
 
 async function setupEnvironment() {
   log('🔧 Setting up environment variables...', 'blue');
-  
+
   const envExamplePath = join(process.cwd(), '.env.example');
   const envLocalPath = join(process.cwd(), '.env.local');
-  
+
   if (!existsSync(envExamplePath)) {
-    log('⚠️  .env.example not found, creating basic environment file...', 'yellow');
-    
+    log(
+      '⚠️  .env.example not found, creating basic environment file...',
+      'yellow'
+    );
+
     const basicEnv = `# Database
 DATABASE_URL="file:./dev.db"
 
@@ -97,10 +103,10 @@ EMAIL_SERVER_USER="your-email@gmail.com"
 EMAIL_SERVER_PASSWORD="your-password"
 EMAIL_FROM="your-email@gmail.com"
 `;
-    
+
     writeFileSync(envExamplePath, basicEnv);
   }
-  
+
   if (!existsSync(envLocalPath)) {
     log('📝 Creating .env.local from .env.example...', 'blue');
     exec(`cp ${envExamplePath} ${envLocalPath}`);
@@ -113,17 +119,17 @@ EMAIL_FROM="your-email@gmail.com"
 
 async function setupDatabase() {
   log('🗄️  Setting up database...', 'blue');
-  
+
   try {
     // Generate Prisma client
     exec('pnpm db:generate');
-    
+
     // Push database schema
     exec('pnpm db:push');
-    
+
     // Seed database
     exec('pnpm db:seed');
-    
+
     log('✅ Database setup completed', 'green');
   } catch (error) {
     log('❌ Database setup failed', 'red');
@@ -134,7 +140,7 @@ async function setupDatabase() {
 
 async function runLinting() {
   log('🔍 Running linting...', 'blue');
-  
+
   try {
     exec('pnpm lint');
     log('✅ Linting passed', 'green');
@@ -152,7 +158,7 @@ async function runLinting() {
 
 async function runTypeChecking() {
   log('🔍 Running type checking...', 'blue');
-  
+
   try {
     exec('pnpm typecheck');
     log('✅ Type checking passed', 'green');
@@ -164,7 +170,7 @@ async function runTypeChecking() {
 
 async function runTests() {
   log('🧪 Running tests...', 'blue');
-  
+
   try {
     exec('pnpm test');
     log('✅ Tests passed', 'green');
@@ -176,7 +182,7 @@ async function runTests() {
 
 async function setupGitHooks() {
   log('🪝 Setting up Git hooks...', 'blue');
-  
+
   try {
     exec('pnpm prepare');
     log('✅ Git hooks setup completed', 'green');
@@ -188,7 +194,7 @@ async function setupGitHooks() {
 
 async function main() {
   log('🚀 Starting development environment setup...', 'bold');
-  
+
   try {
     await checkPrerequisites();
     await installDependencies();
@@ -198,14 +204,13 @@ async function main() {
     await runTypeChecking();
     await runTests();
     await setupGitHooks();
-    
+
     log('\n🎉 Development environment setup completed!', 'green');
     log('\nNext steps:', 'blue');
     log('1. Update .env.local with your actual values', 'yellow');
     log('2. Run "pnpm dev" to start the development server', 'yellow');
     log('3. Open http://localhost:3000 in your browser', 'yellow');
     log('\nHappy coding! 🚀', 'green');
-    
   } catch (error) {
     log('\n❌ Setup failed:', 'red');
     log(error instanceof Error ? error.message : 'Unknown error', 'red');

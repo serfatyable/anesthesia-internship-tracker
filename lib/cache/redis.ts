@@ -13,7 +13,10 @@ interface CacheOptions {
 class RedisCache {
   private client: RedisClientType | null = null;
   private isConnected = false;
-  private fallbackCache = new Map<string, { value: unknown; expires: number }>();
+  private fallbackCache = new Map<
+    string,
+    { value: unknown; expires: number }
+  >();
 
   constructor() {
     this.initializeRedis();
@@ -29,7 +32,7 @@ class RedisCache {
           },
         });
 
-        this.client.on('error', (error) => {
+        this.client.on('error', error => {
           logger.error('Redis connection error', { error: error.message });
           this.isConnected = false;
         });
@@ -83,7 +86,11 @@ class RedisCache {
     }
   }
 
-  async set<T>(key: string, value: T, options: CacheOptions = {}): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    options: CacheOptions = {}
+  ): Promise<void> {
     const fullKey = this.getKey(key, options.prefix);
     const ttl = options.ttl || 3600; // Default 1 hour
 
@@ -230,7 +237,7 @@ export const redisCache = new RedisCache();
 export function cached<T extends (...args: unknown[]) => unknown>(
   fn: T,
   keyGenerator: (...args: Parameters<T>) => string,
-  options: CacheOptions = {},
+  options: CacheOptions = {}
 ): T {
   return (async (...args: Parameters<T>) => {
     const key = keyGenerator(...args);

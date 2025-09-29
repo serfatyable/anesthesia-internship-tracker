@@ -14,7 +14,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
     logSlowOperations?: boolean;
     slowThreshold?: number;
     recordMetrics?: boolean;
-  } = {},
+  } = {}
 ): T {
   const {
     logSlowOperations = true,
@@ -31,7 +31,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
 
       if (result instanceof Promise) {
         return result
-          .then((resolved) => {
+          .then(resolved => {
             const duration = performance.now() - start;
             const endMemory = process.memoryUsage();
             const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
@@ -52,14 +52,20 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
 
             return resolved;
           })
-          .catch((error) => {
+          .catch(error => {
             const duration = performance.now() - start;
             const endMemory = process.memoryUsage();
             const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
 
             if (recordMetrics) {
-              monitoring.recordMetric(`performance.${operationName}_error`, duration);
-              monitoring.recordMetric(`memory.${operationName}_error`, memoryDelta);
+              monitoring.recordMetric(
+                `performance.${operationName}_error`,
+                duration
+              );
+              monitoring.recordMetric(
+                `memory.${operationName}_error`,
+                memoryDelta
+              );
             }
 
             logger.error(
@@ -70,7 +76,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
                 duration: Math.round(duration),
                 memoryDelta: Math.round(memoryDelta / 1024),
               },
-              error as Error,
+              error as Error
             );
 
             throw error;
@@ -114,7 +120,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
           duration: Math.round(duration),
           memoryDelta: Math.round(memoryDelta / 1024),
         },
-        error as Error,
+        error as Error
       );
 
       throw error;
@@ -130,7 +136,7 @@ export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
     ttl?: number;
     maxResults?: number;
     selectFields?: string[];
-  } = {},
+  } = {}
 ): T {
   const { cacheKey, maxResults = 1000 /*, selectFields*/ } = options;
 
@@ -140,7 +146,9 @@ export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
       const start = performance.now();
 
       try {
-        const result = await (queryFn as (...args: unknown[]) => unknown)(...args);
+        const result = await (queryFn as (...args: unknown[]) => unknown)(
+          ...args
+        );
 
         const duration = performance.now() - start;
 
@@ -163,13 +171,13 @@ export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
             operation: 'database_query',
             cacheKey: cacheKey ?? '',
           },
-          error as Error,
+          error as Error
         );
         throw error;
       }
     }) as (...args: unknown[]) => Promise<unknown>,
     `database_query_${cacheKey || 'unknown'}`,
-    { slowThreshold: 500 },
+    { slowThreshold: 500 }
   ) as T;
 }
 
@@ -179,7 +187,7 @@ export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
   options: {
     maxMemoryUsage?: number; // MB
     cleanupInterval?: number; // ms
-  } = {},
+  } = {}
 ): T {
   const { maxMemoryUsage = 100 /*, cleanupInterval = 60000 */ } = options;
 
@@ -190,9 +198,10 @@ export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
       const result = fn(...args);
 
       if (result instanceof Promise) {
-        return result.then((resolved) => {
+        return result.then(resolved => {
           const endMemory = process.memoryUsage();
-          const memoryUsage = (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024; // MB
+          const memoryUsage =
+            (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024; // MB
 
           if (memoryUsage > maxMemoryUsage) {
             logger.warn('High memory usage detected', {
@@ -207,7 +216,8 @@ export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
       }
 
       const endMemory = process.memoryUsage();
-      const memoryUsage = (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024; // MB
+      const memoryUsage =
+        (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024; // MB
 
       if (memoryUsage > maxMemoryUsage) {
         logger.warn('High memory usage detected', {
@@ -224,7 +234,7 @@ export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
         {
           operation: 'memory_optimization',
         },
-        error as Error,
+        error as Error
       );
       throw error;
     }
@@ -241,12 +251,15 @@ export function compressResponse(response: NextResponse): NextResponse {
 }
 
 // Request deduplication
-const requestCache = new Map<string, { response: NextResponse; timestamp: number }>();
+const requestCache = new Map<
+  string,
+  { response: NextResponse; timestamp: number }
+>();
 const CACHE_TTL = 5000; // 5 seconds
 
 export function deduplicateRequests<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  keyGenerator: (...args: Parameters<T>) => string,
+  keyGenerator: (...args: Parameters<T>) => string
 ): T {
   return ((...args: Parameters<T>) => {
     const key = keyGenerator(...args);
@@ -267,7 +280,7 @@ export function deduplicateRequests<T extends (...args: unknown[]) => unknown>(
     const result = fn(...args);
 
     if (result instanceof Promise) {
-      return result.then((response) => {
+      return result.then(response => {
         if (response instanceof NextResponse) {
           requestCache.set(key, { response, timestamp: now });
         }
@@ -318,7 +331,10 @@ export function performanceMiddleware(): NextResponse | null {
   const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
 
   newResponse.headers.set('X-Response-Time', `${Math.round(duration)}ms`);
-  newResponse.headers.set('X-Memory-Usage', `${Math.round(memoryDelta / 1024)}KB`);
+  newResponse.headers.set(
+    'X-Memory-Usage',
+    `${Math.round(memoryDelta / 1024)}KB`
+  );
 
   // Record metrics
   monitoring.recordMetric('middleware.performance', duration);
@@ -344,7 +360,8 @@ export function analyzePerformance(metrics: Record<string, number[]>): {
     return { average: 0, median: 0, p95: 0, p99: 0, min: 0, max: 0 };
   }
 
-  const average = values.reduce((sum, val) => sum + val, 0) / (values.length || 1);
+  const average =
+    values.reduce((sum, val) => sum + val, 0) / (values.length || 1);
   const median = values[Math.floor(values.length / 2)] ?? 0;
   const p95Index = Math.floor(values.length * 0.95);
   const p99Index = Math.floor(values.length * 0.99);
@@ -360,7 +377,9 @@ export function analyzePerformance(metrics: Record<string, number[]>): {
 }
 
 // Memory leak detection
-type MemorySnapshot = ReturnType<typeof process.memoryUsage> & { timestamp: number };
+type MemorySnapshot = ReturnType<typeof process.memoryUsage> & {
+  timestamp: number;
+};
 
 export function detectMemoryLeaks(): {
   isLeaking: boolean;
@@ -383,7 +402,8 @@ export function detectMemoryLeaks(): {
 
   const timeDelta = now - state.previous.timestamp;
   const heapGrowth = (memory.heapUsed - state.previous.heapUsed) / timeDelta;
-  const externalGrowth = (memory.external - state.previous.external) / timeDelta;
+  const externalGrowth =
+    (memory.external - state.previous.external) / timeDelta;
   const rssGrowth = (memory.rss - state.previous.rss) / timeDelta;
 
   const isLeaking = heapGrowth > 1024 * 1024; // 1MB per second

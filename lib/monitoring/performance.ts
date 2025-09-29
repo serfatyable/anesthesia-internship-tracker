@@ -45,7 +45,7 @@ class PerformanceMonitor {
       name,
       value,
       timestamp: Date.now(),
-      tags,
+      tags: tags || {},
     };
 
     this.metrics.push(metric);
@@ -59,7 +59,11 @@ class PerformanceMonitor {
   /**
    * Record timing for a function execution
    */
-  async time<T>(name: string, fn: () => Promise<T>, tags?: Record<string, string>): Promise<T> {
+  async time<T>(
+    name: string,
+    fn: () => Promise<T>,
+    tags?: Record<string, string>
+  ): Promise<T> {
     const start = performance.now();
     try {
       const result = await fn();
@@ -70,7 +74,10 @@ class PerformanceMonitor {
     } catch (error) {
       const duration = performance.now() - start;
       this.record(`${name}.duration`, duration, tags);
-      this.record(`${name}.error`, 1, { ...tags, error: error instanceof Error ? error.message : 'Unknown' });
+      this.record(`${name}.error`, 1, {
+        ...tags,
+        error: error instanceof Error ? error.message : 'Unknown',
+      });
       throw error;
     }
   }
@@ -89,7 +96,10 @@ class PerformanceMonitor {
     } catch (error) {
       const duration = performance.now() - start;
       this.record(`${name}.duration`, duration, tags);
-      this.record(`${name}.error`, 1, { ...tags, error: error instanceof Error ? error.message : 'Unknown' });
+      this.record(`${name}.error`, 1, {
+        ...tags,
+        error: error instanceof Error ? error.message : 'Unknown',
+      });
       throw error;
     }
   }
@@ -111,8 +121,14 @@ class PerformanceMonitor {
   /**
    * Get aggregated metrics
    */
-  getAggregatedMetrics(): Record<string, { count: number; avg: number; min: number; max: number; sum: number }> {
-    const aggregated: Record<string, { count: number; avg: number; min: number; max: number; sum: number }> = {};
+  getAggregatedMetrics(): Record<
+    string,
+    { count: number; avg: number; min: number; max: number; sum: number }
+  > {
+    const aggregated: Record<
+      string,
+      { count: number; avg: number; min: number; max: number; sum: number }
+    > = {};
 
     for (const metric of this.metrics) {
       if (!aggregated[metric.name]) {
@@ -126,11 +142,13 @@ class PerformanceMonitor {
       }
 
       const stats = aggregated[metric.name];
-      stats.count++;
-      stats.sum += metric.value;
-      stats.min = Math.min(stats.min, metric.value);
-      stats.max = Math.max(stats.max, metric.value);
-      stats.avg = stats.sum / stats.count;
+      if (stats) {
+        stats.count++;
+        stats.sum += metric.value;
+        stats.min = Math.min(stats.min, metric.value);
+        stats.max = Math.max(stats.max, metric.value);
+        stats.avg = stats.sum / stats.count;
+      }
     }
 
     return aggregated;
@@ -167,8 +185,10 @@ class PerformanceMonitor {
     try {
       // In a real implementation, you would send metrics to your monitoring service
       // For now, we'll just log them
-      console.log(`[PerformanceMonitor] Flushing ${this.metrics.length} metrics`);
-      
+      console.log(
+        `[PerformanceMonitor] Flushing ${this.metrics.length} metrics`
+      );
+
       // Clear metrics after flushing
       this.metrics = [];
     } catch (error) {

@@ -9,7 +9,7 @@ interface ErrorContext {
   url?: string;
   method?: string;
   timestamp: number;
-  stack?: string;
+  stack?: string | undefined;
   [key: string]: any;
 }
 
@@ -52,7 +52,7 @@ class ErrorMonitor {
       context: {
         ...context,
         timestamp: now,
-        stack: error.stack,
+        stack: error.stack || undefined,
       },
       severity,
       resolved: false,
@@ -133,7 +133,7 @@ class ErrorMonitor {
     recent: number; // Errors in last hour
   } {
     const now = Date.now();
-    const oneHourAgo = now - (60 * 60 * 1000);
+    const oneHourAgo = now - 60 * 60 * 1000;
 
     const stats = {
       total: this.errors.length,
@@ -171,11 +171,11 @@ class ErrorMonitor {
    * Clear resolved errors older than specified days
    */
   clearOldErrors(days: number = 7): number {
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
     const initialLength = this.errors.length;
-    
-    this.errors = this.errors.filter(error => 
-      !error.resolved || error.createdAt > cutoff
+
+    this.errors = this.errors.filter(
+      error => !error.resolved || error.createdAt > cutoff
     );
 
     return initialLength - this.errors.length;
@@ -211,7 +211,7 @@ class ErrorMonitor {
    */
   private sendAlert(severity: ErrorReport['severity'], count: number): void {
     console.warn(`[ErrorMonitor] ALERT: ${count} ${severity} errors detected`);
-    
+
     // In a real implementation, you would:
     // - Send email/SMS notifications
     // - Post to Slack/Discord
@@ -225,7 +225,7 @@ class ErrorMonitor {
   private logError(error: ErrorReport): void {
     const logLevel = this.getLogLevel(error.severity);
     const message = `[ErrorMonitor] ${error.type}: ${error.message}`;
-    
+
     switch (logLevel) {
       case 'error':
         console.error(message, error.context);
@@ -244,7 +244,9 @@ class ErrorMonitor {
   /**
    * Get log level based on severity
    */
-  private getLogLevel(severity: ErrorReport['severity']): 'error' | 'warn' | 'info' | 'log' {
+  private getLogLevel(
+    severity: ErrorReport['severity']
+  ): 'error' | 'warn' | 'info' | 'log' {
     switch (severity) {
       case 'critical':
       case 'high':

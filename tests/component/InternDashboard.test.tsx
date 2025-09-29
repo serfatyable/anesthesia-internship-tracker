@@ -6,7 +6,7 @@ import type { InternDashboard as InternDashboardType } from '@/lib/domain/progre
 // Mock child components
 vi.mock('@/components/site/dashboard/OverallProgressCard', () => ({
   OverallProgressCard: ({ summary, rotations, userInfo }: any) => (
-    <div data-testid="overall-progress-card">
+    <div data-testid='overall-progress-card'>
       Overall Progress: {summary.completionPercentage}%
     </div>
   ),
@@ -14,33 +14,29 @@ vi.mock('@/components/site/dashboard/OverallProgressCard', () => ({
 
 vi.mock('@/components/site/dashboard/RotationGroups', () => ({
   RotationGroups: ({ rotations }: any) => (
-    <div data-testid="rotation-groups">
-      Rotations: {rotations.length}
-    </div>
+    <div data-testid='rotation-groups'>Rotations: {rotations.length}</div>
   ),
 }));
 
 vi.mock('@/components/site/dashboard/CaseReviewCard', () => ({
-  CaseReviewCard: () => (
-    <div data-testid="case-review-card">Case Review</div>
-  ),
+  CaseReviewCard: () => <div data-testid='case-review-card'>Case Review</div>,
 }));
 
 vi.mock('@/components/site/dashboard/ProcedureKnowledgeFavoritesCard', () => ({
   ProcedureKnowledgeFavoritesCard: () => (
-    <div data-testid="procedure-knowledge-card">Procedure Knowledge</div>
+    <div data-testid='procedure-knowledge-card'>Procedure Knowledge</div>
   ),
 }));
 
 vi.mock('@/components/site/dashboard/FeedbackNotificationsCard', () => ({
   FeedbackNotificationsCard: () => (
-    <div data-testid="feedback-notifications-card">Feedback Notifications</div>
+    <div data-testid='feedback-notifications-card'>Feedback Notifications</div>
   ),
 }));
 
 vi.mock('@/components/site/dashboard/ResourcesCard', () => ({
   ResourcesCard: ({ driveUrl }: any) => (
-    <div data-testid="resources-card">
+    <div data-testid='resources-card'>
       Resources {driveUrl ? '(with drive URL)' : ''}
     </div>
   ),
@@ -102,32 +98,34 @@ describe('InternDashboard', () => {
 
   it('renders all main components', () => {
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     expect(screen.getByTestId('overall-progress-card')).toBeInTheDocument();
     expect(screen.getByTestId('rotation-groups')).toBeInTheDocument();
     expect(screen.getByTestId('case-review-card')).toBeInTheDocument();
     expect(screen.getByTestId('procedure-knowledge-card')).toBeInTheDocument();
-    expect(screen.getByTestId('feedback-notifications-card')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('feedback-notifications-card')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('resources-card')).toBeInTheDocument();
   });
 
   it('passes correct props to OverallProgressCard', () => {
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const overallProgressCard = screen.getByTestId('overall-progress-card');
     expect(overallProgressCard).toHaveTextContent('Overall Progress: 75%');
   });
 
   it('passes correct props to RotationGroups', () => {
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const rotationGroups = screen.getByTestId('rotation-groups');
     expect(rotationGroups).toHaveTextContent('Rotations: 2');
   });
 
   it('renders ResourcesCard without drive URL when env var is not set', () => {
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const resourcesCard = screen.getByTestId('resources-card');
     expect(resourcesCard).toHaveTextContent('Resources');
     expect(resourcesCard).not.toHaveTextContent('with drive URL');
@@ -135,30 +133,34 @@ describe('InternDashboard', () => {
 
   it('renders ResourcesCard with drive URL when env var is set', () => {
     vi.stubEnv('NEXT_PUBLIC_GOOGLE_DRIVE_URL', 'https://drive.google.com');
-    
+
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const resourcesCard = screen.getByTestId('resources-card');
     expect(resourcesCard).toHaveTextContent('Resources (with drive URL)');
   });
 
   it('applies custom className', () => {
-    const { container } = render(<InternDashboard dashboard={mockDashboard} className="custom-class" />);
-    
+    const { container } = render(
+      <InternDashboard dashboard={mockDashboard} className='custom-class' />
+    );
+
     const dashboardElement = container.querySelector('.custom-class');
     expect(dashboardElement).toBeInTheDocument();
   });
 
   it('has correct grid layout classes', () => {
     const { container } = render(<InternDashboard dashboard={mockDashboard} />);
-    
-    const gridElement = container.querySelector('.grid-cols-1.md\\:grid-cols-2');
+
+    const gridElement = container.querySelector(
+      '.grid-cols-1.md\\:grid-cols-2'
+    );
     expect(gridElement).toBeInTheDocument();
   });
 
   it('has correct spacing classes', () => {
     const { container } = render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const mainContainer = container.querySelector('.space-y-6');
     expect(mainContainer).toBeInTheDocument();
   });
@@ -166,7 +168,7 @@ describe('InternDashboard', () => {
   it('handles empty rotations array', () => {
     const emptyDashboard = { ...mockDashboard, rotations: [] };
     render(<InternDashboard dashboard={emptyDashboard} />);
-    
+
     const rotationGroups = screen.getByTestId('rotation-groups');
     expect(rotationGroups).toHaveTextContent('Rotations: 0');
   });
@@ -174,7 +176,7 @@ describe('InternDashboard', () => {
   it('handles missing userInfo', () => {
     const dashboardWithoutUserInfo = { ...mockDashboard, userInfo: undefined };
     render(<InternDashboard dashboard={dashboardWithoutUserInfo} />);
-    
+
     expect(screen.getByTestId('overall-progress-card')).toBeInTheDocument();
     expect(screen.getByTestId('rotation-groups')).toBeInTheDocument();
   });
@@ -185,7 +187,7 @@ describe('InternDashboard', () => {
       summary: { ...mockDashboard.summary, completionPercentage: 0 },
     };
     render(<InternDashboard dashboard={zeroProgressDashboard} />);
-    
+
     const overallProgressCard = screen.getByTestId('overall-progress-card');
     expect(overallProgressCard).toHaveTextContent('Overall Progress: 0%');
   });
@@ -196,21 +198,21 @@ describe('InternDashboard', () => {
       summary: { ...mockDashboard.summary, completionPercentage: 100 },
     };
     render(<InternDashboard dashboard={fullProgressDashboard} />);
-    
+
     const overallProgressCard = screen.getByTestId('overall-progress-card');
     expect(overallProgressCard).toHaveTextContent('Overall Progress: 100%');
   });
 
   it('renders all four bottom cards in correct order', () => {
     render(<InternDashboard dashboard={mockDashboard} />);
-    
+
     const cards = [
       screen.getByTestId('case-review-card'),
       screen.getByTestId('procedure-knowledge-card'),
       screen.getByTestId('feedback-notifications-card'),
       screen.getByTestId('resources-card'),
     ];
-    
+
     cards.forEach(card => {
       expect(card).toBeInTheDocument();
     });

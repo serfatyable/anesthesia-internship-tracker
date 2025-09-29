@@ -28,7 +28,9 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
-    if (!canAccessAdmin({ id: token.id as string, role: token.role as string })) {
+    if (
+      !canAccessAdmin({ id: token.id as string, role: token.role as string })
+    ) {
       return NextResponse.redirect(new URL('/403', req.url));
     }
   }

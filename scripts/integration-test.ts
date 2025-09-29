@@ -47,12 +47,12 @@ async function runIntegrationTest() {
 
     if (userWithLogs) {
       console.log(
-        `   ✅ Found intern "${userWithLogs.name}" with ${userWithLogs.logs.length} logs`,
+        `   ✅ Found intern "${userWithLogs.name}" with ${userWithLogs.logs.length} logs`
       );
       if (userWithLogs.logs.length > 0) {
         const log = userWithLogs.logs[0];
         console.log(
-          `   ✅ Log entry for "${log?.procedure?.name || 'unknown'}" with ${log?.verification?.status || 'no'} verification`,
+          `   ✅ Log entry for "${log?.procedure?.name || 'unknown'}" with ${log?.verification?.status || 'no'} verification`
         );
       }
     }
@@ -71,9 +71,11 @@ async function runIntegrationTest() {
 
     if (rotationWithProcedures) {
       console.log(
-        `   ✅ Rotation "${rotationWithProcedures.name}" has ${rotationWithProcedures.procedures.length} procedures`,
+        `   ✅ Rotation "${rotationWithProcedures.name}" has ${rotationWithProcedures.procedures.length} procedures`
       );
-      console.log(`   ✅ Rotation has ${rotationWithProcedures.requirements.length} requirements`);
+      console.log(
+        `   ✅ Rotation has ${rotationWithProcedures.requirements.length} requirements`
+      );
     }
 
     console.log('\n🎉 Integration test completed successfully!');

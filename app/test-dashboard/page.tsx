@@ -145,11 +145,13 @@ const mockDashboard = {
 
 export default function TestDashboardPage() {
   return (
-    <main className="p-6">
-      <section className="space-y-6">
+    <main className='p-6'>
+      <section className='space-y-6'>
         <header>
-          <h1 className="text-2xl font-semibold">Test Dashboard - Styling Check</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className='text-2xl font-semibold'>
+            Test Dashboard - Styling Check
+          </h1>
+          <p className='text-sm text-zinc-500'>
             This page shows the dashboard styling without authentication
           </p>
         </header>
@@ -158,14 +160,34 @@ export default function TestDashboardPage() {
         <InternDashboard dashboard={mockDashboard} />
 
         {/* Quick Actions */}
-        <div className="mt-8">
-          <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <CardTile title="Log Procedures" href="/logs/new" desc="Add new procedure logs" />
-            <CardTile title="View All Logs" href="/logs" desc="Browse your procedure history" />
-            <CardTile title="Verify Queue" href="/verify" desc="Review pending verifications" />
-            <CardTile title="Rotations" href="/rotations" desc="Browse rotation requirements" />
-            <CardTile title="Settings" href="/admin" desc="Manage your account" />
+        <div className='mt-8'>
+          <h2 className='text-lg font-medium mb-4'>Quick Actions</h2>
+          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+            <CardTile
+              title='Log Procedures'
+              href='/logs/new'
+              desc='Add new procedure logs'
+            />
+            <CardTile
+              title='View All Logs'
+              href='/logs'
+              desc='Browse your procedure history'
+            />
+            <CardTile
+              title='Verify Queue'
+              href='/verify'
+              desc='Review pending verifications'
+            />
+            <CardTile
+              title='Rotations'
+              href='/rotations'
+              desc='Browse rotation requirements'
+            />
+            <CardTile
+              title='Settings'
+              href='/admin'
+              desc='Manage your account'
+            />
           </div>
         </div>
       </section>

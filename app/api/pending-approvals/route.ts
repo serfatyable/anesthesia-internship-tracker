@@ -43,7 +43,7 @@ export async function GET() {
       take: 20, // Limit for preview
     });
 
-    const formattedItems = pendingItems.map((item) => ({
+    const formattedItems = pendingItems.map(item => ({
       id: item.id,
       procedureName: item.logEntry.procedure.name,
       internName: item.logEntry.intern.name || item.logEntry.intern.email,
@@ -56,6 +56,9 @@ export async function GET() {
     return NextResponse.json({ pendingItems: formattedItems });
   } catch (error) {
     console.error('Error fetching pending approvals:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

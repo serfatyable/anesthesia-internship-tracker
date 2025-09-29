@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { isValidItemType, validateString, validateItemId } from '@/lib/validation';
+import {
+  isValidItemType,
+  validateString,
+  validateItemId,
+} from '@/lib/validation';
 
 // GET /api/procedure-knowledge-favorites - Get user's favorite procedures and knowledge
 export async function GET() {
@@ -26,7 +30,10 @@ export async function GET() {
     const response = NextResponse.json(favorites);
 
     // Add caching headers for better performance
-    response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+    response.headers.set(
+      'Cache-Control',
+      'private, max-age=60, stale-while-revalidate=300'
+    );
 
     return response;
   } catch (error) {
@@ -36,7 +43,7 @@ export async function GET() {
         error: 'Internal server error',
         code: 'FETCH_FAVORITES_ERROR',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -66,22 +73,27 @@ export async function POST(request: Request) {
     } catch (validationError) {
       return NextResponse.json(
         {
-          error: validationError instanceof Error ? validationError.message : 'Invalid input data',
+          error:
+            validationError instanceof Error
+              ? validationError.message
+              : 'Invalid input data',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // Check if already favorited
-    const existingFavorite = await prisma.procedureKnowledgeFavorite.findUnique({
-      where: {
-        userId_itemId_itemType: {
-          userId: session.user.id,
-          itemId,
-          itemType,
+    const existingFavorite = await prisma.procedureKnowledgeFavorite.findUnique(
+      {
+        where: {
+          userId_itemId_itemType: {
+            userId: session.user.id,
+            itemId,
+            itemType,
+          },
         },
-      },
-    });
+      }
+    );
 
     if (existingFavorite) {
       return NextResponse.json({ error: 'Already favorited' }, { status: 400 });
@@ -98,7 +110,10 @@ export async function POST(request: Request) {
     return NextResponse.json(favorite);
   } catch (error) {
     console.error('Error adding procedure/knowledge to favorites:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -127,9 +142,12 @@ export async function DELETE(request: Request) {
     } catch (validationError) {
       return NextResponse.json(
         {
-          error: validationError instanceof Error ? validationError.message : 'Invalid input data',
+          error:
+            validationError instanceof Error
+              ? validationError.message
+              : 'Invalid input data',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -142,12 +160,18 @@ export async function DELETE(request: Request) {
     });
 
     if (deleted.count === 0) {
-      return NextResponse.json({ error: 'Favorite not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Favorite not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error removing procedure/knowledge from favorites:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

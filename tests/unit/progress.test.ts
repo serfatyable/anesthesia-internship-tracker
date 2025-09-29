@@ -88,7 +88,9 @@ describe('ProgressService', () => {
       ];
 
       // Mock the getCachedRotations method instead of prisma.rotation.findMany
-      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(mockRotations);
+      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(
+        mockRotations
+      );
       vi.mocked(prisma.logEntry.findMany).mockResolvedValue(mockLogEntries);
       vi.mocked(prisma.verification.findMany).mockResolvedValue([]);
 
@@ -118,7 +120,9 @@ describe('ProgressService', () => {
           state: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
-          requirements: [{ minCount: 10, procedure: { id: 'proc-1', name: 'Intubation' } }],
+          requirements: [
+            { minCount: 10, procedure: { id: 'proc-1', name: 'Intubation' } },
+          ],
         },
         {
           id: 'rotation-2',
@@ -128,7 +132,9 @@ describe('ProgressService', () => {
           state: 'ACTIVE',
           createdAt: new Date(),
           updatedAt: new Date(),
-          requirements: [{ minCount: 5, procedure: { id: 'proc-2', name: 'Surgery' } }],
+          requirements: [
+            { minCount: 5, procedure: { id: 'proc-2', name: 'Surgery' } },
+          ],
         },
       ];
 
@@ -160,7 +166,9 @@ describe('ProgressService', () => {
       ];
 
       // Mock the getCachedRotations method instead of prisma.rotation.findMany
-      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(mockRotations);
+      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(
+        mockRotations
+      );
       vi.mocked(prisma.logEntry.findMany).mockResolvedValue(mockLogEntries);
       vi.mocked(prisma.verification.findMany).mockResolvedValue([]);
 
@@ -179,7 +187,9 @@ describe('ProgressService', () => {
 
     it('should handle empty data gracefully', async () => {
       // Mock the getCachedRotations method instead of prisma.rotation.findMany
-      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue([]);
+      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(
+        []
+      );
       vi.mocked(prisma.logEntry.findMany).mockResolvedValue([]);
       vi.mocked(prisma.verification.findMany).mockResolvedValue([]);
 
@@ -304,7 +314,9 @@ describe('ProgressService', () => {
       ];
 
       // Mock the getCachedRotations method instead of prisma.rotation.findMany
-      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(mockRotations);
+      vi.spyOn(progressService as any, 'getCachedRotations').mockResolvedValue(
+        mockRotations
+      );
       vi.mocked(prisma.logEntry.findMany).mockResolvedValue(mockLogEntries);
 
       const result = await progressService.getDashboardOverview();

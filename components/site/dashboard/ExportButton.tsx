@@ -10,7 +10,12 @@ interface ExportButtonProps {
   className?: string;
 }
 
-export function ExportButton({ userId, from, to, className }: ExportButtonProps) {
+export function ExportButton({
+  userId,
+  from,
+  to,
+  className,
+}: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
@@ -40,7 +45,9 @@ export function ExportButton({ userId, from, to, className }: ExportButtonProps)
         ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
         : `logs_${userId}_${new Date().toISOString().split('T')[0]}.csv`;
 
-      a.download = filename || `logs_${userId}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download =
+        filename ||
+        `logs_${userId}_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -49,7 +56,9 @@ export function ExportButton({ userId, from, to, className }: ExportButtonProps)
       console.error('Export failed:', error);
       // More user-friendly error handling
       const errorMessage =
-        error instanceof Error ? error.message : 'Export failed. Please try again.';
+        error instanceof Error
+          ? error.message
+          : 'Export failed. Please try again.';
       alert(`Export failed: ${errorMessage}`);
     } finally {
       setIsExporting(false);
@@ -62,37 +71,42 @@ export function ExportButton({ userId, from, to, className }: ExportButtonProps)
       disabled={isExporting}
       className={cn(
         'inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
-        className,
+        className
       )}
     >
       {isExporting ? (
         <>
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+          <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
             <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
+              className='opacity-25'
+              cx='12'
+              cy='12'
+              r='10'
+              stroke='currentColor'
+              strokeWidth='4'
+              fill='none'
             />
             <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              className='opacity-75'
+              fill='currentColor'
+              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
             />
           </svg>
           Exporting...
         </>
       ) : (
         <>
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className='h-4 w-4'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap='round'
+              strokeLinejoin='round'
               strokeWidth={2}
-              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              d='M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
             />
           </svg>
           Export CSV

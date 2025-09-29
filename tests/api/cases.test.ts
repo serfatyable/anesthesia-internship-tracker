@@ -56,14 +56,20 @@ describe('Cases API', () => {
           createdAt: new Date(),
           _count: { comments: 0, favorites: 0 },
           favorites: [],
-          author: { id: 'user_123', name: 'Test User', email: 'test@example.com' },
+          author: {
+            id: 'user_123',
+            name: 'Test User',
+            email: 'test@example.com',
+          },
         },
       ];
 
       (prisma.case.findMany as any).mockResolvedValue(mockCases);
       (prisma.case.count as any).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/cases?page=1&limit=10');
+      const request = new NextRequest(
+        'http://localhost:3000/api/cases?page=1&limit=10'
+      );
       const response = await GET(request);
       const data = await response.json();
 
@@ -79,7 +85,9 @@ describe('Cases API', () => {
       (prisma.case.findMany as any).mockResolvedValue([]);
       (prisma.case.count as any).mockResolvedValue(0);
 
-      const request = new NextRequest('http://localhost:3000/api/cases?category=Cardiac');
+      const request = new NextRequest(
+        'http://localhost:3000/api/cases?category=Cardiac'
+      );
       const response = await GET(request);
 
       expect(response.status).toBe(200);
@@ -88,7 +96,7 @@ describe('Cases API', () => {
           where: expect.objectContaining({
             category: 'Cardiac',
           }),
-        }),
+        })
       );
     });
 
@@ -97,7 +105,9 @@ describe('Cases API', () => {
       (prisma.case.findMany as any).mockResolvedValue([]);
       (prisma.case.count as any).mockResolvedValue(0);
 
-      const request = new NextRequest('http://localhost:3000/api/cases?search=test');
+      const request = new NextRequest(
+        'http://localhost:3000/api/cases?search=test'
+      );
       const response = await GET(request);
 
       expect(response.status).toBe(200);
@@ -109,7 +119,7 @@ describe('Cases API', () => {
               { description: { contains: 'test', mode: 'insensitive' } },
             ]),
           }),
-        }),
+        })
       );
     });
 
@@ -135,7 +145,11 @@ describe('Cases API', () => {
         authorId: 'user_123',
         createdAt: new Date(),
         _count: { comments: 0, favorites: 0 },
-        author: { id: 'user_123', name: 'Test User', email: 'test@example.com' },
+        author: {
+          id: 'user_123',
+          name: 'Test User',
+          email: 'test@example.com',
+        },
       };
 
       (prisma.case.create as any).mockResolvedValue(mockCase);
@@ -189,7 +203,11 @@ describe('Cases API', () => {
         authorId: 'user_123',
         createdAt: new Date(),
         _count: { comments: 0, favorites: 0 },
-        author: { id: 'user_123', name: 'Test User', email: 'test@example.com' },
+        author: {
+          id: 'user_123',
+          name: 'Test User',
+          email: 'test@example.com',
+        },
       };
 
       (prisma.case.create as any).mockResolvedValue(mockCase);
@@ -214,7 +232,7 @@ describe('Cases API', () => {
           data: expect.objectContaining({
             title: 'Test Case', // Script tag should be removed
           }),
-        }),
+        })
       );
     });
   });

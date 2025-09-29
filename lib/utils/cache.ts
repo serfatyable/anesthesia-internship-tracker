@@ -39,7 +39,7 @@ class AdvancedCache<T> {
       () => {
         this.cleanupExpiredEntries();
       },
-      5 * 60 * 1000,
+      5 * 60 * 1000
     );
   }
 
@@ -126,7 +126,7 @@ class AdvancedCache<T> {
       }
     }
 
-    expiredKeys.forEach((key) => this.remove(key));
+    expiredKeys.forEach(key => this.remove(key));
   }
 
   // Destructor to clean up resources
@@ -153,8 +153,8 @@ class AdvancedCache<T> {
       size: this.cache.size,
       memoryUsage: this.currentMemory,
       hitRate: this.calculateHitRate(),
-      oldestEntry: Math.min(...entries.map((e) => e.lastAccessed)),
-      newestEntry: Math.max(...entries.map((e) => e.lastAccessed)),
+      oldestEntry: Math.min(...entries.map(e => e.lastAccessed)),
+      newestEntry: Math.max(...entries.map(e => e.lastAccessed)),
     };
   }
 
@@ -163,14 +163,14 @@ class AdvancedCache<T> {
     if (!entry) return false;
 
     this.cache.delete(key);
-    this.accessOrder = this.accessOrder.filter((k) => k !== key);
+    this.accessOrder = this.accessOrder.filter(k => k !== key);
     this.currentMemory -= this.estimateSize(entry.value);
     return true;
   }
 
   private updateAccessOrder(key: string): void {
     // Remove from current position
-    this.accessOrder = this.accessOrder.filter((k) => k !== key);
+    this.accessOrder = this.accessOrder.filter(k => k !== key);
     // Add to end (most recently accessed)
     this.accessOrder.push(key);
   }
@@ -185,7 +185,10 @@ class AdvancedCache<T> {
     }
 
     // Evict by memory limit
-    while (this.currentMemory + entrySize > this.maxMemory && this.cache.size > 0) {
+    while (
+      this.currentMemory + entrySize > this.maxMemory &&
+      this.cache.size > 0
+    ) {
       const oldestKey = this.accessOrder[0];
       if (oldestKey) {
         this.remove(oldestKey);
@@ -204,7 +207,10 @@ class AdvancedCache<T> {
 
   private calculateHitRate(): number {
     const entries = Array.from(this.cache.values());
-    const totalAccesses = entries.reduce((sum, entry) => sum + entry.accessCount, 0);
+    const totalAccesses = entries.reduce(
+      (sum, entry) => sum + entry.accessCount,
+      0
+    );
     return totalAccesses > 0 ? entries.length / totalAccesses : 0;
   }
 }
@@ -251,7 +257,7 @@ export const procedureCache = new AdvancedCache<ProcedureCacheData>({
 export function cached<T extends (...args: unknown[]) => unknown>(
   fn: T,
   cache: AdvancedCache<ReturnType<T>>,
-  keyGenerator?: (...args: Parameters<T>) => string,
+  keyGenerator?: (...args: Parameters<T>) => string
 ): T {
   return ((...args: Parameters<T>) => {
     const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
@@ -267,7 +273,7 @@ export function cached<T extends (...args: unknown[]) => unknown>(
 
     // Handle promises
     if (result instanceof Promise) {
-      return result.then((resolved) => {
+      return result.then(resolved => {
         cache.set(key, resolved);
         return resolved;
       });
@@ -295,7 +301,7 @@ export async function warmCache(): Promise<void> {
 
 // Cache cleanup utilities
 export function cleanupExpiredEntries(): void {
-  [userCache, rotationCache, procedureCache].forEach((cache) => {
+  [userCache, rotationCache, procedureCache].forEach(cache => {
     // The cache automatically handles expiration on access
     // This is just for manual cleanup if needed
     const stats = cache.getStats();

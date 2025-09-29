@@ -10,13 +10,13 @@ export async function GET() {
   try {
     // Track the health check request
     const startTime = performance.now();
-    
+
     const healthStatus = await monitoring.time('health_check', async () => {
       return monitoring.getHealthStatus();
     });
 
     const responseTime = performance.now() - startTime;
-    
+
     // Track the API call
     monitoring.trackAPICall('/api/health', 'GET', 200, responseTime);
 
@@ -24,16 +24,19 @@ export async function GET() {
       status: healthStatus.status === 'healthy' ? 200 : 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
   } catch (error) {
     // Track the error
-    monitoring.trackError(error instanceof Error ? error : new Error('Unknown error'), {
-      endpoint: '/api/health',
-      method: 'GET',
-    });
+    monitoring.trackError(
+      error instanceof Error ? error : new Error('Unknown error'),
+      {
+        endpoint: '/api/health',
+        method: 'GET',
+      }
+    );
 
     return NextResponse.json(
       {
@@ -54,4 +57,3 @@ export async function GET() {
     );
   }
 }
-

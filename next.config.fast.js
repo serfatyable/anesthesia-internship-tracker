@@ -11,6 +11,11 @@ const nextConfig = {
   // External packages for server components
   serverExternalPackages: ['@prisma/client'],
 
+  // ESLint configuration - ignore during build for analysis
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Simplified headers for development (major performance gain)
   async headers() {
     if (process.env.NODE_ENV === 'development') {

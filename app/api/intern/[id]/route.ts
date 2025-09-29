@@ -3,7 +3,10 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params;
     console.log('API: Getting intern data for ID:', id);
@@ -112,7 +115,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Group by rotation to find the most active one (or we can use a different logic)
     const rotationStats = new Map();
 
-    logEntries.forEach((le) => {
+    logEntries.forEach(le => {
       const rotationId = le.procedure.rotationId;
       const rotationName = le.procedure.rotation.name;
 
@@ -128,7 +131,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       rotationStats.get(rotationId).logEntries.push(le);
     });
 
-    verifications.forEach((v) => {
+    verifications.forEach(v => {
       const rotationId = v.logEntry.procedure.rotationId;
       if (rotationStats.has(rotationId)) {
         rotationStats.get(rotationId).verifications.push(v);
@@ -165,27 +168,31 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         {
           error: 'No rotation data found',
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     // Filter data for the active rotation
     const activeRotationLogEntries = logEntries.filter(
-      (le) => le.procedure.rotationId === activeRotation.id,
+      le => le.procedure.rotationId === activeRotation.id
     );
     const activeRotationVerifications = verifications.filter(
-      (v) => v.logEntry.procedure.rotationId === activeRotation.id,
+      v => v.logEntry.procedure.rotationId === activeRotation.id
     );
 
     // Get procedures for this rotation
-    const rotationProcedures = allProcedures.filter((p) => p.rotationId === activeRotation.id);
-    const rotationRequirements = rotationProcedures.flatMap((p) => p.requirements);
+    const rotationProcedures = allProcedures.filter(
+      p => p.rotationId === activeRotation.id
+    );
+    const rotationRequirements = rotationProcedures.flatMap(
+      p => p.requirements
+    );
 
     // Process procedures
     const procedures = {
       pending: activeRotationLogEntries
-        .filter((le) => le.verification && le.verification.status === 'PENDING')
-        .map((le) => ({
+        .filter(le => le.verification && le.verification.status === 'PENDING')
+        .map(le => ({
           id: le.id,
           name: le.procedure?.name || 'Unknown Procedure',
           logEntryId: le.id,
@@ -194,8 +201,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           notes: le.notes,
         })),
       completed: activeRotationVerifications
-        .filter((v) => v.status === 'APPROVED')
-        .map((v) => ({
+        .filter(v => v.status === 'APPROVED')
+        .map(v => ({
           id: v.logEntry.id,
           name: v.logEntry.procedure?.name || 'Unknown Procedure',
           count: v.logEntry.count,
@@ -203,11 +210,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           notes: v.logEntry.notes,
         })),
       notStarted: rotationProcedures
-        .filter((proc) => !activeRotationLogEntries.some((le) => le.procedureId === proc.id))
-        .map((proc) => ({
+        .filter(
+          proc =>
+            !activeRotationLogEntries.some(le => le.procedureId === proc.id)
+        )
+        .map(proc => ({
           id: proc.id,
           name: proc.name,
-          required: rotationRequirements.find((r) => r.procedureId === proc.id)?.minCount || 1,
+          required:
+            rotationRequirements.find(r => r.procedureId === proc.id)
+              ?.minCount || 1,
         })),
     };
 
@@ -220,7 +232,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Calculate totals
     const totalRequired = rotationProcedures.length;
-    const totalVerified = activeRotationVerifications.filter((v) => v.status === 'APPROVED').length;
+    const totalVerified = activeRotationVerifications.filter(
+      v => v.status === 'APPROVED'
+    ).length;
     const totalPending = procedures.pending.length;
 
     const completionPercentage =
@@ -248,7 +262,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(responseData);
   } catch (error) {
     console.error('API: Error fetching intern data:', error);
-    console.error('API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error(
+      'API: Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace'
+    );
 
     // Return more detailed error information for debugging
     return NextResponse.json(
@@ -257,7 +274,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         details: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

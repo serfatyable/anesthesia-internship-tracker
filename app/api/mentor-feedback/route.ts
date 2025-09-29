@@ -25,7 +25,10 @@ export async function GET(request: Request) {
 
     try {
       itemId = validateItemId(searchParams.get('itemId'));
-      const itemTypeRaw = validateString(searchParams.get('itemType'), 'Item type');
+      const itemTypeRaw = validateString(
+        searchParams.get('itemType'),
+        'Item type'
+      );
 
       if (!isValidItemType(itemTypeRaw)) {
         throw new Error('Item type must be PROCEDURE or KNOWLEDGE');
@@ -35,9 +38,12 @@ export async function GET(request: Request) {
     } catch (validationError) {
       return NextResponse.json(
         {
-          error: validationError instanceof Error ? validationError.message : 'Invalid parameters',
+          error:
+            validationError instanceof Error
+              ? validationError.message
+              : 'Invalid parameters',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -80,7 +86,7 @@ export async function GET(request: Request) {
         });
         return acc;
       },
-      {} as Record<string, { mentor: unknown; feedback: unknown[] }>,
+      {} as Record<string, { mentor: unknown; feedback: unknown[] }>
     );
 
     const response = NextResponse.json({
@@ -88,14 +94,20 @@ export async function GET(request: Request) {
       itemType,
       feedback: Object.values(groupedFeedback),
       totalCount: feedback.length,
-      unreadCount: feedback.filter((f) => !f.isRead).length,
+      unreadCount: feedback.filter(f => !f.isRead).length,
     });
 
-    response.headers.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+    response.headers.set(
+      'Cache-Control',
+      'private, max-age=60, stale-while-revalidate=300'
+    );
     return response;
   } catch (error) {
     console.error('Error fetching mentor feedback:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -109,7 +121,10 @@ export async function POST(request: Request) {
 
     // Check if user is a mentor
     if (session.user.role !== 'MENTOR') {
-      return NextResponse.json({ error: 'Only mentors can provide feedback' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Only mentors can provide feedback' },
+        { status: 403 }
+      );
     }
 
     const rawData = await request.json();
@@ -133,9 +148,12 @@ export async function POST(request: Request) {
     } catch (validationError) {
       return NextResponse.json(
         {
-          error: validationError instanceof Error ? validationError.message : 'Invalid input data',
+          error:
+            validationError instanceof Error
+              ? validationError.message
+              : 'Invalid input data',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -150,7 +168,10 @@ export async function POST(request: Request) {
     }
 
     if (intern.role !== 'INTERN') {
-      return NextResponse.json({ error: 'User is not an intern' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'User is not an intern' },
+        { status: 400 }
+      );
     }
 
     // Create the feedback
@@ -176,7 +197,10 @@ export async function POST(request: Request) {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error creating mentor feedback:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -197,9 +221,12 @@ export async function PUT(request: Request) {
     } catch (validationError) {
       return NextResponse.json(
         {
-          error: validationError instanceof Error ? validationError.message : 'Invalid input data',
+          error:
+            validationError instanceof Error
+              ? validationError.message
+              : 'Invalid input data',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -217,6 +244,9 @@ export async function PUT(request: Request) {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error updating mentor feedback:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -13,7 +13,10 @@ export async function POST(request: Request) {
 
     // Check if user is a mentor
     if (session.user.role !== 'MENTOR') {
-      return NextResponse.json({ error: 'Only mentors can create feedback' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Only mentors can create feedback' },
+        { status: 403 }
+      );
     }
 
     const { internId, itemId, itemType } = await request.json();
@@ -21,14 +24,14 @@ export async function POST(request: Request) {
     if (!internId || !itemId || !itemType) {
       return NextResponse.json(
         { error: 'internId, itemId, and itemType are required' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     if (!['PROCEDURE', 'KNOWLEDGE'].includes(itemType)) {
       return NextResponse.json(
         { error: 'itemType must be PROCEDURE or KNOWLEDGE' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -54,8 +57,9 @@ export async function POST(request: Request) {
     ];
 
     const randomContent =
-      mockFeedbackContent[Math.floor(Math.random() * mockFeedbackContent.length)] ||
-      'Great work on this task!';
+      mockFeedbackContent[
+        Math.floor(Math.random() * mockFeedbackContent.length)
+      ] || 'Great work on this task!';
 
     // Create the mock feedback
     const feedback = await prisma.mentorFeedback.create({
@@ -80,6 +84,9 @@ export async function POST(request: Request) {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error creating mock mentor feedback:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

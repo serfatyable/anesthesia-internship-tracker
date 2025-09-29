@@ -40,7 +40,10 @@ function parseEnvFile(file: string): Record<string, string> {
     if (idx === -1) continue;
     const key = trimmed.slice(0, idx).trim();
     let val = trimmed.slice(idx + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
       val = val.slice(1, -1);
     }
     out[key] = val;
@@ -81,7 +84,9 @@ async function run(cmd: string, args: string[], opts: { cwd?: string } = {}) {
       shell: process.platform === 'win32',
       cwd: opts.cwd,
     });
-    p.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))));
+    p.on('close', code =>
+      code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))
+    );
   });
 }
 
@@ -94,7 +99,11 @@ function readJSON<T = unknown>(file: string): T | null {
 }
 
 function getMode(): Mode {
-  if (process.argv.includes('--prod') || process.env.VERCEL === '1' || process.env.CI === 'true')
+  if (
+    process.argv.includes('--prod') ||
+    process.env.VERCEL === '1' ||
+    process.env.CI === 'true'
+  )
     return 'prod';
   return 'local';
 }
@@ -110,7 +119,7 @@ function checkNode() {
     const current = process.versions.node;
     if (!current.startsWith(wanted.split('.')[0] || '')) {
       warn(
-        `Node version differs from .nvmrc (wanted v${wanted}, current v${current}). Use: nvm use`,
+        `Node version differs from .nvmrc (wanted v${wanted}, current v${current}). Use: nvm use`
       );
     } else {
       ok(`Node version matches .nvmrc (v${current})`);
@@ -132,7 +141,7 @@ function checkPrismaVersions() {
     const cm = c.split('.').slice(0, 2).join('.');
     if (dm !== cm)
       warn(
-        `Prisma versions differ (prisma ${prismaDev} vs @prisma/client ${prismaClient}). Keep them aligned.`,
+        `Prisma versions differ (prisma ${prismaDev} vs @prisma/client ${prismaClient}). Keep them aligned.`
       );
     else ok(`Prisma versions aligned (${prismaDev} / ${prismaClient})`);
   }
@@ -144,10 +153,13 @@ function summarizeAndFixEnv() {
   const envProdPath = path.join(root, '.env.production');
   const envLocal = parseEnvFile(envLocalPath);
   const envProd = parseEnvFile(envProdPath);
-  const env = { ...envLocal, ...envProd, ...process.env } as Record<string, string>;
+  const env = { ...envLocal, ...envProd, ...process.env } as Record<
+    string,
+    string
+  >;
 
   const required = ['DATABASE_URL', 'NEXTAUTH_URL', 'NEXTAUTH_SECRET'];
-  const missing = required.filter((k) => !env[k]);
+  const missing = required.filter(k => !env[k]);
   if (missing.length) warn(`Missing env vars: ${missing.join(', ')}`);
 
   const dbUrl = env.DATABASE_URL;
@@ -164,21 +176,27 @@ function summarizeAndFixEnv() {
   const issues: string[] = [];
 
   const schema = fs.readFileSync('prisma/schema.prisma', 'utf8');
-  const isPostgres = /datasource db\s*{\s*provider\s*=\s*"postgresql"/m.test(schema);
+  const isPostgres = /datasource db\s*{\s*provider\s*=\s*"postgresql"/m.test(
+    schema
+  );
   const isSqlite = /datasource db\s*{\s*provider\s*=\s*"sqlite"/m.test(schema);
 
   if (isPostgres && dbUrl && !/^postgresql:\/\//i.test(dbUrl)) {
-    issues.push('DATABASE_URL must be a PostgreSQL URL when using PostgreSQL provider.');
+    issues.push(
+      'DATABASE_URL must be a PostgreSQL URL when using PostgreSQL provider.'
+    );
   }
 
   if (isSqlite && dbUrl && !/^file:/.test(dbUrl)) {
     issues.push(
-      'DATABASE_URL must be a file:// URL when using SQLite provider (e.g., "file:./prisma/dev.db").',
+      'DATABASE_URL must be a file:// URL when using SQLite provider (e.g., "file:./prisma/dev.db").'
     );
   }
 
   if (!isPostgres && !isSqlite) {
-    issues.push('Prisma datasource provider must be either "postgresql" or "sqlite".');
+    issues.push(
+      'Prisma datasource provider must be either "postgresql" or "sqlite".'
+    );
   }
   if (secret && secret.length < 32) {
     issues.push('NEXTAUTH_SECRET should be at least 32 characters.');
@@ -189,7 +207,7 @@ function summarizeAndFixEnv() {
     }
     if (/\s/.test(nextUrl)) {
       issues.push(
-        'NEXTAUTH_URL contains whitespace/newline; trimming it now if present in .env.production',
+        'NEXTAUTH_URL contains whitespace/newline; trimming it now if present in .env.production'
       );
       if (fs.existsSync(envProdPath)) {
         const trimmed = nextUrl.trim();
@@ -211,8 +229,12 @@ function summarizeAndFixEnv() {
 
   const pkg = readJSON<Record<string, unknown>>('package.json');
   const scripts = pkg?.scripts as Record<string, string> | undefined;
-  if (scripts?.postinstall?.includes('prisma generate')) ok('postinstall runs prisma generate');
-  else issues.push('Add "postinstall": "prisma generate" to package.json scripts.');
+  if (scripts?.postinstall?.includes('prisma generate'))
+    ok('postinstall runs prisma generate');
+  else
+    issues.push(
+      'Add "postinstall": "prisma generate" to package.json scripts.'
+    );
 
   return { env, issues, envLocalPath, envProdPath };
 }
@@ -220,7 +242,7 @@ function summarizeAndFixEnv() {
 async function waitForTcp(host: string, port: number, timeoutMs = 25000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    const ok = await new Promise<boolean>((resolve) => {
+    const ok = await new Promise<boolean>(resolve => {
       const sock = net.createConnection({ host, port }, () => {
         sock.end();
         resolve(true);
@@ -232,7 +254,7 @@ async function waitForTcp(host: string, port: number, timeoutMs = 25000) {
       });
     });
     if (ok) return;
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1000));
   }
   throw new Error(`Timed out waiting for ${host}:${port}`);
 }
@@ -250,7 +272,7 @@ async function ensureLocalPostgresIfNeeded(dbUrl: string | undefined) {
   if (!['localhost', '127.0.0.1'].includes(host)) return;
 
   info(`Checking local Postgres at ${host}:${port}...`);
-  const canConnect = await new Promise<boolean>((resolve) => {
+  const canConnect = await new Promise<boolean>(resolve => {
     const sock = net.createConnection({ host, port }, () => {
       sock.end();
       resolve(true);
@@ -266,7 +288,9 @@ async function ensureLocalPostgresIfNeeded(dbUrl: string | undefined) {
     return;
   }
 
-  warn('Local Postgres not reachable; trying to start via Docker Compose (service: db)');
+  warn(
+    'Local Postgres not reachable; trying to start via Docker Compose (service: db)'
+  );
   try {
     await run('docker', ['compose', 'up', '-d', 'db']).catch(async () => {
       await run('docker-compose', ['up', '-d', 'db']);
@@ -275,7 +299,7 @@ async function ensureLocalPostgresIfNeeded(dbUrl: string | undefined) {
     ok('Local Postgres started and reachable');
   } catch (e) {
     warn(
-      'Could not auto-start Postgres via Docker. Ensure Docker is running and run: docker compose up -d db',
+      'Could not auto-start Postgres via Docker. Ensure Docker is running and run: docker compose up -d db'
     );
   }
 }
@@ -284,16 +308,17 @@ async function prismaConnectivityCheck() {
   const prisma = new PrismaClient();
   try {
     info('Checking database connectivity and counts...');
-    const [users, rotations, procedures, reqs, logs, verifs] = await Promise.all([
-      prisma.user.count(),
-      prisma.rotation.count(),
-      prisma.procedure.count(),
-      prisma.requirement.count(),
-      prisma.logEntry.count(),
-      prisma.verification.count(),
-    ]);
+    const [users, rotations, procedures, reqs, logs, verifs] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.rotation.count(),
+        prisma.procedure.count(),
+        prisma.requirement.count(),
+        prisma.logEntry.count(),
+        prisma.verification.count(),
+      ]);
     ok(
-      `DB connected. Counts => users:${users}, rotations:${rotations}, procedures:${procedures}, reqs:${reqs}, logs:${logs}, verifs:${verifs}`,
+      `DB connected. Counts => users:${users}, rotations:${rotations}, procedures:${procedures}, reqs:${reqs}, logs:${logs}, verifs:${verifs}`
     );
   } finally {
     await prisma.$disconnect();
@@ -303,7 +328,9 @@ async function prismaConnectivityCheck() {
 async function main() {
   const mode = getMode();
   const serve = getServeFlag();
-  log(`\n=== Anesthesia Internship Tracker Doctor (${mode}${serve ? ', serve' : ''}) ===\n`);
+  log(
+    `\n=== Anesthesia Internship Tracker Doctor (${mode}${serve ? ', serve' : ''}) ===\n`
+  );
 
   checkNode();
   checkPrismaVersions();
@@ -331,7 +358,9 @@ async function main() {
     await run('pnpm', ['peek']);
   } else {
     if (!env.DIRECT_URL)
-      warn('DIRECT_URL missing. It is recommended for Prisma migrate deploy with Neon.');
+      warn(
+        'DIRECT_URL missing. It is recommended for Prisma migrate deploy with Neon.'
+      );
     await run('pnpm', ['exec', 'prisma', 'migrate', 'deploy']);
   }
 
@@ -351,13 +380,15 @@ async function main() {
   log('\nVercel checklist:');
   log('- Set env vars in Vercel Project → Settings → Environment Variables:');
   log(
-    '  DATABASE_URL, DIRECT_URL, NEXTAUTH_URL (your prod domain), NEXTAUTH_SECRET (32+ chars), AUTH_PROVIDER=credentials',
+    '  DATABASE_URL, DIRECT_URL, NEXTAUTH_URL (your prod domain), NEXTAUTH_SECRET (32+ chars), AUTH_PROVIDER=credentials'
   );
   log(
-    '- Ensure prisma/migrations are committed. Vercel build will run prisma generate; migrate deploy should run via your pipeline or manually.',
+    '- Ensure prisma/migrations are committed. Vercel build will run prisma generate; migrate deploy should run via your pipeline or manually.'
   );
   log('- Remove any trailing whitespace in NEXTAUTH_URL on Vercel as well.');
-  log('- Consider NOT committing .env.production with secrets; use Vercel envs.');
+  log(
+    '- Consider NOT committing .env.production with secrets; use Vercel envs.'
+  );
 
   if (serve && mode === 'local') {
     info('\nStarting dev server (Ctrl+C to stop)...');
@@ -365,7 +396,7 @@ async function main() {
   }
 }
 
-main().catch((e) => {
+main().catch(e => {
   fail(e?.message || String(e));
   process.exit(1);
 });

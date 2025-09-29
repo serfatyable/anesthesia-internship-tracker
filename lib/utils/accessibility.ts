@@ -24,7 +24,10 @@ export function announceToScreenReader(message: string): void {
   }
 }
 
-export function validateColorContrast(foreground: string, background: string): boolean {
+export function validateColorContrast(
+  foreground: string,
+  background: string
+): boolean {
   // Simple contrast ratio calculation
   // In a real app, you'd use a proper color contrast library
   const hexToRgb = (hex: string) => {
@@ -40,7 +43,7 @@ export function validateColorContrast(foreground: string, background: string): b
 
   const getLuminance = (rgb: { r: number; g: number; b: number }) => {
     const { r, g, b } = rgb;
-    const [rs, gs, bs] = [r, g, b].map((c) => {
+    const [rs, gs, bs] = [r, g, b].map(c => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
@@ -56,18 +59,21 @@ export function validateColorContrast(foreground: string, background: string): b
   const bgLuminance = getLuminance(bgRgb);
 
   const contrastRatio =
-    (Math.max(fgLuminance, bgLuminance) + 0.05) / (Math.min(fgLuminance, bgLuminance) + 0.05);
+    (Math.max(fgLuminance, bgLuminance) + 0.05) /
+    (Math.min(fgLuminance, bgLuminance) + 0.05);
 
   return contrastRatio >= 4.5; // WCAG AA standard
 }
 
 export function createFocusTrap(element: HTMLElement): () => void {
   const focusableElements = element.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
 
   const firstElement = focusableElements[0] as HTMLElement;
-  const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+  const lastElement = focusableElements[
+    focusableElements.length - 1
+  ] as HTMLElement;
 
   const handleTabKey = (e: KeyboardEvent) => {
     if (e.key === 'Tab') {
@@ -135,7 +141,7 @@ export function createKeyboardNavigation(items: HTMLElement[]): () => void {
 
 export function createSkipLink(
   targetId: string,
-  label: string = 'Skip to main content',
+  label: string = 'Skip to main content'
 ): HTMLElement {
   const skipLink = document.createElement('a');
   skipLink.href = `#${targetId}`;

@@ -61,10 +61,13 @@ class HealthMonitor {
       try {
         const result = await check();
         checks.push(result);
-        
+
         if (result.status === 'unhealthy') {
           overallStatus = 'unhealthy';
-        } else if (result.status === 'degraded' && overallStatus === 'healthy') {
+        } else if (
+          result.status === 'degraded' &&
+          overallStatus === 'healthy'
+        ) {
           overallStatus = 'degraded';
         }
       } catch (error) {
@@ -96,7 +99,7 @@ class HealthMonitor {
     const memoryUsage = process.memoryUsage();
     const totalMemory = memoryUsage.heapTotal + memoryUsage.external;
     const usedMemory = memoryUsage.heapUsed + memoryUsage.external;
-    
+
     return {
       nodeVersion: process.version,
       platform: process.platform,
@@ -117,13 +120,13 @@ class HealthMonitor {
   private async getDatabaseStatus() {
     try {
       const start = Date.now();
-      
+
       // Try to connect to database
       const { prisma } = await import('@/lib/db');
       await prisma.$queryRaw`SELECT 1`;
-      
+
       const responseTime = Date.now() - start;
-      
+
       return {
         status: 'connected' as const,
         responseTime,
@@ -131,7 +134,8 @@ class HealthMonitor {
     } catch (error) {
       return {
         status: 'error' as const,
-        error: error instanceof Error ? error.message : 'Unknown database error',
+        error:
+          error instanceof Error ? error.message : 'Unknown database error',
       };
     }
   }
@@ -179,7 +183,8 @@ class HealthMonitor {
       const uptime = Date.now() - this.startTime;
       const uptimeHours = uptime / (1000 * 60 * 60);
 
-      if (uptimeHours > 24 * 7) { // More than a week
+      if (uptimeHours > 24 * 7) {
+        // More than a week
         return {
           name: 'uptime',
           status: 'degraded',

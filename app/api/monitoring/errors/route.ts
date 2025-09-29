@@ -6,14 +6,28 @@ import { monitoring } from '@/lib/monitoring';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const severity = searchParams.get('severity') as 'low' | 'medium' | 'high' | 'critical' | null;
-    const resolved = searchParams.get('resolved') === 'true' ? true : searchParams.get('resolved') === 'false' ? false : undefined;
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const severity = searchParams.get('severity') as
+      | 'low'
+      | 'medium'
+      | 'high'
+      | 'critical'
+      | null;
+    const resolved =
+      searchParams.get('resolved') === 'true'
+        ? true
+        : searchParams.get('resolved') === 'false'
+          ? false
+          : undefined;
+    const limit = searchParams.get('limit')
+      ? parseInt(searchParams.get('limit')!)
+      : undefined;
 
     const errors = monitoring.getErrors({
-      severity: severity || undefined,
-      resolved,
-      limit,
+      ...(severity && {
+        severity: severity as 'low' | 'medium' | 'high' | 'critical',
+      }),
+      ...(resolved !== undefined && { resolved }),
+      ...(limit && { limit }),
     });
 
     const stats = monitoring.getErrorStats();
@@ -29,7 +43,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error retrieval failed:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -75,7 +89,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error resolution failed:', error);
-    
+
     return NextResponse.json(
       {
         success: false,

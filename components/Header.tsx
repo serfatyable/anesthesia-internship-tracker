@@ -14,12 +14,12 @@ export default function Header() {
   useEffect(() => {
     setLoading(true);
     fetch('/api/session')
-      .then((r) => {
+      .then(r => {
         if (!r.ok) throw new Error('Failed to fetch session');
         return r.json();
       })
-      .then((d) => setUser(d.user ?? null))
-      .catch((error) => {
+      .then(d => setUser(d.user ?? null))
+      .catch(error => {
         console.error('Session fetch error:', error);
         setUser(null);
       })
@@ -27,12 +27,14 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full border-b">
-      <div className="mx-auto max-w-5xl p-3 flex items-center justify-between">
-        <a href="/" className="font-semibold">
+    <header className='w-full border-b'>
+      <div className='mx-auto max-w-5xl p-3 flex items-center justify-between'>
+        <a href='/' className='font-semibold'>
           Anesthesia Tracker
         </a>
-        <div className="text-sm text-gray-600">{loading ? 'Loading...' : (user?.email ?? '')}</div>
+        <div className='text-sm text-gray-600'>
+          {loading ? 'Loading...' : (user?.email ?? '')}
+        </div>
       </div>
     </header>
   );

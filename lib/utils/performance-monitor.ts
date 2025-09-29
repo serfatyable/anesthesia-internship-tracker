@@ -40,10 +40,13 @@ class PerformanceMonitor {
     if (duration > 1000) {
       console.warn(
         `Slow operation detected: ${name} took ${duration.toFixed(2)}ms`,
-        metric.metadata,
+        metric.metadata
       );
     } else if (duration > 500) {
-      console.info(`Operation: ${name} took ${duration.toFixed(2)}ms`, metric.metadata);
+      console.info(
+        `Operation: ${name} took ${duration.toFixed(2)}ms`,
+        metric.metadata
+      );
     }
 
     return duration;
@@ -66,7 +69,7 @@ class PerformanceMonitor {
   async measureAsync<T>(
     name: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, unknown>,
+    metadata?: Record<string, unknown>
   ): Promise<T> {
     if (!this.isDevelopment) return fn();
 
@@ -92,9 +95,9 @@ class PerformanceMonitor {
   getReport(): string {
     const metrics = this.getMetrics();
     const report = metrics
-      .filter((m) => m.duration !== undefined)
+      .filter(m => m.duration !== undefined)
       .sort((a, b) => (b.duration || 0) - (a.duration || 0))
-      .map((m) => `${m.name}: ${m.duration?.toFixed(2)}ms`)
+      .map(m => `${m.name}: ${m.duration?.toFixed(2)}ms`)
       .join('\n');
 
     return report || 'No performance metrics recorded';
@@ -106,7 +109,10 @@ export const performanceMonitor = new PerformanceMonitor();
 // React hook for measuring component render times (import React in your component)
 export function createPerformanceHook() {
   return function usePerformanceMeasure(name: string, deps: unknown[] = []) {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    if (
+      typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'development'
+    ) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { useEffect } = require('react');
       // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -122,27 +128,25 @@ export function createPerformanceHook() {
 }
 
 // Database query performance wrapper
-export function withPerformanceMonitoring<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  operationName: string,
-): T {
+export function withPerformanceMonitoring<
+  T extends (...args: unknown[]) => unknown,
+>(fn: T, operationName: string): T {
   return ((...args: Parameters<T>) => {
     return performanceMonitor.measureAsync(
       `db-${operationName}`,
-      () => fn(...args) as Promise<ReturnType<T>>,
+      () => fn(...args) as Promise<ReturnType<T>>
     );
   }) as T;
 }
 
 // API route performance wrapper
-export function withAPIPerformanceMonitoring<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  routeName: string,
-): T {
+export function withAPIPerformanceMonitoring<
+  T extends (...args: unknown[]) => unknown,
+>(fn: T, routeName: string): T {
   return ((...args: Parameters<T>) => {
     return performanceMonitor.measureAsync(
       `api-${routeName}`,
-      () => fn(...args) as Promise<ReturnType<T>>,
+      () => fn(...args) as Promise<ReturnType<T>>
     );
   }) as T;
 }

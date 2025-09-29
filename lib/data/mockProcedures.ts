@@ -27,7 +27,8 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Mask Ventilation',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Mask Ventilation",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 19, Mask Ventilation",
       },
     ],
   },
@@ -40,14 +41,16 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Peripheral IV Placement',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 20, Peripheral Venous Access",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 20, Peripheral Venous Access",
       },
       {
         id: 'central-line',
         name: 'Central Line Placement',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 20, Central Venous Access",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 20, Central Venous Access",
       },
     ],
   },
@@ -60,7 +63,8 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'General Anesthesia Induction',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 13, Induction of Anesthesia",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 13, Induction of Anesthesia",
       },
       {
         id: 'emergence',
@@ -89,14 +93,16 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Hemodynamic Monitoring',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 20, Hemodynamic Monitoring",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 20, Hemodynamic Monitoring",
       },
       {
         id: 'respiratory-monitoring',
         name: 'Respiratory Monitoring',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 20, Respiratory Monitoring",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 20, Respiratory Monitoring",
       },
     ],
   },
@@ -125,7 +131,8 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Weaning from Ventilator',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Mechanical Ventilation",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 19, Mechanical Ventilation",
       },
     ],
   },
@@ -160,7 +167,8 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Intravenous Anesthetics',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 11, Intravenous Anesthetics",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 11, Intravenous Anesthetics",
       },
       {
         id: 'neuromuscular-blocking',
@@ -189,7 +197,8 @@ export const mockProcedures: ProcedureCategory[] = [
         name: 'Malignant Hyperthermia',
         completed: true,
         pending: false,
-        textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 16, Malignant Hyperthermia",
+        textbookResource:
+          "Miller's Anesthesia, 10th Edition, Chapter 16, Malignant Hyperthermia",
       },
       {
         id: 'anaphylaxis',

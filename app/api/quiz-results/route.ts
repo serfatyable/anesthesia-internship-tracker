@@ -48,9 +48,15 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Quiz result API error:', error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.issues },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -66,7 +72,10 @@ export async function GET(req: NextRequest) {
     const itemType = searchParams.get('itemType');
 
     if (!itemId || !itemType) {
-      return NextResponse.json({ error: 'itemId and itemType are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'itemId and itemType are required' },
+        { status: 400 }
+      );
     }
 
     const quizResult = await prisma.quizResult.findUnique({
@@ -82,6 +91,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ quizResult });
   } catch (error) {
     console.error('Quiz result GET API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

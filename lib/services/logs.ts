@@ -1,7 +1,11 @@
 import { prisma } from '@/lib/db';
 
 // Simple in-memory cache for procedures (they don't change often)
-let proceduresCache: Array<{ id: string; name: string; rotationId: string }> | null = null;
+let proceduresCache: Array<{
+  id: string;
+  name: string;
+  rotationId: string;
+}> | null = null;
 let proceduresCacheTimestamp = 0;
 const PROCEDURES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -9,7 +13,10 @@ export async function listProceduresActive() {
   const now = Date.now();
 
   // Return cached data if available and not expired
-  if (proceduresCache && now - proceduresCacheTimestamp < PROCEDURES_CACHE_TTL) {
+  if (
+    proceduresCache &&
+    now - proceduresCacheTimestamp < PROCEDURES_CACHE_TTL
+  ) {
     return proceduresCache;
   }
 
@@ -60,7 +67,9 @@ export async function listPendingLogsForTutor() {
       notes: true,
       intern: { select: { id: true, name: true, email: true } },
       procedure: { select: { id: true, name: true } },
-      verification: { select: { id: true, status: true, reason: true, timestamp: true } },
+      verification: {
+        select: { id: true, status: true, reason: true, timestamp: true },
+      },
     },
   });
 }

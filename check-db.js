@@ -15,7 +15,7 @@ async function checkDatabase() {
         select: { email: true, role: true, name: true },
       });
       console.log('👥 Users in database:');
-      users.forEach((user) => {
+      users.forEach(user => {
         console.log(`  - ${user.email} (${user.role}) - ${user.name}`);
       });
     }

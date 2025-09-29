@@ -58,7 +58,7 @@ export const FeedbackCard = memo(function FeedbackCard({
     <div
       className={cn(
         'relative p-3 rounded-lg border transition-all duration-200 cursor-pointer',
-        getCardStyles(),
+        getCardStyles()
       )}
       onClick={handleClick}
       // onMouseEnter={() => setIsHovered(true)}
@@ -66,31 +66,36 @@ export const FeedbackCard = memo(function FeedbackCard({
     >
       {/* Notification Badge */}
       {unreadCount > 0 && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+        <div className='absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium'>
           {unreadCount > 99 ? '99+' : unreadCount}
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <div className={cn('p-2 rounded-lg', disabled ? 'bg-gray-100' : 'bg-white')}>
+      <div className='flex items-center gap-3'>
+        <div
+          className={cn(
+            'p-2 rounded-lg',
+            disabled ? 'bg-gray-100' : 'bg-white'
+          )}
+        >
           <svg
             className={cn('w-5 h-5 transition-colors', getIconColor())}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap='round'
+              strokeLinejoin='round'
               strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              d='M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'
             />
           </svg>
         </div>
 
-        <div className="flex-1">
-          <h4 className="font-medium text-gray-900 text-sm">Mentor Feedback</h4>
-          <p className="text-xs text-gray-600">
+        <div className='flex-1'>
+          <h4 className='font-medium text-gray-900 text-sm'>Mentor Feedback</h4>
+          <p className='text-xs text-gray-600'>
             {disabled
               ? 'Complete task first'
               : unreadCount > 0
@@ -104,13 +109,20 @@ export const FeedbackCard = memo(function FeedbackCard({
         <svg
           className={cn(
             'w-4 h-4 transition-colors',
-            disabled ? 'text-gray-400' : 'text-gray-500 group-hover:text-gray-700',
+            disabled
+              ? 'text-gray-400'
+              : 'text-gray-500 group-hover:text-gray-700'
           )}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+          fill='none'
+          stroke='currentColor'
+          viewBox='0 0 24 24'
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M9 5l7 7-7 7'
+          />
         </svg>
       </div>
     </div>

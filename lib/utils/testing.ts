@@ -91,7 +91,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 
 export function renderWithProviders(
   ui: ReactElement,
-  options: CustomRenderOptions = {},
+  options: CustomRenderOptions = {}
 ): RenderResult {
   const { session = mockSession, ...renderOptions } = options;
 
@@ -108,33 +108,42 @@ export const createMockUser = (overrides: Partial<typeof mockUser> = {}) => ({
   ...overrides,
 });
 
-export const createMockRotation = (overrides: Partial<typeof mockRotation> = {}) => ({
+export const createMockRotation = (
+  overrides: Partial<typeof mockRotation> = {}
+) => ({
   ...mockRotation,
   ...overrides,
 });
 
-export const createMockProcedure = (overrides: Partial<typeof mockProcedure> = {}) => ({
+export const createMockProcedure = (
+  overrides: Partial<typeof mockProcedure> = {}
+) => ({
   ...mockProcedure,
   ...overrides,
 });
 
-export const createMockLogEntry = (overrides: Partial<typeof mockLogEntry> = {}) => ({
+export const createMockLogEntry = (
+  overrides: Partial<typeof mockLogEntry> = {}
+) => ({
   ...mockLogEntry,
   ...overrides,
 });
 
-export const createMockVerification = (overrides: Partial<typeof mockVerification> = {}) => ({
+export const createMockVerification = (
+  overrides: Partial<typeof mockVerification> = {}
+) => ({
   ...mockVerification,
   ...overrides,
 });
 
 // Test utilities for async operations
-export const waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
+export const waitForAsync = () =>
+  new Promise(resolve => setTimeout(resolve, 0));
 
 export const waitForCondition = async (
   condition: () => boolean,
   timeout: number = 5000,
-  interval: number = 100,
+  interval: number = 100
 ): Promise<void> => {
   const start = Date.now();
 
@@ -142,7 +151,7 @@ export const waitForCondition = async (
     if (condition()) {
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, interval));
+    await new Promise(resolve => setTimeout(resolve, interval));
   }
 
   throw new Error(`Condition not met within ${timeout}ms`);
@@ -219,7 +228,7 @@ export const setupTestEnvironment = () => {
 // Performance testing utilities
 export const measurePerformance = async <T>(
   fn: () => Promise<T> | T,
-  iterations: number = 1,
+  iterations: number = 1
 ): Promise<{
   result: T;
   averageTime: number;
@@ -293,20 +302,26 @@ export const mockApiRoutes = {
   },
 };
 
-// Test assertions
+// Test assertions - only available in test environment
 export const expectToBeValidDate = (date: any) => {
-  expect(date).toBeInstanceOf(Date);
-  expect(date.getTime()).not.toBeNaN();
+  if (typeof (globalThis as any).expect !== 'undefined') {
+    (globalThis as any).expect(date).toBeInstanceOf(Date);
+    (globalThis as any).expect(date.getTime()).not.toBeNaN();
+  }
 };
 
 export const expectToBeValidId = (id: any) => {
-  expect(typeof id).toBe('string');
-  expect(id.length).toBeGreaterThan(0);
+  if (typeof (globalThis as any).expect !== 'undefined') {
+    (globalThis as any).expect(typeof id).toBe('string');
+    (globalThis as any).expect(id.length).toBeGreaterThan(0);
+  }
 };
 
 export const expectToBeValidEmail = (email: any) => {
-  expect(typeof email).toBe('string');
-  expect(email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  if (typeof (globalThis as any).expect !== 'undefined') {
+    (globalThis as any).expect(typeof email).toBe('string');
+    (globalThis as any).expect(email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  }
 };
 
 // Test data generators for different scenarios
@@ -317,18 +332,21 @@ export const generateTestUsers = (count: number) => {
       name: `User ${i}`,
       email: `user${i}@example.com`,
       idNumber: `ID${i.toString().padStart(3, '0')}`,
-    }),
+    })
   );
 };
 
-export const generateTestLogs = (count: number, userId: string = 'test-user-id') => {
+export const generateTestLogs = (
+  count: number,
+  userId: string = 'test-user-id'
+) => {
   return Array.from({ length: count }, (_, i) =>
     createMockLogEntry({
       id: `log-${i}`,
       internId: userId,
       date: new Date(Date.now() - i * 24 * 60 * 60 * 1000), // Spread over days
       count: Math.floor(Math.random() * 5) + 1,
-    }),
+    })
   );
 };
 

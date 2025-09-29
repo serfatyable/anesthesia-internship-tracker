@@ -6,7 +6,10 @@ import { z } from 'zod';
 import { AppError } from '@/lib/utils/error-handler';
 
 // Common validation schemas
-export const emailSchema = z.string().email('Invalid email address').max(254, 'Email too long');
+export const emailSchema = z
+  .string()
+  .email('Invalid email address')
+  .max(254, 'Email too long');
 
 export const passwordSchema = z
   .string()
@@ -17,7 +20,7 @@ export const passwordSchema = z
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(
     /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
-    'Password must contain at least one special character',
+    'Password must contain at least one special character'
   );
 
 export const nameSchema = z
@@ -36,7 +39,7 @@ export const dateSchema = z
   .string()
   .datetime()
   .or(z.string().min(1))
-  .transform((val) => {
+  .transform(val => {
     const date = new Date(val);
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date format');
@@ -44,9 +47,15 @@ export const dateSchema = z
     return date;
   });
 
-export const positiveIntSchema = z.number().int('Must be an integer').min(1, 'Must be at least 1');
+export const positiveIntSchema = z
+  .number()
+  .int('Must be an integer')
+  .min(1, 'Must be at least 1');
 
-export const optionalStringSchema = z.string().max(2000, 'Text too long').optional();
+export const optionalStringSchema = z
+  .string()
+  .max(2000, 'Text too long')
+  .optional();
 
 // User validation schemas
 export const createUserSchema = z.object({
@@ -101,7 +110,7 @@ export const dateRangeSchema = z
     to: dateSchema.optional(),
   })
   .refine(
-    (data) => {
+    data => {
       if (data.from && data.to) {
         return data.from <= data.to;
       }
@@ -110,7 +119,7 @@ export const dateRangeSchema = z
     {
       message: 'From date must be before or equal to to date',
       path: ['from'],
-    },
+    }
   );
 
 // Utility functions
@@ -132,7 +141,7 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): T {
 
 export function safeValidateInput<T>(
   schema: z.ZodSchema<T>,
-  data: unknown,
+  data: unknown
 ): {
   success: boolean;
   data?: T;
@@ -151,13 +160,18 @@ export function safeValidateInput<T>(
   } catch (error) {
     return {
       success: false,
-      errors: [error instanceof Error ? error.message : 'Unknown validation error'],
+      errors: [
+        error instanceof Error ? error.message : 'Unknown validation error',
+      ],
     };
   }
 }
 
 // Enhanced sanitization functions with comprehensive XSS protection
-export function sanitizeString(input: string, maxLength: number = 1000): string {
+export function sanitizeString(
+  input: string,
+  maxLength: number = 1000
+): string {
   if (typeof input !== 'string') return '';
 
   return (
@@ -244,9 +258,9 @@ export const enhancedPasswordSchema = z
   .regex(/[0-9]/, 'Password must contain at least one number')
   .regex(
     /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
-    'Password must contain at least one special character',
+    'Password must contain at least one special character'
   )
-  .refine((password) => {
+  .refine(password => {
     // Check for common patterns
     const commonPatterns = [
       /(.)\1{2,}/, // Repeated characters
@@ -254,7 +268,9 @@ export const enhancedPasswordSchema = z
       /abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/, // Sequential letters
       /qwerty|asdfgh|zxcvbn/, // Keyboard patterns
     ];
-    return !commonPatterns.some((pattern) => pattern.test(password.toLowerCase()));
+    return !commonPatterns.some(pattern =>
+      pattern.test(password.toLowerCase())
+    );
   }, 'Password contains common patterns that are easy to guess');
 
 // SQL injection prevention

@@ -43,11 +43,13 @@ vi.mock('next-auth', () => ({
 // Create a simple test component instead of testing the server component
 function TestDashboard() {
   return (
-    <main className="p-6">
-      <section className="space-y-6">
+    <main className='p-6'>
+      <section className='space-y-6'>
         <header>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-zinc-500">Quick entry points. Data wiring comes later.</p>
+          <h1 className='text-2xl font-semibold'>Dashboard</h1>
+          <p className='text-sm text-zinc-500'>
+            Quick entry points. Data wiring comes later.
+          </p>
         </header>
       </section>
     </main>
@@ -61,6 +63,8 @@ describe('Dashboard Components', () => {
 
   it('renders dashboard heading', () => {
     render(<TestDashboard />);
-    expect(screen.getByRole('heading', { name: /Dashboard/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Dashboard/i })
+    ).toBeInTheDocument();
   });
 });

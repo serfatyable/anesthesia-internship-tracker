@@ -92,12 +92,18 @@ export interface ExportParams {
 }
 
 // Progress calculation helpers
-export function calculateCompletionPercentage(verified: number, required: number): number {
+export function calculateCompletionPercentage(
+  verified: number,
+  required: number
+): number {
   if (required === 0) return 100;
   return Math.min(Math.round((verified / required) * 100), 100);
 }
 
-export function formatDateForDisplay(date: Date, timezone: string = 'Asia/Jerusalem'): string {
+export function formatDateForDisplay(
+  date: Date,
+  timezone: string = 'Asia/Jerusalem'
+): string {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     year: 'numeric',

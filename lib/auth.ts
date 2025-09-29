@@ -11,7 +11,9 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/login',
   },
-  ...(process.env.NEXTAUTH_SECRET ? { secret: process.env.NEXTAUTH_SECRET } : {}),
+  ...(process.env.NEXTAUTH_SECRET
+    ? { secret: process.env.NEXTAUTH_SECRET }
+    : {}),
   providers: [
     Credentials({
       name: 'Email & Password',
@@ -21,7 +23,9 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await db.user.findUnique({ where: { email: credentials.email } });
+        const user = await db.user.findUnique({
+          where: { email: credentials.email },
+        });
         if (!user?.password) return null;
         const ok = await compare(credentials.password, user.password);
         if (!ok) return null;

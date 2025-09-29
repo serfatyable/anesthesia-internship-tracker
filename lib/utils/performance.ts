@@ -39,14 +39,14 @@ class PerformanceMonitor {
     // Log slow operations in development
     if (process.env.NODE_ENV === 'development' && metric.duration > 1000) {
       console.warn(
-        `Slow operation detected: ${metric.operation} took ${metric.duration.toFixed(2)}ms`,
+        `Slow operation detected: ${metric.operation} took ${metric.duration.toFixed(2)}ms`
       );
     }
   }
 
   getMetrics(operation?: string): PerformanceMetrics[] {
     if (operation) {
-      return this.metrics.filter((m) => m.operation === operation);
+      return this.metrics.filter(m => m.operation === operation);
     }
     return [...this.metrics];
   }
@@ -55,7 +55,10 @@ class PerformanceMonitor {
     const operationMetrics = this.getMetrics(operation);
     if (operationMetrics.length === 0) return 0;
 
-    const totalDuration = operationMetrics.reduce((sum, metric) => sum + metric.duration, 0);
+    const totalDuration = operationMetrics.reduce(
+      (sum, metric) => sum + metric.duration,
+      0
+    );
     return totalDuration / operationMetrics.length;
   }
 
@@ -69,7 +72,7 @@ export const performanceMonitor = new PerformanceMonitor();
 // Higher-order function to wrap async functions with performance monitoring
 export function withPerformanceMonitoring<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
-  operationName: string,
+  operationName: string
 ) {
   return async (...args: T): Promise<R> => {
     const endTimer = performanceMonitor.startTimer(operationName);
@@ -89,14 +92,17 @@ export function usePerformanceMonitor(operationName: string) {
 }
 
 // Database query performance monitoring
-export function monitorDatabaseQuery<T>(queryName: string, queryFn: () => Promise<T>): Promise<T> {
+export function monitorDatabaseQuery<T>(
+  queryName: string,
+  queryFn: () => Promise<T>
+): Promise<T> {
   return withPerformanceMonitoring(queryFn, `db:${queryName}`)();
 }
 
 // API route performance monitoring
 export function monitorApiRoute<T extends unknown[], R>(
   routeName: string,
-  handler: (...args: T) => Promise<R>,
+  handler: (...args: T) => Promise<R>
 ) {
   return withPerformanceMonitoring(handler, `api:${routeName}`);
 }

@@ -28,7 +28,7 @@ function logError(
     method: string;
     userAgent?: string;
     ip?: string;
-  },
+  }
 ) {
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   const errorStack = error instanceof Error ? error.stack : undefined;
@@ -46,7 +46,7 @@ function logError(
   // Record error metrics
   monitoring.recordError(
     error instanceof Error ? error : new Error(errorMessage),
-    `${context.method} ${context.path}`,
+    `${context.method} ${context.path}`
   );
 }
 
@@ -54,7 +54,7 @@ function logError(
 function createErrorResponse(
   error: unknown,
   requestId: string,
-  path: string,
+  path: string
 ): NextResponse<ErrorResponse> {
   const timestamp = new Date().toISOString();
 
@@ -68,7 +68,7 @@ function createErrorResponse(
         path,
         requestId,
       },
-      { status: error.statusCode },
+      { status: error.statusCode }
     );
   }
 
@@ -85,7 +85,7 @@ function createErrorResponse(
         path,
         requestId,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
@@ -98,12 +98,14 @@ function createErrorResponse(
       path,
       requestId,
     },
-    { status: 500 },
+    { status: 500 }
   );
 }
 
 // Main error handling wrapper
-export function withErrorHandling<T extends unknown[], R>(handler: (...args: T) => Promise<R>) {
+export function withErrorHandling<T extends unknown[], R>(
+  handler: (...args: T) => Promise<R>
+) {
   return async (...args: T): Promise<R> => {
     const requestId = generateRequestId();
     const request = args[0] as NextRequest;
@@ -111,7 +113,9 @@ export function withErrorHandling<T extends unknown[], R>(handler: (...args: T) 
     const method = request?.method || 'unknown';
     const userAgent = request?.headers?.get('user-agent') || undefined;
     const ip =
-      request?.headers?.get('x-forwarded-for') || request?.headers?.get('x-real-ip') || 'unknown';
+      request?.headers?.get('x-forwarded-for') ||
+      request?.headers?.get('x-real-ip') ||
+      'unknown';
 
     try {
       const result = await handler(...args);
@@ -144,7 +148,11 @@ export function withErrorHandling<T extends unknown[], R>(handler: (...args: T) 
 }
 
 // Specific error handlers for common scenarios
-export function handleValidationError(error: unknown, requestId: string, path: string) {
+export function handleValidationError(
+  error: unknown,
+  requestId: string,
+  path: string
+) {
   if (error instanceof Error && error.name === 'ZodError') {
     return NextResponse.json(
       {
@@ -156,13 +164,17 @@ export function handleValidationError(error: unknown, requestId: string, path: s
         requestId,
         details: error.message,
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
   return null;
 }
 
-export function handleDatabaseError(error: unknown, requestId: string, path: string) {
+export function handleDatabaseError(
+  error: unknown,
+  requestId: string,
+  path: string
+) {
   if (error instanceof Error && error.message.includes('Prisma')) {
     return NextResponse.json(
       {
@@ -173,13 +185,17 @@ export function handleDatabaseError(error: unknown, requestId: string, path: str
         path,
         requestId,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
   return null;
 }
 
-export function handleAuthError(error: unknown, requestId: string, path: string) {
+export function handleAuthError(
+  error: unknown,
+  requestId: string,
+  path: string
+) {
   if (error instanceof Error && error.message.includes('auth')) {
     return NextResponse.json(
       {
@@ -190,14 +206,18 @@ export function handleAuthError(error: unknown, requestId: string, path: string)
         path,
         requestId,
       },
-      { status: 401 },
+      { status: 401 }
     );
   }
   return null;
 }
 
 // Rate limiting error handler
-export function handleRateLimitError(requestId: string, path: string, retryAfter: number) {
+export function handleRateLimitError(
+  requestId: string,
+  path: string,
+  retryAfter: number
+) {
   return NextResponse.json(
     {
       error: 'Rate Limit Exceeded',
@@ -216,13 +236,13 @@ export function handleRateLimitError(requestId: string, path: string, retryAfter
         'X-RateLimit-Remaining': '0',
         'X-RateLimit-Reset': (Date.now() + retryAfter * 1000).toString(),
       },
-    },
+    }
   );
 }
 
 // Global error handler for unhandled errors
 export function setupGlobalErrorHandlers() {
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', error => {
     console.error('Uncaught Exception:', error);
     monitoring.recordError(error, 'uncaughtException');
     process.exit(1);
@@ -232,7 +252,7 @@ export function setupGlobalErrorHandlers() {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     monitoring.recordError(
       reason instanceof Error ? reason : new Error(String(reason)),
-      'unhandledRejection',
+      'unhandledRejection'
     );
     process.exit(1);
   });

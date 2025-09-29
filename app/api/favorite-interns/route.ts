@@ -39,26 +39,34 @@ export async function GET() {
 
     // Get progress data for each favorite intern
     const favoriteInternsWithProgress = await Promise.all(
-      favoriteInterns.map(async (fav) => {
+      favoriteInterns.map(async fav => {
         try {
-          const progress = await progressService.getInternProgress(fav.intern.id);
+          const progress = await progressService.getInternProgress(
+            fav.intern.id
+          );
           return {
             intern: fav.intern,
             progress,
           };
         } catch (error) {
-          console.error(`Error getting progress for intern ${fav.intern.id}:`, error);
+          console.error(
+            `Error getting progress for intern ${fav.intern.id}:`,
+            error
+          );
           return {
             intern: fav.intern,
             progress: null,
           };
         }
-      }),
+      })
     );
 
     return NextResponse.json({ favoriteInterns: favoriteInternsWithProgress });
   } catch (error) {
     console.error('Error fetching favorite interns:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

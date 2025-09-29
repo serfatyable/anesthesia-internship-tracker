@@ -51,7 +51,7 @@ class SecurityAuditService {
     oldValues: JsonRecord | null = null,
     newValues: JsonRecord | null = null,
     request: NextRequest,
-    metadata?: JsonRecord,
+    metadata?: JsonRecord
   ): Promise<void> {
     try {
       const auditEvent: Omit<AuditEvent, 'id' | 'timestamp'> = {
@@ -101,7 +101,7 @@ class SecurityAuditService {
     details: JsonRecord,
     request: NextRequest,
     severity: SecurityEvent['severity'] = 'MEDIUM',
-    userId?: string,
+    userId?: string
   ): void {
     const securityEvent: SecurityEvent = {
       type,
@@ -124,7 +124,8 @@ class SecurityAuditService {
     monitoring.recordMetric('security.event', 1, { type, severity });
 
     // Log based on severity
-    const logLevel = severity === 'CRITICAL' ? 'error' : severity === 'HIGH' ? 'warn' : 'info';
+    const logLevel =
+      severity === 'CRITICAL' ? 'error' : severity === 'HIGH' ? 'warn' : 'info';
 
     logger[logLevel](`Security event: ${type}`, {
       operation: 'security_audit',
@@ -178,16 +179,20 @@ class SecurityAuditService {
         take: 100,
       });
       // Ensure required fields with defaults
-      return auditEvents.map((e) => ({
+      return auditEvents.map(e => ({
         id: e.id,
         actorUserId: e.actorUserId ?? null,
         action: e.action,
         entity: e.entity,
         entityId: e.entityId,
-        oldValues: (e as unknown as { oldValues?: JsonRecord }).oldValues ?? null,
-        newValues: (e as unknown as { newValues?: JsonRecord }).newValues ?? null,
-        ipAddress: (e as unknown as { ipAddress?: string }).ipAddress ?? 'unknown',
-        userAgent: (e as unknown as { userAgent?: string }).userAgent ?? 'unknown',
+        oldValues:
+          (e as unknown as { oldValues?: JsonRecord }).oldValues ?? null,
+        newValues:
+          (e as unknown as { newValues?: JsonRecord }).newValues ?? null,
+        ipAddress:
+          (e as unknown as { ipAddress?: string }).ipAddress ?? 'unknown',
+        userAgent:
+          (e as unknown as { userAgent?: string }).userAgent ?? 'unknown',
         timestamp: e.timestamp,
         metadata: (e as unknown as { metadata?: JsonRecord }).metadata ?? null,
       }));
@@ -207,7 +212,8 @@ class SecurityAuditService {
     if (!timeRange) return [...this.securityEvents];
 
     return this.securityEvents.filter(
-      (event) => event.timestamp >= timeRange.start && event.timestamp <= timeRange.end,
+      event =>
+        event.timestamp >= timeRange.start && event.timestamp <= timeRange.end
     );
   }
 
@@ -219,15 +225,18 @@ class SecurityAuditService {
     criticalEvents: number;
     suspiciousIPs: string[];
   } {
-    const events = timeRange ? this.getSecurityEvents(timeRange) : this.securityEvents;
+    const events = timeRange
+      ? this.getSecurityEvents(timeRange)
+      : this.securityEvents;
 
     const eventsByType: Record<string, number> = {};
     const eventsBySeverity: Record<string, number> = {};
     const ipCounts: Record<string, number> = {};
 
-    events.forEach((event) => {
+    events.forEach(event => {
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
-      eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] || 0) + 1;
+      eventsBySeverity[event.severity] =
+        (eventsBySeverity[event.severity] || 0) + 1;
       ipCounts[event.ipAddress] = (ipCounts[event.ipAddress] || 0) + 1;
     });
 
@@ -261,20 +270,21 @@ class SecurityAuditService {
       /bot/i,
     ];
 
-    if (suspiciousPatterns.some((pattern) => pattern.test(userAgent))) {
+    if (suspiciousPatterns.some(pattern => pattern.test(userAgent))) {
       this.recordSecurityEvent(
         'SUSPICIOUS_ACTIVITY',
         { reason: 'Suspicious user agent', userAgent },
         request,
         'HIGH',
-        userId,
+        userId
       );
       return true;
     }
 
     // Check for rapid requests from same IP
     const recentEvents = this.securityEvents.filter(
-      (event) => event.ipAddress === ip && Date.now() - event.timestamp.getTime() < 60000, // Last minute
+      event =>
+        event.ipAddress === ip && Date.now() - event.timestamp.getTime() < 60000 // Last minute
     );
 
     if (recentEvents.length > 20) {
@@ -283,7 +293,7 @@ class SecurityAuditService {
         { reason: 'Rapid requests', count: recentEvents.length },
         request,
         'MEDIUM',
-        userId,
+        userId
       );
       return true;
     }
@@ -295,7 +305,9 @@ class SecurityAuditService {
   cleanup(maxAge: number = 30 * 24 * 60 * 60 * 1000): void {
     const cutoff = new Date(Date.now() - maxAge);
 
-    this.securityEvents = this.securityEvents.filter((event) => event.timestamp > cutoff);
+    this.securityEvents = this.securityEvents.filter(
+      event => event.timestamp > cutoff
+    );
   }
 }
 
@@ -311,7 +323,7 @@ export const recordAuditEvent = (
   oldValues: JsonRecord | null = null,
   newValues: JsonRecord | null = null,
   request: NextRequest,
-  metadata?: JsonRecord,
+  metadata?: JsonRecord
 ) =>
   securityAudit.recordAuditEvent(
     actorUserId,
@@ -321,7 +333,7 @@ export const recordAuditEvent = (
     oldValues,
     newValues,
     request,
-    metadata,
+    metadata
   );
 
 export const recordSecurityEvent = (
@@ -329,13 +341,14 @@ export const recordSecurityEvent = (
   details: JsonRecord,
   request: NextRequest,
   severity: SecurityEvent['severity'] = 'MEDIUM',
-  userId?: string,
-) => securityAudit.recordSecurityEvent(type, details, request, severity, userId);
+  userId?: string
+) =>
+  securityAudit.recordSecurityEvent(type, details, request, severity, userId);
 
 // Cleanup old events periodically
 setInterval(
   () => {
     securityAudit.cleanup();
   },
-  24 * 60 * 60 * 1000,
+  24 * 60 * 60 * 1000
 ); // Daily cleanup

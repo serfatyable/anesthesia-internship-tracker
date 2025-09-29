@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: 'File size too large. Maximum size is 5MB.' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -56,6 +56,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error uploading file:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

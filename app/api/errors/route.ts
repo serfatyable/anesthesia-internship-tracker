@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
-import { analytics } from '@/lib/monitoring/analytics';
+import { analyticsMonitor } from '@/lib/monitoring/analytics';
 
 interface ErrorReport {
   errorId: string;
@@ -29,7 +29,10 @@ export async function POST(request: NextRequest) {
 
     // Validate error report
     if (!errorReport.errorId || !errorReport.message) {
-      return NextResponse.json({ error: 'Invalid error report format' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid error report format' },
+        { status: 400 }
+      );
     }
 
     // Log the error
@@ -46,10 +49,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Record error metrics
-    monitoring.recordError(new Error(errorReport.message), `client_${errorReport.level}`);
+    monitoring.recordError(
+      new Error(errorReport.message),
+      `client_${errorReport.level}`
+    );
 
     // Track error analytics
-    analytics.trackEvent(
+    analyticsMonitor.trackEvent(
       'error_reported',
       {
         errorId: errorReport.errorId,
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
         hasComponentStack: !!errorReport.componentStack,
         userId: errorReport.userId,
       },
-      errorReport.userId,
+      errorReport.userId
     );
 
     // In a real application, you would:
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
         errorId: errorReport.errorId,
         timestamp: new Date().toISOString(),
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     logger.error('Error reporting endpoint failed', {
@@ -88,7 +94,7 @@ export async function POST(request: NextRequest) {
         error: 'Failed to process error report',
         timestamp: new Date().toISOString(),
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -119,7 +125,7 @@ export async function GET() {
         error: 'Failed to get error statistics',
         timestamp: new Date().toISOString(),
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -130,12 +136,15 @@ function calculateErrorRate(): number {
   const errorMetrics = metrics['error_rate'] || [];
   const totalMetrics = Object.values(metrics).reduce(
     (total, metricArray) => total + metricArray.length,
-    0,
+    0
   );
 
   if (totalMetrics === 0) return 0;
 
-  const totalErrors = errorMetrics.reduce((sum, metric) => sum + metric.value, 0);
+  const totalErrors = errorMetrics.reduce(
+    (sum, metric) => sum + metric.value,
+    0
+  );
   return Math.round((totalErrors / totalMetrics) * 100 * 100) / 100;
 }
 

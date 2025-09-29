@@ -1,6 +1,6 @@
 // app/api/monitoring/health/route.ts
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { monitoring } from '@/lib/monitoring';
 
 export async function GET() {

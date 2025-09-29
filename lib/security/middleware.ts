@@ -1,8 +1,14 @@
 // lib/security/middleware.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { addSecurityHeaders, isSecureRequest, getClientIP, getUserAgent, isSuspiciousRequest } from './headers';
-import { rateLimiters, withRateLimit } from './rate-limiting';
+import {
+  addSecurityHeaders,
+  isSecureRequest,
+  getClientIP,
+  getUserAgent,
+  isSuspiciousRequest,
+} from './headers';
+import { rateLimiters } from './rate-limiting';
 import { validateSecurity, sanitizeInput } from './validation';
 import { monitoring } from '@/lib/monitoring';
 
@@ -60,14 +66,19 @@ export class SecurityMiddleware {
       }
 
       // 4. Check for blocked user agents
-      if (this.config.blockedUserAgents.some(pattern => 
-        new RegExp(pattern, 'i').test(userAgent)
-      )) {
+      if (
+        this.config.blockedUserAgents.some(pattern =>
+          new RegExp(pattern, 'i').test(userAgent)
+        )
+      ) {
         return this.createSecurityResponse('Access denied', 403);
       }
 
       // 5. Check for suspicious requests
-      if (this.config.enableSuspiciousRequestDetection && isSuspiciousRequest(request)) {
+      if (
+        this.config.enableSuspiciousRequestDetection &&
+        isSuspiciousRequest(request)
+      ) {
         // Log suspicious request
         if (this.config.enableMonitoring) {
           monitoring.trackError(new Error('Suspicious request detected'), {
@@ -77,7 +88,7 @@ export class SecurityMiddleware {
             method: request.method,
           });
         }
-        
+
         return this.createSecurityResponse('Suspicious request detected', 400);
       }
 
@@ -119,12 +130,15 @@ export class SecurityMiddleware {
     } catch (error) {
       // Log error
       if (this.config.enableMonitoring) {
-        monitoring.trackError(error instanceof Error ? error : new Error('Unknown error'), {
-          clientIP: getClientIP(request),
-          userAgent: getUserAgent(request),
-          url: request.url,
-          method: request.method,
-        });
+        monitoring.trackError(
+          error instanceof Error ? error : new Error('Unknown error'),
+          {
+            clientIP: getClientIP(request),
+            userAgent: getUserAgent(request),
+            url: request.url,
+            method: request.method,
+          }
+        );
       }
 
       return this.createSecurityResponse('Internal server error', 500);
@@ -134,9 +148,11 @@ export class SecurityMiddleware {
   /**
    * Validate request data
    */
-  private async validateRequest(request: NextRequest): Promise<{ isValid: boolean; errors: string[] }> {
+  private async validateRequest(
+    request: NextRequest
+  ): Promise<{ isValid: boolean; errors: string[] }> {
     const errors: string[] = [];
-    const clientIP = getClientIP(request);
+    // const clientIP = getClientIP(request);
     const userAgent = getUserAgent(request);
 
     try {
@@ -144,13 +160,17 @@ export class SecurityMiddleware {
       const url = request.nextUrl.pathname + request.nextUrl.search;
       const securityCheck = validateSecurity(url);
       if (!securityCheck.isSafe) {
-        errors.push(`Security threat detected: ${securityCheck.threats.join(', ')}`);
+        errors.push(
+          `Security threat detected: ${securityCheck.threats.join(', ')}`
+        );
       }
 
       // Check user agent for security threats
       const userAgentCheck = validateSecurity(userAgent);
       if (!userAgentCheck.isSafe) {
-        errors.push(`Suspicious user agent: ${userAgentCheck.threats.join(', ')}`);
+        errors.push(
+          `Suspicious user agent: ${userAgentCheck.threats.join(', ')}`
+        );
       }
 
       // Check request body if it exists
@@ -160,7 +180,9 @@ export class SecurityMiddleware {
           if (body) {
             const bodyCheck = validateSecurity(body);
             if (!bodyCheck.isSafe) {
-              errors.push(`Security threat in request body: ${bodyCheck.threats.join(', ')}`);
+              errors.push(
+                `Security threat in request body: ${bodyCheck.threats.join(', ')}`
+              );
             }
           }
         } catch (error) {
@@ -188,7 +210,9 @@ export class SecurityMiddleware {
         if (value) {
           const headerCheck = validateSecurity(value);
           if (!headerCheck.isSafe) {
-            errors.push(`Suspicious header ${header}: ${headerCheck.threats.join(', ')}`);
+            errors.push(
+              `Suspicious header ${header}: ${headerCheck.threats.join(', ')}`
+            );
           }
         }
       }
@@ -208,7 +232,10 @@ export class SecurityMiddleware {
   /**
    * Apply rate limiting
    */
-  private applyRateLimiting(request: NextRequest): { allowed: boolean; remaining: number } {
+  private applyRateLimiting(request: NextRequest): {
+    allowed: boolean;
+    remaining: number;
+  } {
     const pathname = request.nextUrl.pathname;
     const method = request.method;
 
@@ -233,7 +260,7 @@ export class SecurityMiddleware {
     };
 
     const result = limiter.isAllowed(mockReq);
-    
+
     if (result.allowed) {
       limiter.recordRequest(mockReq, true);
     }
@@ -244,7 +271,10 @@ export class SecurityMiddleware {
   /**
    * Create security response
    */
-  private createSecurityResponse(message: string, status: number): NextResponse {
+  private createSecurityResponse(
+    message: string,
+    status: number
+  ): NextResponse {
     const response = NextResponse.json(
       {
         error: message,
@@ -307,10 +337,12 @@ export const securityUtils = {
   /**
    * Validate and sanitize input
    */
-  validateAndSanitize: (input: string): { isValid: boolean; sanitized: string; threats: string[] } => {
+  validateAndSanitize: (
+    input: string
+  ): { isValid: boolean; sanitized: string; threats: string[] } => {
     const securityCheck = validateSecurity(input);
     const sanitized = sanitizeInput(input);
-    
+
     return {
       isValid: securityCheck.isSafe,
       sanitized,

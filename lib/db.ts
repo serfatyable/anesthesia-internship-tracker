@@ -71,7 +71,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // Handle uncaught exceptions
-process.on('uncaughtException', async (error) => {
+process.on('uncaughtException', async error => {
   console.error('Uncaught Exception:', error);
   await disconnectDatabase();
   process.exit(1);

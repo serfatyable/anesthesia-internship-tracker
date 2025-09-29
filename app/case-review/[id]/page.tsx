@@ -118,7 +118,9 @@ export default function CaseDetailPage() {
           ...caseData,
           _count: {
             ...caseData._count,
-            favorites: favorited ? caseData._count.favorites + 1 : caseData._count.favorites - 1,
+            favorites: favorited
+              ? caseData._count.favorites + 1
+              : caseData._count.favorites - 1,
           },
           favorites: favorited ? [{ id: 'temp' }] : [],
         });
@@ -136,9 +138,9 @@ export default function CaseDetailPage() {
   // Show loading state until component is mounted
   if (!mounted || status === 'loading' || loading) {
     return (
-      <main className="max-w-4xl mx-auto p-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <main className='max-w-4xl mx-auto p-4'>
+        <div className='flex items-center justify-center h-64'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
         </div>
       </main>
     );
@@ -150,13 +152,13 @@ export default function CaseDetailPage() {
 
   if (error) {
     return (
-      <main className="max-w-4xl mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
-          <p className="text-red-600 mb-4">{error}</p>
+      <main className='max-w-4xl mx-auto p-4'>
+        <div className='bg-red-50 border border-red-200 rounded-lg p-6'>
+          <h2 className='text-lg font-semibold text-red-800 mb-2'>Error</h2>
+          <p className='text-red-600 mb-4'>{error}</p>
           <button
             onClick={() => router.push('/case-review')}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className='bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors'
           >
             Back to Cases
           </button>
@@ -167,35 +169,43 @@ export default function CaseDetailPage() {
 
   if (!caseData) {
     return (
-      <main className="max-w-4xl mx-auto p-4">
-        <div className="text-center py-8">
-          <p className="text-gray-600">Loading case details...</p>
+      <main className='max-w-4xl mx-auto p-4'>
+        <div className='text-center py-8'>
+          <p className='text-gray-600'>Loading case details...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-4">
-      <div className="space-y-6">
+    <main className='max-w-4xl mx-auto p-4'>
+      <div className='space-y-6'>
         {/* Back Button */}
         <button
           onClick={() => router.push('/case-review')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className='flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors'
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className='w-4 h-4'
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap='round'
+              strokeLinejoin='round'
               strokeWidth={2}
-              d="M15 19l-7-7 7-7"
+              d='M15 19l-7-7 7-7'
             />
           </svg>
           Back to Cases
         </button>
 
         {/* Case Detail */}
-        <CaseDetail caseData={caseData} onFavoriteToggle={handleFavoriteToggle} />
+        <CaseDetail
+          caseData={caseData}
+          onFavoriteToggle={handleFavoriteToggle}
+        />
 
         {/* Comments Section */}
         <CommentsSection

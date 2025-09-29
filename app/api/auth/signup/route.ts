@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         message: 'User created successfully',
         user: userWithoutPassword,
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     console.error('Signup error:', error);
@@ -68,15 +68,22 @@ export async function POST(request: NextRequest) {
     // If validation utilities throw structured AppError, it's handled below
 
     if (error instanceof AppError) {
-      return NextResponse.json(createApiError(error.message, error.statusCode, error.details), {
-        status: error.statusCode,
-      });
+      return NextResponse.json(
+        createApiError(error.message, error.statusCode, error.details),
+        {
+          status: error.statusCode,
+        }
+      );
     }
 
     if (error instanceof Error) {
-      return NextResponse.json(createApiError('Internal server error', 500), { status: 500 });
+      return NextResponse.json(createApiError('Internal server error', 500), {
+        status: 500,
+      });
     }
 
-    return NextResponse.json(createApiError('Internal server error', 500), { status: 500 });
+    return NextResponse.json(createApiError('Internal server error', 500), {
+      status: 500,
+    });
   }
 }

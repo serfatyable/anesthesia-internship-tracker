@@ -51,7 +51,11 @@ export const ResourcesCard = memo(function ResourcesCard({
       const newWindow = window.open(targetUrl, '_blank', 'noopener,noreferrer');
 
       // Check if popup was blocked
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      if (
+        !newWindow ||
+        newWindow.closed ||
+        typeof newWindow.closed === 'undefined'
+      ) {
         console.error('ResourcesCard: Popup blocked or failed to open');
         // Fallback: try to navigate in current window
         window.location.href = targetUrl;
@@ -68,7 +72,7 @@ export const ResourcesCard = memo(function ResourcesCard({
         handleCardClick();
       }
     },
-    [handleCardClick],
+    [handleCardClick]
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -116,12 +120,12 @@ export const ResourcesCard = memo(function ResourcesCard({
           : 'bg-gradient-to-r from-green-50 to-emerald-50 p-4 hover:scale-105',
         // Disabled state
         !isUrlConfigured && 'opacity-75 cursor-not-allowed',
-        className,
+        className
       )}
       onClick={isUrlConfigured ? handleCardClick : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      role="button"
+      role='button'
       tabIndex={isUrlConfigured ? 0 : -1}
       onKeyDown={isUrlConfigured ? handleKeyDown : undefined}
       aria-label={
@@ -133,21 +137,21 @@ export const ResourcesCard = memo(function ResourcesCard({
       }
       aria-disabled={!isUrlConfigured}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+      <div className='flex items-center justify-between mb-4'>
+        <div className='flex items-center gap-3'>
+          <div className='p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors'>
             <svg
-              className="w-5 h-5 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+              className='w-5 h-5 text-green-600'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+              aria-hidden='true'
             >
               <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeLinecap='round'
+                strokeLinejoin='round'
                 strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
               />
             </svg>
           </div>
@@ -155,12 +159,17 @@ export const ResourcesCard = memo(function ResourcesCard({
             <h3
               className={cn(
                 'font-semibold text-gray-900 group-hover:text-green-700 transition-colors',
-                mode === 'main' ? 'text-lg' : 'text-base',
+                mode === 'main' ? 'text-lg' : 'text-base'
               )}
             >
               {displayContent.title}
             </h3>
-            <p className={cn('text-gray-600', mode === 'main' ? 'text-sm' : 'text-xs')}>
+            <p
+              className={cn(
+                'text-gray-600',
+                mode === 'main' ? 'text-sm' : 'text-xs'
+              )}
+            >
               {displayContent.subtitle}
             </p>
           </div>
@@ -168,56 +177,68 @@ export const ResourcesCard = memo(function ResourcesCard({
         <svg
           className={cn(
             'w-5 h-5 text-gray-400 group-hover:text-green-600 transition-all duration-200',
-            isHovered && 'translate-x-1',
+            isHovered && 'translate-x-1'
           )}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
+          fill='none'
+          stroke='currentColor'
+          viewBox='0 0 24 24'
+          aria-hidden='true'
         >
           <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            strokeLinecap='round'
+            strokeLinejoin='round'
             strokeWidth={2}
-            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            d='M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14'
           />
         </svg>
       </div>
 
-      <div className="space-y-3">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+      <div className='space-y-3'>
+        <div className='bg-white rounded-lg border border-gray-200 p-4'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-blue-100 rounded-lg'>
                 <svg
-                  className="w-4 h-4 text-blue-600"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+                  className='w-4 h-4 text-blue-600'
+                  fill='currentColor'
+                  viewBox='0 0 24 24'
+                  aria-hidden='true'
                 >
-                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                  <path d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z' />
                 </svg>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900">Google Drive</h4>
-                <p className="text-xs text-gray-500">Links, videos, documents</p>
+                <h4 className='font-medium text-gray-900'>Google Drive</h4>
+                <p className='text-xs text-gray-500'>
+                  Links, videos, documents
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="text-center">
+        <div className='text-center'>
           {isUrlConfigured ? (
-            <p className={cn('text-gray-600', mode === 'main' ? 'text-sm' : 'text-xs')}>
+            <p
+              className={cn(
+                'text-gray-600',
+                mode === 'main' ? 'text-sm' : 'text-xs'
+              )}
+            >
               {displayContent.description}
             </p>
           ) : (
-            <div className="space-y-2">
-              <p className={cn('text-gray-600', mode === 'main' ? 'text-sm' : 'text-xs')}>
+            <div className='space-y-2'>
+              <p
+                className={cn(
+                  'text-gray-600',
+                  mode === 'main' ? 'text-sm' : 'text-xs'
+                )}
+              >
                 Resources will be available here once configured
               </p>
               {mode === 'main' && (
-                <p className="text-xs text-gray-500">
+                <p className='text-xs text-gray-500'>
                   Set NEXT_PUBLIC_GOOGLE_DRIVE_URL environment variable
                 </p>
               )}

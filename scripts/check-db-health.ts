@@ -49,13 +49,17 @@ async function checkDatabaseHealth(): Promise<HealthCheckResult> {
     result.caseCount = caseCount;
 
     // Check for required demo users
-    const adminUser = await prisma.user.findFirst({ where: { email: 'admin@demo.local' } });
+    const adminUser = await prisma.user.findFirst({
+      where: { email: 'admin@demo.local' },
+    });
     if (!adminUser) {
       result.isHealthy = false;
       result.issues.push('Admin demo user not found');
     }
 
-    const internUser = await prisma.user.findFirst({ where: { email: 'intern@demo.local' } });
+    const internUser = await prisma.user.findFirst({
+      where: { email: 'intern@demo.local' },
+    });
     if (!internUser) {
       result.isHealthy = false;
       result.issues.push('Intern demo user not found');
@@ -63,7 +67,7 @@ async function checkDatabaseHealth(): Promise<HealthCheckResult> {
   } catch (error) {
     result.isHealthy = false;
     result.issues.push(
-      `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   } finally {
     await prisma.$disconnect();
@@ -84,7 +88,7 @@ async function main() {
     console.log(`   Cases: ${health.caseCount}`);
   } else {
     console.log('❌ Database health issues found:');
-    health.issues.forEach((issue) => {
+    health.issues.forEach(issue => {
       console.log(`   • ${issue}`);
     });
     console.log('\n🛠️  Attempting to fix...');
@@ -107,7 +111,7 @@ async function main() {
       }
     } catch (error) {
       console.log(
-        `\n❌ Failed to seed database: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `\n❌ Failed to seed database: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
       console.log('\n📋 Manual steps to fix:');
       console.log('   1. Run: pnpm db:reset');
@@ -117,7 +121,7 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('❌ Health check failed:', error);
   process.exit(1);
 });

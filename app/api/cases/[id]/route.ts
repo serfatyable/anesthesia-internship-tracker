@@ -14,7 +14,10 @@ const updateCaseSchema = z.object({
 });
 
 // GET /api/cases/[id] - Get a specific case with comments
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -56,12 +59,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(caseData);
   } catch (error) {
     console.error('Error fetching case:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 // PUT /api/cases/[id] - Update a case
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -69,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { id: caseId } = await params;
-    const body = await request.json();
+    const body = await _request.json();
     const validatedData = updateCaseSchema.parse(body);
 
     // Check if the case exists and user is the author
@@ -88,7 +97,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Filter out undefined values for Prisma
     const updateData = Object.fromEntries(
-      Object.entries(validatedData).filter(([, value]) => value !== undefined),
+      Object.entries(validatedData).filter(([, value]) => value !== undefined)
     );
 
     const updatedCase = await prisma.case.update({
@@ -111,17 +120,23 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(updatedCase);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.issues },
+        { status: 400 }
+      );
     }
     console.error('Error updating case:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE /api/cases/[id] - Delete a case
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -152,6 +167,9 @@ export async function DELETE(
     return NextResponse.json({ message: 'Case deleted successfully' });
   } catch (error) {
     console.error('Error deleting case:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

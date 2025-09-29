@@ -35,11 +35,14 @@ export default function DataTable<T extends Record<string, any>>({
   // Filter data based on search term
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
-    
-    return data.filter((row) =>
-      columns.some((column) => {
+
+    return data.filter(row =>
+      columns.some(column => {
         const value = row[column.key];
-        return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+        return value
+          ?.toString()
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
       })
     );
   }, [data, searchTerm, columns]);
@@ -47,11 +50,11 @@ export default function DataTable<T extends Record<string, any>>({
   // Sort data
   const sortedData = useMemo(() => {
     if (!sortKey) return filteredData;
-    
+
     return [...filteredData].sort((a, b) => {
       const aValue = a[sortKey];
       const bValue = b[sortKey];
-      
+
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -61,7 +64,7 @@ export default function DataTable<T extends Record<string, any>>({
   // Paginate data
   const paginatedData = useMemo(() => {
     if (!pagination) return sortedData;
-    
+
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return sortedData.slice(startIndex, endIndex);
@@ -84,21 +87,33 @@ export default function DataTable<T extends Record<string, any>>({
   };
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${className}`}>
+    <div
+      className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${className}`}
+    >
       {/* Search */}
       {searchable && (
-        <div className="p-4 border-b border-gray-200">
-          <div className="relative">
+        <div className='p-4 border-b border-gray-200'>
+          <div className='relative'>
             <input
-              type="text"
-              placeholder="Search..."
+              type='text'
+              placeholder='Search...'
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={e => setSearchTerm(e.target.value)}
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+              <svg
+                className='h-5 w-5 text-gray-400'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                />
               </svg>
             </div>
           </div>
@@ -106,9 +121,9 @@ export default function DataTable<T extends Record<string, any>>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className='overflow-x-auto'>
+        <table className='min-w-full divide-y divide-gray-200'>
+          <thead className='bg-gray-50'>
             <tr>
               {columns.map((column, index) => (
                 <th
@@ -118,25 +133,29 @@ export default function DataTable<T extends Record<string, any>>({
                   } ${column.className || ''}`}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
-                  <div className="flex items-center space-x-1">
+                  <div className='flex items-center space-x-1'>
                     <span>{column.label}</span>
                     {column.sortable && (
-                      <span className="text-gray-400">{getSortIcon(column.key)}</span>
+                      <span className='text-gray-400'>
+                        {getSortIcon(column.key)}
+                      </span>
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className='bg-white divide-y divide-gray-200'>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+              <tr key={index} className='hover:bg-gray-50'>
                 {columns.map((column, index) => (
                   <td
                     key={`${String(column.key)}-${index}`}
                     className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${column.className || ''}`}
                   >
-                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                    {column.render
+                      ? column.render(row[column.key], row)
+                      : row[column.key]}
                   </td>
                 ))}
               </tr>
@@ -147,25 +166,29 @@ export default function DataTable<T extends Record<string, any>>({
 
       {/* Pagination */}
       {pagination && totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} results
+        <div className='px-6 py-4 border-t border-gray-200 flex items-center justify-between'>
+          <div className='text-sm text-gray-700'>
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, sortedData.length)} of{' '}
+            {sortedData.length} results
           </div>
-          <div className="flex space-x-2">
+          <div className='flex space-x-2'>
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className='px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50'
             >
               Previous
             </button>
-            <span className="px-3 py-1 text-sm">
+            <span className='px-3 py-1 text-sm'>
               Page {currentPage} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className='px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50'
             >
               Next
             </button>
@@ -175,10 +198,12 @@ export default function DataTable<T extends Record<string, any>>({
 
       {/* Empty state */}
       {paginatedData.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg mb-2">No data found</div>
-          <div className="text-gray-400 text-sm">
-            {searchTerm ? 'Try adjusting your search terms' : 'No data available'}
+        <div className='text-center py-12'>
+          <div className='text-gray-500 text-lg mb-2'>No data found</div>
+          <div className='text-gray-400 text-sm'>
+            {searchTerm
+              ? 'Try adjusting your search terms'
+              : 'No data available'}
           </div>
         </div>
       )}

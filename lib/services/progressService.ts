@@ -13,50 +13,13 @@ import {
   calculateCompletionPercentage,
   formatDateForCSV,
 } from '@/lib/domain/progress';
-import { CACHE_TTL, VERIFICATION_STATUS } from '@/lib/constants';
+import { VERIFICATION_STATUS } from '@/lib/constants';
 import { monitorDatabaseQuery } from '@/lib/utils/performance';
-import { userCache, rotationCache, procedureCache } from '@/lib/utils/cache';
+import { userCache, rotationCache } from '@/lib/utils/cache';
 import { monitoring } from '@/lib/utils/monitoring';
 
 export class ProgressService {
-  // Cache for rotations data (they don't change often)
-  private static rotationsCache: Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    state: string;
-    requirements: Array<{
-      id: string;
-      minCount: number;
-      procedure: { id: string; name: string };
-    }>;
-  }> | null = null;
-  private static cacheTimestamp: number = 0;
-  private static readonly CACHE_TTL = CACHE_TTL.ROTATIONS;
-
-  // Cache for procedures data
-  private static proceduresCache: Array<{
-    id: string;
-    name: string;
-    rotationId: string;
-  }> | null = null;
-  private static proceduresCacheTimestamp: number = 0;
-  private static readonly PROCEDURES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-  // Cache for user data
-  private static userCache: Map<
-    string,
-    {
-      name: string | null;
-      email: string;
-      createdAt: Date;
-    }
-  > = new Map();
-  private static userCacheTimestamp: number = 0;
-  private static readonly USER_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+  // Cache variables removed as they were not being used
 
   /**
    * Get cached user data or fetch from database
@@ -76,7 +39,7 @@ export class ProgressService {
       prisma.user.findUnique({
         where: { id: userId },
         select: { name: true, email: true, createdAt: true },
-      }),
+      })
     );
 
     if (user) {
@@ -92,31 +55,7 @@ export class ProgressService {
     return null;
   }
 
-  /**
-   * Get cached procedures or fetch from database
-   */
-  private async getCachedProcedures() {
-    const cacheKey = 'all_procedures';
-    const cachedProcedures = procedureCache.get(cacheKey);
-
-    if (cachedProcedures) {
-      monitoring.recordMetric('cache.hit', 1, { type: 'procedures' });
-      return cachedProcedures;
-    }
-
-    monitoring.recordMetric('cache.miss', 1, { type: 'procedures' });
-
-    const procedures = await monitorDatabaseQuery('getProcedures', () =>
-      prisma.procedure.findMany({
-        where: { rotation: { isActive: true } },
-        select: { id: true, name: true, description: true, rotationId: true },
-        orderBy: [{ rotationId: 'asc' }, { name: 'asc' }],
-      }),
-    );
-
-    procedureCache.set(cacheKey, procedures);
-    return procedures;
-  }
+  // getCachedProcedures method removed as it was not being used
 
   /**
    * Get cached rotations or fetch from database
@@ -142,7 +81,7 @@ export class ProgressService {
             },
           },
         },
-      }),
+      })
     );
 
     rotationCache.set(cacheKey, rotations);
@@ -209,7 +148,7 @@ export class ProgressService {
 
       // Pre-group log entries by rotation ID for better performance
       const logsByRotation = new Map<string, typeof logEntries>();
-      logEntries.forEach((log) => {
+      logEntries.forEach(log => {
         const rotationId = log.procedure.rotationId;
         if (!logsByRotation.has(rotationId)) {
           logsByRotation.set(rotationId, []);
@@ -236,7 +175,7 @@ export class ProgressService {
       });
       // Map: rotationId -> Set of internIds
       const recentInternsByRotation = new Map<string, Set<string>>();
-      allRecentLogs.forEach((log) => {
+      allRecentLogs.forEach(log => {
         const rotationId = log.procedure?.rotationId;
         if (!rotationId) return;
         if (!recentInternsByRotation.has(rotationId)) {
@@ -247,26 +186,31 @@ export class ProgressService {
 
       // Calculate progress per rotation
       const rotationProgress: RotationProgress[] = await Promise.all(
-        rotations.map(async (rotation) => {
+        rotations.map(async rotation => {
           const requirements = rotation.requirements;
           const totalRequired = requirements.reduce(
             (sum: number, req: { minCount: number }) => sum + req.minCount,
-            0,
+            0
           );
 
           // Get logs for this rotation from pre-grouped data
           const rotationLogs = logsByRotation.get(rotation.id) || [];
 
           const verified = rotationLogs
-            .filter((log) => log.verification?.status === VERIFICATION_STATUS.APPROVED)
+            .filter(
+              log => log.verification?.status === VERIFICATION_STATUS.APPROVED
+            )
             .reduce((sum, log) => sum + log.count, 0);
 
           const pending = rotationLogs
-            .filter((log) => log.verification?.status === VERIFICATION_STATUS.PENDING)
+            .filter(
+              log => log.verification?.status === VERIFICATION_STATUS.PENDING
+            )
             .reduce((sum, log) => sum + log.count, 0);
 
           // Use precomputed recent interns
-          const currentInterns = recentInternsByRotation.get(rotation.id)?.size || 0;
+          const currentInterns =
+            recentInternsByRotation.get(rotation.id)?.size || 0;
 
           return {
             rotationId: rotation.id,
@@ -274,27 +218,45 @@ export class ProgressService {
             required: totalRequired,
             verified,
             pending,
-            completionPercentage: calculateCompletionPercentage(verified, totalRequired),
+            completionPercentage: calculateCompletionPercentage(
+              verified,
+              totalRequired
+            ),
             state: rotation.state,
             currentInterns,
           };
-        }),
+        })
       );
 
       // Calculate overall summary
-      const totalRequired = rotationProgress.reduce((sum, r) => sum + r.required, 0);
-      const totalVerified = rotationProgress.reduce((sum, r) => sum + r.verified, 0);
-      const totalPending = rotationProgress.reduce((sum, r) => sum + r.pending, 0);
+      const totalRequired = rotationProgress.reduce(
+        (sum, r) => sum + r.required,
+        0
+      );
+      const totalVerified = rotationProgress.reduce(
+        (sum, r) => sum + r.verified,
+        0
+      );
+      const totalPending = rotationProgress.reduce(
+        (sum, r) => sum + r.pending,
+        0
+      );
 
       const summary: ProgressSummary = {
         totalRequired,
         totalVerified,
         totalPending,
-        completionPercentage: calculateCompletionPercentage(totalVerified, totalRequired),
+        completionPercentage: calculateCompletionPercentage(
+          totalVerified,
+          totalRequired
+        ),
       };
 
       // Get pending verifications (latest 5)
-      const pendingVerifications = await this.getPendingVerifications(userId, 5);
+      const pendingVerifications = await this.getPendingVerifications(
+        userId,
+        5
+      );
 
       // Get recent activity (latest 10)
       const recentActivity = await this.getRecentActivity(userId, 10);
@@ -320,7 +282,7 @@ export class ProgressService {
 
       console.error('Error in getInternProgress:', error);
       throw new Error(
-        `Failed to get intern progress: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get intern progress: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -331,43 +293,47 @@ export class ProgressService {
   async getDashboardOverview(): Promise<DashboardOverview> {
     try {
       // Execute all queries in parallel to minimize database round trips
-      const [interns, totalPendingVerifications, last7DaysActivity, allRotations] =
-        await Promise.all([
-          // Get all interns
-          prisma.user.findMany({
-            where: { role: 'INTERN' },
-            select: { id: true, name: true, email: true },
-            orderBy: { createdAt: 'desc' }, // Order by creation date
-          }),
+      const [
+        interns,
+        totalPendingVerifications,
+        last7DaysActivity,
+        allRotations,
+      ] = await Promise.all([
+        // Get all interns
+        prisma.user.findMany({
+          where: { role: 'INTERN' },
+          select: { id: true, name: true, email: true },
+          orderBy: { createdAt: 'desc' }, // Order by creation date
+        }),
 
-          // Get total pending verifications
-          prisma.verification.count({
-            where: { status: VERIFICATION_STATUS.PENDING },
-          }),
+        // Get total pending verifications
+        prisma.verification.count({
+          where: { status: VERIFICATION_STATUS.PENDING },
+        }),
 
-          // Get last 7 days activity count
-          prisma.logEntry.count({
-            where: {
-              createdAt: {
-                gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-              },
+        // Get last 7 days activity count
+        prisma.logEntry.count({
+          where: {
+            createdAt: {
+              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             },
-          }),
+          },
+        }),
 
-          // Get all rotations with requirements
-          prisma.rotation.findMany({
-            where: { isActive: true },
-            include: {
-              requirements: {
-                include: { procedure: true },
-              },
+        // Get all rotations with requirements
+        prisma.rotation.findMany({
+          where: { isActive: true },
+          include: {
+            requirements: {
+              include: { procedure: true },
             },
-            orderBy: { name: 'asc' }, // Order by name for consistency
-          }),
-        ]);
+          },
+          orderBy: { name: 'asc' }, // Order by name for consistency
+        }),
+      ]);
 
       // Now get log entries for all interns
-      const internIds = interns.map((intern) => intern.id);
+      const internIds = interns.map(intern => intern.id);
       const allLogEntriesWithInterns = await prisma.logEntry.findMany({
         where: { internId: { in: internIds } },
         include: {
@@ -378,12 +344,17 @@ export class ProgressService {
       });
 
       // Calculate progress for each intern using the already loaded data
-      const internSummaries: InternSummary[] = interns.map((intern) => {
+      const internSummaries: InternSummary[] = interns.map(intern => {
         const internLogs =
-          allLogEntriesWithInterns?.filter((log) => log.intern.id === intern.id) || [];
+          allLogEntriesWithInterns?.filter(
+            log => log.intern.id === intern.id
+          ) || [];
 
         // Calculate summary for this intern
-        const summary = this.calculateInternSummaryFromLogs(internLogs, allRotations);
+        const summary = this.calculateInternSummaryFromLogs(
+          internLogs,
+          allRotations
+        );
 
         return {
           id: intern.id,
@@ -404,7 +375,7 @@ export class ProgressService {
     } catch (error) {
       console.error('Error in getDashboardOverview:', error);
       throw new Error(
-        `Failed to get dashboard overview: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to get dashboard overview: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -421,7 +392,7 @@ export class ProgressService {
     rotations: Array<{
       id: string;
       requirements: Array<{ minCount: number }>;
-    }>,
+    }>
   ): {
     totalVerified: number;
     totalPending: number;
@@ -429,22 +400,29 @@ export class ProgressService {
   } {
     const totalRequired = (rotations || []).reduce(
       (sum, rotation) =>
-        sum + (rotation.requirements || []).reduce((reqSum, req) => reqSum + req.minCount, 0),
-      0,
+        sum +
+        (rotation.requirements || []).reduce(
+          (reqSum, req) => reqSum + req.minCount,
+          0
+        ),
+      0
     );
 
     const verified = logs
-      .filter((log) => log.verification?.status === VERIFICATION_STATUS.APPROVED)
+      .filter(log => log.verification?.status === VERIFICATION_STATUS.APPROVED)
       .reduce((sum, log) => sum + log.count, 0);
 
     const pending = logs
-      .filter((log) => log.verification?.status === VERIFICATION_STATUS.PENDING)
+      .filter(log => log.verification?.status === VERIFICATION_STATUS.PENDING)
       .reduce((sum, log) => sum + log.count, 0);
 
     return {
       totalVerified: verified,
       totalPending: pending,
-      completionPercentage: calculateCompletionPercentage(verified, totalRequired),
+      completionPercentage: calculateCompletionPercentage(
+        verified,
+        totalRequired
+      ),
     };
   }
 
@@ -453,7 +431,7 @@ export class ProgressService {
    */
   private async getPendingVerifications(
     userId: string,
-    limit: number = 5,
+    limit: number = 5
   ): Promise<PendingVerification[]> {
     try {
       const verifications = await prisma.verification.findMany({
@@ -473,7 +451,7 @@ export class ProgressService {
         take: limit,
       });
 
-      return verifications.map((v) => ({
+      return verifications.map(v => ({
         id: v.id,
         logEntryId: v.logEntryId,
         procedureName: v.logEntry.procedure.name,
@@ -492,7 +470,10 @@ export class ProgressService {
   /**
    * Get recent activity for a specific intern
    */
-  private async getRecentActivity(userId: string, limit: number = 10): Promise<RecentActivity[]> {
+  private async getRecentActivity(
+    userId: string,
+    limit: number = 10
+  ): Promise<RecentActivity[]> {
     try {
       // Get recent log entries
       const recentLogs = await prisma.logEntry.findMany({
@@ -505,7 +486,7 @@ export class ProgressService {
         take: limit,
       });
 
-      return recentLogs.map((log) => {
+      return recentLogs.map(log => {
         let type: RecentActivity['type'];
         let description: string;
 
@@ -573,7 +554,7 @@ export class ProgressService {
       orderBy: { date: 'desc' },
     });
 
-    return logs.map((log) => ({
+    return logs.map(log => ({
       id: log.id,
       internName: log.intern.name || 'Unknown',
       procedureName: log.procedure.name,
@@ -612,7 +593,7 @@ export class ProgressService {
       'Reason',
     ];
 
-    const csvRows = rows.map((row) => [
+    const csvRows = rows.map(row => [
       row.id,
       row.internName,
       row.procedureName,
@@ -627,7 +608,7 @@ export class ProgressService {
     ]);
 
     const csvContent = [headers, ...csvRows]
-      .map((row) => row.map((field) => `"${field.replace(/"/g, '""')}"`).join(','))
+      .map(row => row.map(field => `"${field.replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
     return csvContent;

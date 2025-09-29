@@ -18,11 +18,7 @@ interface QueryAnalysis {
 class DatabaseOptimizer {
   private queries: QueryAnalysis[] = [];
 
-  async analyzeQuery<T>(
-    name: string,
-    queryFn: () => Promise<T>,
-    expectedRows?: number,
-  ): Promise<T> {
+  async analyzeQuery<T>(name: string, queryFn: () => Promise<T>): Promise<T> {
     const start = performance.now();
     const result = await queryFn();
     const duration = performance.now() - start;
@@ -45,7 +41,7 @@ class DatabaseOptimizer {
     await this.analyzeQuery('Get all users', () =>
       prisma.user.findMany({
         select: { id: true, name: true, email: true, role: true },
-      }),
+      })
     );
 
     // 2. Rotation queries
@@ -58,7 +54,7 @@ class DatabaseOptimizer {
             },
           },
         },
-      }),
+      })
     );
 
     // 3. Log entry queries (most frequent)
@@ -79,7 +75,7 @@ class DatabaseOptimizer {
         },
         orderBy: { date: 'desc' },
         take: 1000,
-      }),
+      })
     );
 
     // 4. Verification queries
@@ -99,7 +95,7 @@ class DatabaseOptimizer {
           },
         },
         orderBy: { timestamp: 'desc' },
-      }),
+      })
     );
 
     // 5. Progress calculation query (most complex)
@@ -139,19 +135,19 @@ class DatabaseOptimizer {
   async suggestOptimizations() {
     console.log('\n💡 Optimization Suggestions:\n');
 
-    const slowQueries = this.queries.filter((q) => q.duration > 100);
-    const frequentQueries = this.queries.filter((q) => q.rows > 100);
+    const slowQueries = this.queries.filter(q => q.duration > 100);
+    const frequentQueries = this.queries.filter(q => q.rows > 100);
 
     if (slowQueries.length > 0) {
       console.log('🐌 Slow Queries (>100ms):');
-      slowQueries.forEach((q) => {
+      slowQueries.forEach(q => {
         console.log(`  - ${q.query}: ${q.duration.toFixed(2)}ms`);
       });
     }
 
     if (frequentQueries.length > 0) {
       console.log('📈 High-Volume Queries (>100 rows):');
-      frequentQueries.forEach((q) => {
+      frequentQueries.forEach(q => {
         console.log(`  - ${q.query}: ${q.rows} rows`);
       });
     }
@@ -245,7 +241,9 @@ class DatabaseOptimizer {
       .sort((a, b) => b.duration - a.duration)
       .forEach((q, i) => {
         const status = q.duration > 100 ? '🐌' : q.duration > 50 ? '⚠️' : '✅';
-        console.log(`${i + 1}. ${status} ${q.query}: ${q.duration.toFixed(2)}ms`);
+        console.log(
+          `${i + 1}. ${status} ${q.query}: ${q.duration.toFixed(2)}ms`
+        );
       });
   }
 }

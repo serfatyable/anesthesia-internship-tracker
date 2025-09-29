@@ -51,9 +51,15 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Reflection API error:', error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.issues },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -69,7 +75,10 @@ export async function GET(req: NextRequest) {
     const itemType = searchParams.get('itemType');
 
     if (!itemId || !itemType) {
-      return NextResponse.json({ error: 'itemId and itemType are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'itemId and itemType are required' },
+        { status: 400 }
+      );
     }
 
     const reflection = await prisma.reflection.findUnique({
@@ -85,7 +94,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ reflection });
   } catch (error) {
     console.error('Reflection GET API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -101,7 +113,10 @@ export async function DELETE(req: NextRequest) {
     const itemType = searchParams.get('itemType');
 
     if (!itemId || !itemType) {
-      return NextResponse.json({ error: 'itemId and itemType are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'itemId and itemType are required' },
+        { status: 400 }
+      );
     }
 
     // Only interns can delete their own reflections
@@ -122,6 +137,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Reflection DELETE API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

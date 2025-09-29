@@ -34,7 +34,7 @@ class MonitoringService {
 
   constructor(config: Partial<MonitoringConfig> = {}) {
     const isMonitoringDisabled = process.env.DISABLE_MONITORING === 'true';
-    
+
     this.config = {
       performance: {
         enabled: process.env.NODE_ENV === 'production' && !isMonitoringDisabled,
@@ -70,13 +70,21 @@ class MonitoringService {
   }
 
   // Performance Monitoring
-  recordMetric(name: string, value: number, tags?: Record<string, string>): void {
+  recordMetric(
+    name: string,
+    value: number,
+    tags?: Record<string, string>
+  ): void {
     if (this.config.performance.enabled) {
       performanceMonitor.record(name, value, tags);
     }
   }
 
-  async time<T>(name: string, fn: () => Promise<T>, tags?: Record<string, string>): Promise<T> {
+  async time<T>(
+    name: string,
+    fn: () => Promise<T>,
+    tags?: Record<string, string>
+  ): Promise<T> {
     if (this.config.performance.enabled) {
       return performanceMonitor.time(name, fn, tags);
     }
@@ -94,7 +102,10 @@ class MonitoringService {
     return performanceMonitor.getMetrics();
   }
 
-  getAggregatedMetrics(): Record<string, { count: number; avg: number; min: number; max: number; sum: number }> {
+  getAggregatedMetrics(): Record<
+    string,
+    { count: number; avg: number; min: number; max: number; sum: number }
+  > {
     return performanceMonitor.getAggregatedMetrics();
   }
 
@@ -162,7 +173,13 @@ class MonitoringService {
     context: Record<string, any> = {}
   ): string {
     if (this.config.analytics.enabled) {
-      return analyticsMonitor.track(name, properties, userId, sessionId, context);
+      return analyticsMonitor.track(
+        name,
+        properties,
+        userId,
+        sessionId,
+        context
+      );
     }
     return '';
   }
@@ -188,7 +205,14 @@ class MonitoringService {
     sessionId?: string
   ): string {
     if (this.config.analytics.enabled) {
-      return analyticsMonitor.trackAction(action, category, label, value, userId, sessionId);
+      return analyticsMonitor.trackAction(
+        action,
+        category,
+        label,
+        value,
+        userId,
+        sessionId
+      );
     }
     return '';
   }
@@ -201,7 +225,13 @@ class MonitoringService {
     userId?: string
   ): string {
     if (this.config.analytics.enabled) {
-      return analyticsMonitor.trackAPICall(endpoint, method, statusCode, duration, userId);
+      return analyticsMonitor.trackAPICall(
+        endpoint,
+        method,
+        statusCode,
+        duration,
+        userId
+      );
     }
     return '';
   }
@@ -213,7 +243,12 @@ class MonitoringService {
     userId?: string
   ): string {
     if (this.config.analytics.enabled) {
-      return analyticsMonitor.trackDatabaseQuery(query, duration, rowsAffected, userId);
+      return analyticsMonitor.trackDatabaseQuery(
+        query,
+        duration,
+        rowsAffected,
+        userId
+      );
     }
     return '';
   }
@@ -273,4 +308,4 @@ export const monitoring = new MonitoringService();
 export { performanceMonitor, healthMonitor, errorMonitor, analyticsMonitor };
 
 // Export types
-export type { PerformanceMetric, HealthStatus, ErrorReport, AnalyticsEvent, MonitoringConfig };
+export type { PerformanceMetric, HealthStatus, ErrorReport, AnalyticsEvent };

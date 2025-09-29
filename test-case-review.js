@@ -30,7 +30,9 @@ async function testCaseReviewAPI() {
     }
 
     console.log('\n✅ API endpoint tests completed!');
-    console.log('Note: Some endpoints require authentication, so 401 errors are expected.');
+    console.log(
+      'Note: Some endpoints require authentication, so 401 errors are expected.'
+    );
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   }

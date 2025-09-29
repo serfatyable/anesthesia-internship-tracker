@@ -21,8 +21,10 @@ async function debugFavoritesFeature() {
         PRAGMA table_info(ProcedureKnowledgeFavorite)
       `;
       console.log('   📋 Table structure:');
-      tableSchema.forEach((column) => {
-        console.log(`      - ${column.name}: ${column.type} ${column.pk ? '(PRIMARY KEY)' : ''}`);
+      tableSchema.forEach(column => {
+        console.log(
+          `      - ${column.name}: ${column.type} ${column.pk ? '(PRIMARY KEY)' : ''}`
+        );
       });
     } else {
       console.log('   ❌ ProcedureKnowledgeFavorite table does not exist');
@@ -45,7 +47,7 @@ async function debugFavoritesFeature() {
 
       console.log('   👥 Favorites by user:');
       const userFavorites = {};
-      favorites.forEach((fav) => {
+      favorites.forEach(fav => {
         const userKey = `${fav.user.email} (${fav.user.name})`;
         if (!userFavorites[userKey]) {
           userFavorites[userKey] = { procedures: 0, knowledge: 0 };
@@ -59,7 +61,7 @@ async function debugFavoritesFeature() {
 
       Object.entries(userFavorites).forEach(([user, counts]) => {
         console.log(
-          `      ${user}: ${counts.procedures} procedures, ${counts.knowledge} knowledge`,
+          `      ${user}: ${counts.procedures} procedures, ${counts.knowledge} knowledge`
         );
       });
 
@@ -93,8 +95,10 @@ async function debugFavoritesFeature() {
     `;
 
     console.log('   📋 Available indexes:');
-    indexes.forEach((index) => {
-      console.log(`      - ${index.name}: ${index.unique ? 'UNIQUE' : 'NON-UNIQUE'}`);
+    indexes.forEach(index => {
+      console.log(
+        `      - ${index.name}: ${index.unique ? 'UNIQUE' : 'NON-UNIQUE'}`
+      );
     });
 
     // Test 5: Data Integrity Check
@@ -108,7 +112,9 @@ async function debugFavoritesFeature() {
     `;
 
     if (orphanedFavorites.length > 0) {
-      console.log(`   ⚠️  Found ${orphanedFavorites.length} orphaned favorites`);
+      console.log(
+        `   ⚠️  Found ${orphanedFavorites.length} orphaned favorites`
+      );
     } else {
       console.log('   ✅ No orphaned favorites found');
     }
@@ -123,7 +129,9 @@ async function debugFavoritesFeature() {
     });
 
     if (invalidTypes.length > 0) {
-      console.log(`   ⚠️  Found ${invalidTypes.length} favorites with invalid itemType`);
+      console.log(
+        `   ⚠️  Found ${invalidTypes.length} favorites with invalid itemType`
+      );
     } else {
       console.log('   ✅ All itemTypes are valid');
     }
@@ -140,7 +148,9 @@ async function debugFavoritesFeature() {
         where: { userId: testUser.id },
         orderBy: { createdAt: 'desc' },
       });
-      console.log(`   ✅ GET /api/procedure-knowledge-favorites: ${favorites.length} results`);
+      console.log(
+        `   ✅ GET /api/procedure-knowledge-favorites: ${favorites.length} results`
+      );
 
       // Simulate POST request (check if already exists)
       const testItemId = 'test-procedure-123';
@@ -169,7 +179,7 @@ async function debugFavoritesFeature() {
     const allFavorites = await prisma.procedureKnowledgeFavorite.findMany();
     const memoryEstimate = allFavorites.length * 200; // Rough estimate: 200 bytes per record
     console.log(
-      `   📊 Estimated memory usage: ${memoryEstimate} bytes (${(memoryEstimate / 1024).toFixed(2)} KB)`,
+      `   📊 Estimated memory usage: ${memoryEstimate} bytes (${(memoryEstimate / 1024).toFixed(2)} KB)`
     );
 
     if (memoryEstimate > 1024 * 1024) {

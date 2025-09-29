@@ -1,7 +1,8 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
-export const isRole = (role?: string | null, target?: string) => role === target;
+export const isRole = (role?: string | null, target?: string) =>
+  role === target;
 export const isAdmin = (role?: string | null) => isRole(role, 'ADMIN');
 export const isTutor = (role?: string | null) => isRole(role, 'TUTOR');
 export const isIntern = (role?: string | null) => isRole(role, 'INTERN');

@@ -16,13 +16,16 @@ export async function GET(request: Request) {
     const itemType = searchParams.get('itemType');
 
     if (!itemId || !itemType) {
-      return NextResponse.json({ error: 'itemId and itemType are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'itemId and itemType are required' },
+        { status: 400 }
+      );
     }
 
     if (!['PROCEDURE', 'KNOWLEDGE'].includes(itemType)) {
       return NextResponse.json(
         { error: 'itemType must be PROCEDURE or KNOWLEDGE' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -65,6 +68,9 @@ export async function GET(request: Request) {
     }
   } catch (error) {
     console.error('Error fetching procedure/knowledge details:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

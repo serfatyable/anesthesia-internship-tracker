@@ -101,7 +101,7 @@ export function useUrlParams() {
     (key: string) => {
       return searchParams.get(key);
     },
-    [searchParams],
+    [searchParams]
   );
 
   const setParam = useCallback(
@@ -110,7 +110,7 @@ export function useUrlParams() {
       params.set(key, value);
       return params.toString();
     },
-    [searchParams],
+    [searchParams]
   );
 
   const removeParam = useCallback(
@@ -119,7 +119,7 @@ export function useUrlParams() {
       params.delete(key);
       return params.toString();
     },
-    [searchParams],
+    [searchParams]
   );
 
   return {

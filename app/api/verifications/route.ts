@@ -19,7 +19,8 @@ export async function POST(req: Request) {
   logger.request('POST', '/api/verifications', 0);
 
   const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session?.user)
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const u = session?.user;
   if (!u?.id || !u.role) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -34,7 +35,10 @@ export async function POST(req: Request) {
     logger.warn('Invalid JSON in verification request', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Invalid JSON in request body' },
+      { status: 400 }
+    );
   }
 
   // Sanitize reason if provided
@@ -44,8 +48,13 @@ export async function POST(req: Request) {
 
   const parsed = VerifyLogSchema.safeParse(body);
   if (!parsed.success) {
-    logger.warn('Invalid verification request', { errors: JSON.stringify(parsed.error.flatten()) });
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    logger.warn('Invalid verification request', {
+      errors: JSON.stringify(parsed.error.flatten()),
+    });
+    return NextResponse.json(
+      { error: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
 
   const { logEntryId, status, reason } = parsed.data;
@@ -65,7 +74,10 @@ export async function POST(req: Request) {
 
   // For REJECTED, require reason
   if (status === 'REJECTED' && (!reason || reason.trim().length === 0)) {
-    return NextResponse.json({ error: 'Reason is required when rejecting' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Reason is required when rejecting' },
+      { status: 400 }
+    );
   }
 
   await prisma.verification.update({
@@ -79,7 +91,11 @@ export async function POST(req: Request) {
   });
 
   // Log the verification decision
-  logger.verificationDecision(status === 'APPROVED' ? 'APPROVE' : 'REJECT', logEntryId, reason);
+  logger.verificationDecision(
+    status === 'APPROVED' ? 'APPROVE' : 'REJECT',
+    logEntryId,
+    reason
+  );
   logger.request('POST', '/api/verifications', Date.now() - startTime);
 
   return NextResponse.json({ ok: true });

@@ -58,12 +58,18 @@ export default function PendingApprovalsPage() {
       }
     };
 
-    if (session && (session.user.role === 'TUTOR' || session.user.role === 'ADMIN')) {
+    if (
+      session &&
+      (session.user.role === 'TUTOR' || session.user.role === 'ADMIN')
+    ) {
       fetchPendingApprovals();
     }
   }, [session]);
 
-  const handleApproval = async (logEntryId: string, status: 'APPROVED' | 'REJECTED') => {
+  const handleApproval = async (
+    logEntryId: string,
+    status: 'APPROVED' | 'REJECTED'
+  ) => {
     setProcessing(logEntryId);
     try {
       const response = await fetch('/api/verify', {
@@ -94,9 +100,9 @@ export default function PendingApprovalsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <main className="max-w-6xl mx-auto p-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <main className='max-w-6xl mx-auto p-4'>
+        <div className='flex items-center justify-center h-64'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
         </div>
       </main>
     );
@@ -107,73 +113,96 @@ export default function PendingApprovalsPage() {
   }
 
   const totalPending = Object.values(groupedItems).reduce(
-    (sum, items) => sum + items.reduce((itemSum, item) => itemSum + item.count, 0),
-    0,
+    (sum, items) =>
+      sum + items.reduce((itemSum, item) => itemSum + item.count, 0),
+    0
   );
 
   return (
-    <main className="max-w-6xl mx-auto p-4">
-      <div className="mb-6">
-        <BackButton className="mb-4" />
+    <main className='max-w-6xl mx-auto p-4'>
+      <div className='mb-6'>
+        <BackButton className='mb-4' />
 
         {/* Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Pending Approvals</h1>
-          <p className="text-gray-600">
-            {totalPending} total tasks from {Object.keys(groupedItems).length} interns
+        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2'>
+            Pending Approvals
+          </h1>
+          <p className='text-gray-600'>
+            {totalPending} total tasks from {Object.keys(groupedItems).length}{' '}
+            interns
           </p>
         </div>
       </div>
 
       {/* Grouped by Intern */}
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {Object.entries(groupedItems).map(([internName, items]) => (
-          <div key={internName} className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div
+            key={internName}
+            className='bg-white rounded-lg border border-gray-200 p-6'
+          >
+            <div className='flex items-center justify-between mb-4'>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">{internName}</h2>
-                <p className="text-sm text-gray-600">{items.length} items pending</p>
+                <h2 className='text-xl font-semibold text-gray-900'>
+                  {internName}
+                </h2>
+                <p className='text-sm text-gray-600'>
+                  {items.length} items pending
+                </p>
               </div>
               <Link
                 href={`/intern/${items[0]?.internId || ''}`}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className='text-blue-600 hover:text-blue-800 text-sm font-medium'
               >
                 View Intern Details →
               </Link>
             </div>
 
-            <div className="space-y-3">
-              {items.map((item) => (
+            <div className='space-y-3'>
+              {items.map(item => (
                 <div
                   key={item.id}
-                  className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className='border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors'
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-medium text-gray-900">{item.procedureName}</div>
-                    <div className="text-sm text-gray-700">
+                  <div className='flex items-center justify-between mb-2'>
+                    <div className='font-medium text-gray-900'>
+                      {item.procedureName}
+                    </div>
+                    <div className='text-sm text-gray-700'>
                       {new Date(item.date).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="text-sm text-gray-600 mb-2">Count: {item.count}</div>
+                  <div className='text-sm text-gray-600 mb-2'>
+                    Count: {item.count}
+                  </div>
                   {item.notes && (
-                    <div className="text-sm text-gray-600 mb-3">
+                    <div className='text-sm text-gray-600 mb-3'>
                       <strong>Notes:</strong> {item.notes}
                     </div>
                   )}
-                  <div className="flex gap-2">
+                  <div className='flex gap-2'>
                     <button
-                      onClick={() => handleApproval(item.logEntryId, 'APPROVED')}
+                      onClick={() =>
+                        handleApproval(item.logEntryId, 'APPROVED')
+                      }
                       disabled={processing === item.logEntryId}
-                      className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className='bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                     >
-                      {processing === item.logEntryId ? 'Processing...' : 'Approve'}
+                      {processing === item.logEntryId
+                        ? 'Processing...'
+                        : 'Approve'}
                     </button>
                     <button
-                      onClick={() => handleApproval(item.logEntryId, 'REJECTED')}
+                      onClick={() =>
+                        handleApproval(item.logEntryId, 'REJECTED')
+                      }
                       disabled={processing === item.logEntryId}
-                      className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className='bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                     >
-                      {processing === item.logEntryId ? 'Processing...' : 'Reject'}
+                      {processing === item.logEntryId
+                        ? 'Processing...'
+                        : 'Reject'}
                     </button>
                   </div>
                 </div>
@@ -184,9 +213,11 @@ export default function PendingApprovalsPage() {
       </div>
 
       {Object.keys(groupedItems).length === 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <div className="text-gray-500 text-lg">No pending approvals</div>
-          <p className="text-gray-400 mt-2">All verifications are up to date!</p>
+        <div className='bg-white rounded-lg border border-gray-200 p-8 text-center'>
+          <div className='text-gray-500 text-lg'>No pending approvals</div>
+          <p className='text-gray-400 mt-2'>
+            All verifications are up to date!
+          </p>
         </div>
       )}
     </main>

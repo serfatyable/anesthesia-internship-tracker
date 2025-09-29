@@ -11,7 +11,10 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 
-function log(message: string, type: 'info' | 'success' | 'error' | 'warn' = 'info') {
+function log(
+  message: string,
+  type: 'info' | 'success' | 'error' | 'warn' = 'info'
+) {
   const colors = {
     info: '\x1b[36m', // Cyan
     success: '\x1b[32m', // Green
@@ -71,7 +74,10 @@ async function checkDatabase() {
     log(`Database connected successfully (${userCount} users)`, 'success');
     return true;
   } catch (error) {
-    log(`Database connection failed: ${error instanceof Error ? error.message : error}`, 'error');
+    log(
+      `Database connection failed: ${error instanceof Error ? error.message : error}`,
+      'error'
+    );
     return false;
   }
 }
@@ -86,7 +92,7 @@ async function checkPrismaClient() {
   } catch (error) {
     log(
       `Prisma client generation failed: ${error instanceof Error ? error.message : error}`,
-      'error',
+      'error'
     );
     return false;
   }
@@ -100,7 +106,10 @@ async function checkDependencies() {
     log('Dependencies are up to date', 'success');
     return true;
   } catch (error) {
-    log(`Dependency check failed: ${error instanceof Error ? error.message : error}`, 'warn');
+    log(
+      `Dependency check failed: ${error instanceof Error ? error.message : error}`,
+      'warn'
+    );
     return false;
   }
 }
@@ -113,7 +122,10 @@ async function fixDatabaseIfNeeded() {
     log('Database schema synchronized', 'success');
     return true;
   } catch (error) {
-    log(`Database fix failed: ${error instanceof Error ? error.message : error}`, 'error');
+    log(
+      `Database fix failed: ${error instanceof Error ? error.message : error}`,
+      'error'
+    );
     return false;
   }
 }
@@ -148,7 +160,10 @@ async function main() {
   }
 
   if (allPassed) {
-    log('🎉 All startup checks passed! Application should start successfully.', 'success');
+    log(
+      '🎉 All startup checks passed! Application should start successfully.',
+      'success'
+    );
     process.exit(0);
   } else {
     log('❌ Some startup checks failed. Please fix the issues above.', 'error');
@@ -161,7 +176,10 @@ process.on('exit', async () => {
   await prisma.$disconnect();
 });
 
-main().catch((error) => {
-  log(`Startup check failed: ${error instanceof Error ? error.message : error}`, 'error');
+main().catch(error => {
+  log(
+    `Startup check failed: ${error instanceof Error ? error.message : error}`,
+    'error'
+  );
   process.exit(1);
 });

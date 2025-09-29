@@ -70,7 +70,8 @@ const CORS_HEADERS = {
       ? process.env.NEXTAUTH_URL || 'https://your-domain.com'
       : 'http://localhost:3000',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-CSRF-Token, X-Requested-With',
   'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Max-Age': '86400', // 24 hours
 };
@@ -90,7 +91,7 @@ type SecurityEvent =
 function handleSecurityEvent(
   event: SecurityEvent,
   request: NextRequest,
-  details?: Record<string, unknown>,
+  details?: Record<string, unknown>
 ): void {
   const context = {
     operation: 'security_event',
@@ -98,8 +99,12 @@ function handleSecurityEvent(
     ip: getClientIP(request),
     path: request.nextUrl.pathname,
     method: request.method,
-    ...(request.headers.get('user-agent') && { userAgent: request.headers.get('user-agent')! }),
-    ...(request.headers.get('referer') && { referer: request.headers.get('referer')! }),
+    ...(request.headers.get('user-agent') && {
+      userAgent: request.headers.get('user-agent')!,
+    }),
+    ...(request.headers.get('referer') && {
+      referer: request.headers.get('referer')!,
+    }),
     ...details,
   };
 
@@ -130,7 +135,7 @@ function isValidOrigin(request: NextRequest): boolean {
     process.env.NEXTAUTH_URL,
   ].filter(Boolean);
 
-  return allowedOrigins.some((allowed) => allowed && origin!.startsWith(allowed));
+  return allowedOrigins.some(allowed => allowed && origin!.startsWith(allowed));
 }
 
 // Check for suspicious patterns
@@ -151,20 +156,27 @@ function isSuspiciousRequest(request: NextRequest): boolean {
   ];
 
   // Check URL path
-  if (suspiciousPatterns.some((pattern) => pattern.test(path))) {
+  if (suspiciousPatterns.some(pattern => pattern.test(path))) {
     return true;
   }
 
   // Check query parameters
   const queryString = request.nextUrl.search;
-  if (suspiciousPatterns.some((pattern) => pattern.test(queryString))) {
+  if (suspiciousPatterns.some(pattern => pattern.test(queryString))) {
     return true;
   }
 
   // Check for suspicious user agents
-  const suspiciousUserAgents = [/sqlmap/i, /nikto/i, /nmap/i, /masscan/i, /zap/i, /burp/i];
+  const suspiciousUserAgents = [
+    /sqlmap/i,
+    /nikto/i,
+    /nmap/i,
+    /masscan/i,
+    /zap/i,
+    /burp/i,
+  ];
 
-  if (suspiciousUserAgents.some((pattern) => pattern.test(userAgent))) {
+  if (suspiciousUserAgents.some(pattern => pattern.test(userAgent))) {
     return true;
   }
 
@@ -172,7 +184,10 @@ function isSuspiciousRequest(request: NextRequest): boolean {
 }
 
 // Apply security headers
-function applySecurityHeaders(response: NextResponse, isApiRoute: boolean = false): NextResponse {
+function applySecurityHeaders(
+  response: NextResponse,
+  isApiRoute: boolean = false
+): NextResponse {
   const headers = isApiRoute ? API_SECURITY_HEADERS : SECURITY_HEADERS;
 
   Object.entries(headers).forEach(([key, value]) => {
@@ -240,7 +255,7 @@ export function securityMiddleware(request: NextRequest): NextResponse | null {
     /execute\s*\(/i,
   ];
 
-  if (sqlPatterns.some((pattern) => pattern.test(queryString))) {
+  if (sqlPatterns.some(pattern => pattern.test(queryString))) {
     handleSecurityEvent('sql_injection_attempt', request, {
       queryString,
     });
@@ -258,7 +273,7 @@ export function securityMiddleware(request: NextRequest): NextResponse | null {
     /onmouseover=/i,
   ];
 
-  if (xssPatterns.some((pattern) => pattern.test(queryString))) {
+  if (xssPatterns.some(pattern => pattern.test(queryString))) {
     handleSecurityEvent('xss_attempt', request, {
       queryString,
     });
@@ -271,7 +286,7 @@ export function securityMiddleware(request: NextRequest): NextResponse | null {
 // Enhanced response wrapper
 export function withSecurityHeaders<T extends (...args: unknown[]) => unknown>(
   handler: T,
-  isApiRoute: boolean = false,
+  isApiRoute: boolean = false
 ): T {
   return ((...args: Parameters<T>) => {
     const result = handler(...args);
@@ -301,7 +316,10 @@ export function sanitizeRequest(request: NextRequest): NextRequest {
 }
 
 // Security monitoring
-export function monitorSecurityMetrics(request: NextRequest, response: NextResponse): void {
+export function monitorSecurityMetrics(
+  request: NextRequest,
+  response: NextResponse
+): void {
   const duration = performance.now();
   const statusCode = response.status;
 

@@ -97,13 +97,13 @@ class MemoryCache {
       const allKeys = Array.from(this.cache.keys());
 
       if (!pattern) {
-        return allKeys.map((key) => key.replace(`${this.prefix}:`, ''));
+        return allKeys.map(key => key.replace(`${this.prefix}:`, ''));
       }
 
       const regex = new RegExp(pattern.replace(/\*/g, '.*'));
       return allKeys
-        .filter((key) => regex.test(key))
-        .map((key) => key.replace(`${this.prefix}:`, ''));
+        .filter(key => regex.test(key))
+        .map(key => key.replace(`${this.prefix}:`, ''));
     } catch (error) {
       logger.error('Cache keys error', {
         pattern: pattern || 'unknown',
@@ -187,7 +187,7 @@ setInterval(
   () => {
     cache.cleanup();
   },
-  5 * 60 * 1000,
+  5 * 60 * 1000
 );
 
 export { MemoryCache };

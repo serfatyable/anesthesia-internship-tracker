@@ -12,7 +12,10 @@ const createCommentSchema = z.object({
 });
 
 // GET /api/cases/[id]/comments - Get comments for a case
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -54,12 +57,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(comments);
   } catch (error) {
     console.error('Error fetching comments:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 // POST /api/cases/[id]/comments - Create a new comment
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   // Apply rate limiting
   const rateLimitResponse = apiRateLimit(request);
   if (rateLimitResponse) return rateLimitResponse;
@@ -99,7 +108,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
 
       if (!parentComment || parentComment.caseId !== caseId) {
-        return NextResponse.json({ error: 'Parent comment not found' }, { status: 404 });
+        return NextResponse.json(
+          { error: 'Parent comment not found' },
+          { status: 404 }
+        );
       }
     }
 
@@ -115,9 +127,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json(newComment, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid data', details: error.issues },
+        { status: 400 }
+      );
     }
     console.error('Error creating comment:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

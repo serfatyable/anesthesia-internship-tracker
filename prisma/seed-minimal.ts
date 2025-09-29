@@ -29,7 +29,12 @@ async function main() {
     const passwordHash = await hash(u.password, 12);
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, role: u.role, password: passwordHash, idNumber: u.idNumber },
+      update: {
+        name: u.name,
+        role: u.role,
+        password: passwordHash,
+        idNumber: u.idNumber,
+      },
       create: {
         name: u.name,
         email: u.email,
@@ -66,7 +71,12 @@ async function main() {
 
   // Create one simple requirement
   await prisma.requirement.upsert({
-    where: { rotationId_procedureId: { rotationId: icu.id, procedureId: arterialLine.id } },
+    where: {
+      rotationId_procedureId: {
+        rotationId: icu.id,
+        procedureId: arterialLine.id,
+      },
+    },
     update: { minCount: 5 },
     create: { rotationId: icu.id, procedureId: arterialLine.id, minCount: 5 },
   });
@@ -75,7 +85,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Minimal seed error:', e);
     process.exit(1);
   })

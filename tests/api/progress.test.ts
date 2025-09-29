@@ -4,7 +4,12 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('@/lib/services/progressService', () => ({
   progressService: {
     getInternProgress: vi.fn().mockResolvedValue({
-      summary: { totalRequired: 1, totalVerified: 0, totalPending: 1, completionPercentage: 0 },
+      summary: {
+        totalRequired: 1,
+        totalVerified: 0,
+        totalPending: 1,
+        completionPercentage: 0,
+      },
       rotations: [],
       pendingVerifications: [],
       recentActivity: [],
@@ -21,7 +26,9 @@ vi.mock('@/lib/services/progressService', () => ({
 // Mock NextAuth
 vi.mock('next-auth/next', () => {
   return {
-    getServerSession: vi.fn().mockResolvedValue({ user: { id: 'user-1', role: 'INTERN' } }),
+    getServerSession: vi
+      .fn()
+      .mockResolvedValue({ user: { id: 'user-1', role: 'INTERN' } }),
   };
 });
 

@@ -6,7 +6,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang='en' dir='ltr'>
       <body suppressHydrationWarning={true}>
         <NextAuthProvider>
           <ErrorBoundary>

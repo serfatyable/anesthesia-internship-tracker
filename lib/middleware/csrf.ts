@@ -11,7 +11,7 @@ const CSRF_HEADER = 'x-csrf-token';
 function generateCSRFToken(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 // Get CSRF token from request
@@ -68,7 +68,9 @@ export function setCSRFToken(response: NextResponse): NextResponse {
 }
 
 // CSRF protection middleware
-export async function csrfProtection(request: NextRequest): Promise<NextResponse | null> {
+export async function csrfProtection(
+  request: NextRequest
+): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl;
   const method = request.method;
 
@@ -118,10 +120,11 @@ export async function csrfProtection(request: NextRequest): Promise<NextResponse
     return NextResponse.json(
       {
         error: 'CSRF token mismatch',
-        message: 'Invalid or missing CSRF token. Please refresh the page and try again.',
+        message:
+          'Invalid or missing CSRF token. Please refresh the page and try again.',
         code: 'CSRF_TOKEN_MISMATCH',
       },
-      { status: 403 },
+      { status: 403 }
     );
   }
 
@@ -163,19 +166,25 @@ export async function generateCSRFTokenEndpoint(): Promise<NextResponse> {
 }
 
 // CSRF token validation for API routes
-export async function validateCSRFToken(request: NextRequest): Promise<boolean> {
+export async function validateCSRFToken(
+  request: NextRequest
+): Promise<boolean> {
   return await verifyCSRFToken(request);
 }
 
 // Helper to add CSRF token to forms
-export async function addCSRFTokenToForm(formData: FormData): Promise<FormData> {
+export async function addCSRFTokenToForm(
+  formData: FormData
+): Promise<FormData> {
   const token = await getCSRFTokenForClient();
   formData.append('_csrf', token);
   return formData;
 }
 
 // Helper to add CSRF token to fetch requests
-export async function addCSRFTokenToHeaders(headers: Headers): Promise<Headers> {
+export async function addCSRFTokenToHeaders(
+  headers: Headers
+): Promise<Headers> {
   const token = await getCSRFTokenForClient();
   headers.set(CSRF_HEADER, token);
   return headers;

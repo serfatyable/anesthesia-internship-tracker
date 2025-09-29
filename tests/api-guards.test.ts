@@ -3,7 +3,9 @@ import { requireRole } from '@/lib/rbac';
 
 // mock getServerSession used in requireRole
 vi.mock('next-auth/next', () => ({
-  getServerSession: vi.fn().mockResolvedValue({ user: { id: 'u1', role: 'INTERN' } }),
+  getServerSession: vi
+    .fn()
+    .mockResolvedValue({ user: { id: 'u1', role: 'INTERN' } }),
 }));
 
 describe('requireRole', () => {
@@ -16,7 +18,9 @@ describe('requireRole', () => {
     // temporarily mock to TUTOR
     const { getServerSession } = await import('next-auth/next');
     (
-      getServerSession as unknown as { mockResolvedValueOnce: (value: unknown) => void }
+      getServerSession as unknown as {
+        mockResolvedValueOnce: (value: unknown) => void;
+      }
     ).mockResolvedValueOnce({ user: { id: 'u2', role: 'TUTOR' } });
     const res = await requireRole('ADMIN');
     expect(res.ok).toBe(false);

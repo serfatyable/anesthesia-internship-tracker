@@ -52,7 +52,12 @@ async function main() {
     const passwordHash = await hash(u.password, 12);
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, role: u.role, password: passwordHash, idNumber: u.idNumber },
+      update: {
+        name: u.name,
+        role: u.role,
+        password: passwordHash,
+        idNumber: u.idNumber,
+      },
       create: {
         name: u.name,
         email: u.email,
@@ -64,11 +69,13 @@ async function main() {
     createdUsers.push({ id: user.id, role: user.role });
   }
 
-  const admin = createdUsers.find((u) => u.role === 'ADMIN');
-  const tutor = createdUsers.find((u) => u.role === 'TUTOR');
-  const interns = createdUsers.filter((u) => u.role === 'INTERN');
+  const admin = createdUsers.find(u => u.role === 'ADMIN');
+  const tutor = createdUsers.find(u => u.role === 'TUTOR');
+  const interns = createdUsers.filter(u => u.role === 'INTERN');
   if (interns.length === 0 || !tutor || !admin) {
-    throw new Error('Seed error: required seed users (interns/tutor/admin) not found');
+    throw new Error(
+      'Seed error: required seed users (interns/tutor/admin) not found'
+    );
   }
 
   // --- ROTATIONS ---
@@ -108,7 +115,9 @@ async function main() {
     });
   }
 
-  let or = await prisma.rotation.findFirst({ where: { name: 'Operating Room' } });
+  let or = await prisma.rotation.findFirst({
+    where: { name: 'Operating Room' },
+  });
   if (!or) {
     or = await prisma.rotation.create({
       data: {
@@ -157,7 +166,9 @@ async function main() {
     });
   }
 
-  let blockRoom = await prisma.rotation.findFirst({ where: { name: 'Block Room' } });
+  let blockRoom = await prisma.rotation.findFirst({
+    where: { name: 'Block Room' },
+  });
   if (!blockRoom) {
     blockRoom = await prisma.rotation.create({
       data: {
@@ -193,7 +204,9 @@ async function main() {
     });
   }
 
-  let elective1 = await prisma.rotation.findFirst({ where: { name: 'Elective 1' } });
+  let elective1 = await prisma.rotation.findFirst({
+    where: { name: 'Elective 1' },
+  });
   if (!elective1) {
     elective1 = await prisma.rotation.create({
       data: {
@@ -205,7 +218,9 @@ async function main() {
     });
   }
 
-  let elective2 = await prisma.rotation.findFirst({ where: { name: 'Elective 2' } });
+  let elective2 = await prisma.rotation.findFirst({
+    where: { name: 'Elective 2' },
+  });
   if (!elective2) {
     elective2 = await prisma.rotation.create({
       data: {
@@ -217,7 +232,9 @@ async function main() {
     });
   }
 
-  let studyMonth = await prisma.rotation.findFirst({ where: { name: 'Study Month' } });
+  let studyMonth = await prisma.rotation.findFirst({
+    where: { name: 'Study Month' },
+  });
   if (!studyMonth) {
     studyMonth = await prisma.rotation.create({
       data: {
@@ -282,7 +299,12 @@ async function main() {
   });
 
   const dlIntubation = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Direct Laryngoscopy Intubation', rotationId: icu.id } },
+    where: {
+      rotationId_name: {
+        name: 'Direct Laryngoscopy Intubation',
+        rotationId: icu.id,
+      },
+    },
     update: {},
     create: {
       name: 'Direct Laryngoscopy Intubation',
@@ -292,7 +314,12 @@ async function main() {
   });
 
   const vlIntubation = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Video Laryngoscopy Intubation', rotationId: icu.id } },
+    where: {
+      rotationId_name: {
+        name: 'Video Laryngoscopy Intubation',
+        rotationId: icu.id,
+      },
+    },
     update: {},
     create: {
       name: 'Video Laryngoscopy Intubation',
@@ -312,7 +339,12 @@ async function main() {
   });
 
   const sbt = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Spontaneous Breathing Trial', rotationId: icu.id } },
+    where: {
+      rotationId_name: {
+        name: 'Spontaneous Breathing Trial',
+        rotationId: icu.id,
+      },
+    },
     update: {},
     create: {
       name: 'Spontaneous Breathing Trial',
@@ -322,7 +354,12 @@ async function main() {
   });
 
   const trachCap = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Tracheostomy Capping Test', rotationId: icu.id } },
+    where: {
+      rotationId_name: {
+        name: 'Tracheostomy Capping Test',
+        rotationId: icu.id,
+      },
+    },
     update: {},
     create: {
       name: 'Tracheostomy Capping Test',
@@ -332,7 +369,9 @@ async function main() {
   });
 
   const ventConnect = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Ventilator Connection', rotationId: icu.id } },
+    where: {
+      rotationId_name: { name: 'Ventilator Connection', rotationId: icu.id },
+    },
     update: {},
     create: {
       name: 'Ventilator Connection',
@@ -342,19 +381,36 @@ async function main() {
   });
 
   const feedingTubeNasal = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Feeding Tube (Nasal)', rotationId: icu.id } },
+    where: {
+      rotationId_name: { name: 'Feeding Tube (Nasal)', rotationId: icu.id },
+    },
     update: {},
-    create: { name: 'Feeding Tube (Nasal)', description: 'NG tube insertion', rotationId: icu.id },
+    create: {
+      name: 'Feeding Tube (Nasal)',
+      description: 'NG tube insertion',
+      rotationId: icu.id,
+    },
   });
 
   const feedingTubeOral = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Feeding Tube (Oral)', rotationId: icu.id } },
+    where: {
+      rotationId_name: { name: 'Feeding Tube (Oral)', rotationId: icu.id },
+    },
     update: {},
-    create: { name: 'Feeding Tube (Oral)', description: 'OG tube insertion', rotationId: icu.id },
+    create: {
+      name: 'Feeding Tube (Oral)',
+      description: 'OG tube insertion',
+      rotationId: icu.id,
+    },
   });
 
   const transportIntubated = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Intubated Patient Transport', rotationId: icu.id } },
+    where: {
+      rotationId_name: {
+        name: 'Intubated Patient Transport',
+        rotationId: icu.id,
+      },
+    },
     update: {},
     create: {
       name: 'Intubated Patient Transport',
@@ -365,7 +421,9 @@ async function main() {
 
   // --- PROCEDURES (PACU) ---
   const pacuExtubation = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'PACU Extubation', rotationId: pacu.id } },
+    where: {
+      rotationId_name: { name: 'PACU Extubation', rotationId: pacu.id },
+    },
     update: {},
     create: {
       name: 'PACU Extubation',
@@ -375,7 +433,9 @@ async function main() {
   });
 
   const painAssessment = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Pain Assessment', rotationId: pacu.id } },
+    where: {
+      rotationId_name: { name: 'Pain Assessment', rotationId: pacu.id },
+    },
     update: {},
     create: {
       name: 'Pain Assessment',
@@ -385,7 +445,9 @@ async function main() {
   });
 
   const nauseaManagement = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Nausea Management', rotationId: pacu.id } },
+    where: {
+      rotationId_name: { name: 'Nausea Management', rotationId: pacu.id },
+    },
     update: {},
     create: {
       name: 'Nausea Management',
@@ -396,7 +458,9 @@ async function main() {
 
   // --- PROCEDURES (OR) ---
   const generalAnesthesia = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'General Anesthesia', rotationId: or.id } },
+    where: {
+      rotationId_name: { name: 'General Anesthesia', rotationId: or.id },
+    },
     update: {},
     create: {
       name: 'General Anesthesia',
@@ -406,7 +470,9 @@ async function main() {
   });
 
   const spinalAnesthesia = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Spinal Anesthesia', rotationId: or.id } },
+    where: {
+      rotationId_name: { name: 'Spinal Anesthesia', rotationId: or.id },
+    },
     update: {},
     create: {
       name: 'Spinal Anesthesia',
@@ -416,7 +482,9 @@ async function main() {
   });
 
   const epiduralAnesthesia = await prisma.procedure.upsert({
-    where: { rotationId_name: { name: 'Epidural Anesthesia', rotationId: or.id } },
+    where: {
+      rotationId_name: { name: 'Epidural Anesthesia', rotationId: or.id },
+    },
     update: {},
     create: {
       name: 'Epidural Anesthesia',
@@ -451,9 +519,18 @@ async function main() {
 
   for (const r of reqsData) {
     await prisma.requirement.upsert({
-      where: { rotationId_procedureId: { rotationId: r.rotationId, procedureId: r.procedureId } },
+      where: {
+        rotationId_procedureId: {
+          rotationId: r.rotationId,
+          procedureId: r.procedureId,
+        },
+      },
       update: { minCount: r.minCount },
-      create: { rotationId: r.rotationId, procedureId: r.procedureId, minCount: r.minCount },
+      create: {
+        rotationId: r.rotationId,
+        procedureId: r.procedureId,
+        minCount: r.minCount,
+      },
     });
   }
 
@@ -529,9 +606,18 @@ async function main() {
 
   for (const r of newRotationReqs) {
     await prisma.requirement.upsert({
-      where: { rotationId_procedureId: { rotationId: r.rotationId, procedureId: r.procedureId } },
+      where: {
+        rotationId_procedureId: {
+          rotationId: r.rotationId,
+          procedureId: r.procedureId,
+        },
+      },
       update: { minCount: r.minCount },
-      create: { rotationId: r.rotationId, procedureId: r.procedureId, minCount: r.minCount },
+      create: {
+        rotationId: r.rotationId,
+        procedureId: r.procedureId,
+        minCount: r.minCount,
+      },
     });
   }
 
@@ -590,7 +676,7 @@ async function main() {
     count: number,
     notes: string,
     status: 'APPROVED' | 'PENDING' | 'REJECTED' = 'APPROVED',
-    daysAgo: number = 0,
+    daysAgo: number = 0
   ) => {
     const logDate = new Date();
     logDate.setDate(logDate.getDate() - daysAgo);
@@ -612,7 +698,10 @@ async function main() {
           verifierId: tutor.id,
           status,
           timestamp: new Date(),
-          reason: status === 'APPROVED' ? 'Technique satisfactory' : 'Needs improvement',
+          reason:
+            status === 'APPROVED'
+              ? 'Technique satisfactory'
+              : 'Needs improvement',
         },
       });
     } else {
@@ -629,17 +718,57 @@ async function main() {
 
   // Create comprehensive log data for all interns
   const allProcedures = [
-    { procedure: arterialLine, count: 3, notes: 'Radial line, US-guided, no complications' },
-    { procedure: centralLine, count: 2, notes: 'IJ approach, US-guided, successful' },
-    { procedure: dlIntubation, count: 4, notes: 'Grade I view, successful intubation' },
-    { procedure: vlIntubation, count: 2, notes: 'VL with hyperangulated blade, grade I view' },
-    { procedure: extubation, count: 3, notes: 'Safe extubation, no complications' },
+    {
+      procedure: arterialLine,
+      count: 3,
+      notes: 'Radial line, US-guided, no complications',
+    },
+    {
+      procedure: centralLine,
+      count: 2,
+      notes: 'IJ approach, US-guided, successful',
+    },
+    {
+      procedure: dlIntubation,
+      count: 4,
+      notes: 'Grade I view, successful intubation',
+    },
+    {
+      procedure: vlIntubation,
+      count: 2,
+      notes: 'VL with hyperangulated blade, grade I view',
+    },
+    {
+      procedure: extubation,
+      count: 3,
+      notes: 'Safe extubation, no complications',
+    },
     { procedure: sbt, count: 5, notes: 'SBT protocol executed successfully' },
-    { procedure: ventConnect, count: 4, notes: 'Ventilator parameters set appropriately' },
-    { procedure: pacuExtubation, count: 2, notes: 'PACU extubation criteria met' },
-    { procedure: painAssessment, count: 6, notes: 'Comprehensive pain evaluation' },
-    { procedure: generalAnesthesia, count: 7, notes: 'Complete GA induction and maintenance' },
-    { procedure: spinalAnesthesia, count: 2, notes: 'Successful subarachnoid block' },
+    {
+      procedure: ventConnect,
+      count: 4,
+      notes: 'Ventilator parameters set appropriately',
+    },
+    {
+      procedure: pacuExtubation,
+      count: 2,
+      notes: 'PACU extubation criteria met',
+    },
+    {
+      procedure: painAssessment,
+      count: 6,
+      notes: 'Comprehensive pain evaluation',
+    },
+    {
+      procedure: generalAnesthesia,
+      count: 7,
+      notes: 'Complete GA induction and maintenance',
+    },
+    {
+      procedure: spinalAnesthesia,
+      count: 2,
+      notes: 'Successful subarachnoid block',
+    },
   ];
 
   // Create logs for first intern (Itai) - realistic progress showing finished ICU/PACU, active OR/OBGYN
@@ -650,7 +779,7 @@ async function main() {
     5,
     'ICU arterial line placement, US-guided',
     'APPROVED',
-    30,
+    30
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -658,7 +787,7 @@ async function main() {
     4,
     'ICU central line, IJ approach',
     'APPROVED',
-    28,
+    28
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -666,7 +795,7 @@ async function main() {
     6,
     'ICU intubation, difficult airway',
     'APPROVED',
-    25,
+    25
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -674,7 +803,7 @@ async function main() {
     3,
     'ICU VL intubation, grade I view',
     'APPROVED',
-    22,
+    22
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -682,7 +811,7 @@ async function main() {
     5,
     'ICU extubation, safe emergence',
     'APPROVED',
-    20,
+    20
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -690,7 +819,7 @@ async function main() {
     8,
     'ICU SBT protocol, successful weaning',
     'APPROVED',
-    18,
+    18
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -698,7 +827,7 @@ async function main() {
     6,
     'ICU ventilator management',
     'APPROVED',
-    15,
+    15
   );
 
   // PACU procedures (finished) - all approved
@@ -708,7 +837,7 @@ async function main() {
     4,
     'PACU extubation, criteria met',
     'APPROVED',
-    12,
+    12
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -716,7 +845,7 @@ async function main() {
     7,
     'PACU pain assessment, multimodal approach',
     'APPROVED',
-    10,
+    10
   );
 
   // OR procedures (active) - mix of approved and pending
@@ -726,7 +855,7 @@ async function main() {
     3,
     'OR general anesthesia, complex case',
     'APPROVED',
-    5,
+    5
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -734,7 +863,7 @@ async function main() {
     2,
     'OR spinal anesthesia, orthopedic case',
     'PENDING',
-    3,
+    3
   );
 
   // OBGYN procedures (active) - mix of approved and pending
@@ -744,7 +873,7 @@ async function main() {
     2,
     'OBGYN GA, cesarean section',
     'APPROVED',
-    2,
+    2
   );
   await createLogWithVerification(
     interns[0]?.id || '',
@@ -752,7 +881,7 @@ async function main() {
     1,
     'OBGYN spinal, labor analgesia',
     'PENDING',
-    1,
+    1
   );
 
   // Create logs for second intern (Sarah) - mostly approved
@@ -767,7 +896,7 @@ async function main() {
       count,
       notes,
       status,
-      i + 1,
+      i + 1
     );
   }
 
@@ -783,7 +912,7 @@ async function main() {
       count,
       notes,
       status,
-      i + 2,
+      i + 2
     );
   }
 
@@ -807,11 +936,13 @@ async function main() {
   console.log('  sarah@demo.local / intern123 (INTERN)');
   console.log('  david@demo.local / intern123 (INTERN)');
   console.log('Created 3 rotations: ICU, PACU, Operating Room');
-  console.log('Created comprehensive log entries with mixed verification statuses');
+  console.log(
+    'Created comprehensive log entries with mixed verification statuses'
+  );
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seed error:', e);
     process.exit(1);
   })

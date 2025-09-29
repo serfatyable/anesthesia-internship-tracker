@@ -6,14 +6,14 @@ import React from 'react';
 
 // Dynamic imports for code splitting
 export const lazyLoadComponent = <T extends React.ComponentType<unknown>>(
-  importFunc: () => Promise<{ default: T }>,
+  importFunc: () => Promise<{ default: T }>
 ) => {
   return React.lazy(importFunc);
 };
 
 // Route-based code splitting
 export const createLazyRoute = (
-  importFunc: () => Promise<{ default: React.ComponentType<unknown> }>,
+  importFunc: () => Promise<{ default: React.ComponentType<unknown> }>
 ) => {
   return lazyLoadComponent(importFunc);
 };
@@ -72,15 +72,25 @@ export const analyzeBundleSize = () => {
       | PerformanceNavigationTiming
       | undefined;
     if (!navigation) return null;
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+    const resources = performance.getEntriesByType(
+      'resource'
+    ) as PerformanceResourceTiming[];
 
-    const jsResources = resources.filter((r: PerformanceResourceTiming) => r.name.endsWith('.js'));
+    const jsResources = resources.filter((r: PerformanceResourceTiming) =>
+      r.name.endsWith('.js')
+    );
     const cssResources = resources.filter((r: PerformanceResourceTiming) =>
-      r.name.endsWith('.css'),
+      r.name.endsWith('.css')
     );
 
-    const totalJSSize = jsResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
-    const totalCSSSize = cssResources.reduce((sum, r) => sum + (r.transferSize || 0), 0);
+    const totalJSSize = jsResources.reduce(
+      (sum, r) => sum + (r.transferSize || 0),
+      0
+    );
+    const totalCSSSize = cssResources.reduce(
+      (sum, r) => sum + (r.transferSize || 0),
+      0
+    );
 
     return {
       totalSize: totalJSSize + totalCSSSize,
@@ -100,7 +110,11 @@ export const monitorMemoryUsage = () => {
   if (typeof window !== 'undefined' && 'memory' in performance) {
     const memory = (
       performance as {
-        memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number };
+        memory?: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+          jsHeapSizeLimit: number;
+        };
       }
     ).memory;
     if (!memory) return null;
@@ -133,7 +147,7 @@ export const useLazyLoading = (threshold = 0.1) => {
           observer.disconnect();
         }
       },
-      { threshold },
+      { threshold }
     );
 
     if (ref.current) {
@@ -151,14 +165,14 @@ export const useVirtualScrolling = <T>(
   items: T[],
   itemHeight: number,
   containerHeight: number,
-  overscan = 5,
+  overscan = 5
 ) => {
   const [scrollTop, setScrollTop] = React.useState(0);
 
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
     items.length - 1,
-    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan,
+    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
   );
 
   const visibleItems = items.slice(startIndex, endIndex + 1);
@@ -193,7 +207,7 @@ export const useDebouncedSearch = (value: string, delay: number = 300) => {
 // Memoized component wrapper
 export const withMemo = <P extends object>(
   Component: React.ComponentType<P>,
-  areEqual?: (prevProps: P, nextProps: P) => boolean,
+  areEqual?: (prevProps: P, nextProps: P) => boolean
 ) => {
   return React.memo(Component, areEqual);
 };
@@ -212,12 +226,8 @@ export const OptimizedList = <T extends { id: string }>({
   containerHeight?: number;
   overscan?: number;
 }) => {
-  const { visibleItems, totalHeight, offsetY, setScrollTop } = useVirtualScrolling(
-    items,
-    itemHeight,
-    containerHeight,
-    overscan,
-  );
+  const { visibleItems, totalHeight, offsetY, setScrollTop } =
+    useVirtualScrolling(items, itemHeight, containerHeight, overscan);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
@@ -246,11 +256,11 @@ export const OptimizedList = <T extends { id: string }>({
               key: item.id,
               style: { height: itemHeight },
             },
-            renderItem(item, index),
-          ),
-        ),
-      ),
-    ),
+            renderItem(item, index)
+          )
+        )
+      )
+    )
   );
 };
 
@@ -292,20 +302,19 @@ export const webpackConfig = {
 };
 
 // Export everything
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const bundleOptimizer = {
-  lazyLoadComponent,
-  createLazyRoute,
-  preloadComponent,
-  preloadRoute,
-  analyzeBundleSize,
-  monitorMemoryUsage,
-  optimizeImage,
-  useLazyLoading,
-  useVirtualScrolling,
-  useDebouncedSearch,
-  withMemo,
-  OptimizedList,
-  bundleConfig,
-  webpackConfig,
-};
+// const _bundleOptimizer = {
+//   lazyLoadComponent,
+//   createLazyRoute,
+//   preloadComponent,
+//   preloadRoute,
+//   analyzeBundleSize,
+//   monitorMemoryUsage,
+//   optimizeImage,
+//   useLazyLoading,
+//   useVirtualScrolling,
+//   useDebouncedSearch,
+//   withMemo,
+//   OptimizedList,
+//   bundleConfig,
+//   webpackConfig,
+// };

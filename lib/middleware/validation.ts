@@ -33,13 +33,13 @@ export const commonSchemas = {
       to: z.string().datetime().optional(),
     })
     .refine(
-      (data) => {
+      data => {
         if (data.from && data.to) {
           return new Date(data.from) <= new Date(data.to);
         }
         return true;
       },
-      { message: 'From date must be before or equal to to date' },
+      { message: 'From date must be before or equal to to date' }
     ),
 
   search: z.object({
@@ -57,7 +57,10 @@ export const commonSchemas = {
 };
 
 // Validate request body
-export function validateBody<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult<T> {
+export function validateBody<T>(
+  schema: z.ZodSchema<T>,
+  data: unknown
+): ValidationResult<T> {
   try {
     const result = schema.parse(data);
     return { success: true, data: result };
@@ -72,7 +75,7 @@ export function validateBody<T>(schema: z.ZodSchema<T>, data: unknown): Validati
 // Validate query parameters
 export function validateQuery<T>(
   schema: z.ZodSchema<T>,
-  searchParams: URLSearchParams,
+  searchParams: URLSearchParams
 ): ValidationResult<T> {
   try {
     const queryObject = Object.fromEntries(searchParams.entries());
@@ -89,7 +92,7 @@ export function validateQuery<T>(
 // Validate route parameters
 export function validateParams<T>(
   schema: z.ZodSchema<T>,
-  params: Record<string, string | string[]>,
+  params: Record<string, string | string[]>
 ): ValidationResult<T> {
   try {
     const result = schema.parse(params);
@@ -103,7 +106,10 @@ export function validateParams<T>(
 }
 
 // Validate headers
-export function validateHeaders<T>(schema: z.ZodSchema<T>, headers: Headers): ValidationResult<T> {
+export function validateHeaders<T>(
+  schema: z.ZodSchema<T>,
+  headers: Headers
+): ValidationResult<T> {
   try {
     const headerObject = Object.fromEntries(headers.entries());
     const result = schema.parse(headerObject);
@@ -117,8 +123,11 @@ export function validateHeaders<T>(schema: z.ZodSchema<T>, headers: Headers): Va
 }
 
 // Create validation error response
-function createValidationErrorResponse(errors: z.ZodError, context: string): NextResponse {
-  const formattedErrors = errors.issues.map((issue) => ({
+function createValidationErrorResponse(
+  errors: z.ZodError,
+  context: string
+): NextResponse {
+  const formattedErrors = errors.issues.map(issue => ({
     field: issue.path.join('.'),
     message: issue.message,
     code: issue.code,
@@ -137,14 +146,14 @@ function createValidationErrorResponse(errors: z.ZodError, context: string): Nex
       details: formattedErrors,
       timestamp: new Date().toISOString(),
     },
-    { status: 400 },
+    { status: 400 }
   );
 }
 
 // Main validation middleware
 export function withValidation<T extends Record<string, unknown>>(
   options: ValidationOptions,
-  handler: (validatedData: T, request: NextRequest) => Promise<NextResponse>,
+  handler: (validatedData: T, request: NextRequest) => Promise<NextResponse>
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const validatedDataMutable: Record<string, unknown> = {};
@@ -157,21 +166,36 @@ export function withValidation<T extends Record<string, unknown>>(
         const bodyResult = validateBody(options.body, body);
 
         if (!bodyResult.success) {
-          return createValidationErrorResponse(bodyResult.errors!, `${context} body`);
+          return createValidationErrorResponse(
+            bodyResult.errors!,
+            `${context} body`
+          );
         }
 
-        Object.assign(validatedDataMutable, bodyResult.data as Record<string, unknown>);
+        Object.assign(
+          validatedDataMutable,
+          bodyResult.data as Record<string, unknown>
+        );
       }
 
       // Validate query parameters
       if (options.query) {
-        const queryResult = validateQuery(options.query, request.nextUrl.searchParams);
+        const queryResult = validateQuery(
+          options.query,
+          request.nextUrl.searchParams
+        );
 
         if (!queryResult.success) {
-          return createValidationErrorResponse(queryResult.errors!, `${context} query`);
+          return createValidationErrorResponse(
+            queryResult.errors!,
+            `${context} query`
+          );
         }
 
-        Object.assign(validatedDataMutable, queryResult.data as Record<string, unknown>);
+        Object.assign(
+          validatedDataMutable,
+          queryResult.data as Record<string, unknown>
+        );
       }
 
       // Validate route parameters
@@ -180,16 +204,22 @@ export function withValidation<T extends Record<string, unknown>>(
           request.nextUrl.pathname
             .split('/')
             .filter(Boolean)
-            .map((segment, index) => [`param${index}`, segment]),
+            .map((segment, index) => [`param${index}`, segment])
         );
 
         const paramsResult = validateParams(options.params, params);
 
         if (!paramsResult.success) {
-          return createValidationErrorResponse(paramsResult.errors!, `${context} params`);
+          return createValidationErrorResponse(
+            paramsResult.errors!,
+            `${context} params`
+          );
         }
 
-        Object.assign(validatedDataMutable, paramsResult.data as Record<string, unknown>);
+        Object.assign(
+          validatedDataMutable,
+          paramsResult.data as Record<string, unknown>
+        );
       }
 
       // Validate headers
@@ -197,10 +227,16 @@ export function withValidation<T extends Record<string, unknown>>(
         const headersResult = validateHeaders(options.headers, request.headers);
 
         if (!headersResult.success) {
-          return createValidationErrorResponse(headersResult.errors!, `${context} headers`);
+          return createValidationErrorResponse(
+            headersResult.errors!,
+            `${context} headers`
+          );
         }
 
-        Object.assign(validatedDataMutable, headersResult.data as Record<string, unknown>);
+        Object.assign(
+          validatedDataMutable,
+          headersResult.data as Record<string, unknown>
+        );
       }
 
       // Call the handler with validated data
@@ -218,7 +254,7 @@ export function withValidation<T extends Record<string, unknown>>(
           message: 'Validation processing failed',
           timestamp: new Date().toISOString(),
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
   };
@@ -243,7 +279,7 @@ export const validateId = (params: Record<string, string | string[]>) =>
 // Sanitization helpers
 export function sanitizeInput<T extends Record<string, unknown>>(
   data: T,
-  rules: Partial<Record<keyof T, (value: unknown) => unknown>>,
+  rules: Partial<Record<keyof T, (value: unknown) => unknown>>
 ): T {
   const sanitized = { ...data };
 

@@ -4,14 +4,14 @@ interface AnalyticsEvent {
   id: string;
   name: string;
   properties: Record<string, any>;
-  userId?: string;
-  sessionId?: string;
+  userId?: string | undefined;
+  sessionId?: string | undefined;
   timestamp: number;
   context: {
-    userAgent?: string;
-    ip?: string;
-    url?: string;
-    referrer?: string;
+    userAgent?: string | undefined;
+    ip?: string | undefined;
+    url?: string | undefined;
+    referrer?: string | undefined;
   };
 }
 
@@ -44,6 +44,19 @@ class AnalyticsMonitor {
   }
 
   /**
+   * Track an event (alias for track method)
+   */
+  trackEvent(
+    name: string,
+    properties: Record<string, any> = {},
+    userId?: string,
+    sessionId?: string,
+    context: Partial<AnalyticsEvent['context']> = {}
+  ): string {
+    return this.track(name, properties, userId, sessionId, context);
+  }
+
+  /**
    * Track an event
    */
   track(
@@ -71,10 +84,10 @@ class AnalyticsMonitor {
       sessionId,
       timestamp: now,
       context: {
-        userAgent: context.userAgent || this.getUserAgent(),
-        ip: context.ip || this.getClientIP(),
-        url: context.url || this.getCurrentURL(),
-        referrer: context.referrer || this.getReferrer(),
+        userAgent: context.userAgent || this.getUserAgent() || undefined,
+        ip: context.ip || this.getClientIP() || undefined,
+        url: context.url || this.getCurrentURL() || undefined,
+        referrer: context.referrer || this.getReferrer() || undefined,
       },
     };
 
@@ -97,10 +110,15 @@ class AnalyticsMonitor {
     userId?: string,
     sessionId?: string
   ): string {
-    return this.track('page_view', {
-      page,
-      title: title || page,
-    }, userId, sessionId);
+    return this.track(
+      'page_view',
+      {
+        page,
+        title: title || page,
+      },
+      userId,
+      sessionId
+    );
   }
 
   /**
@@ -114,12 +132,17 @@ class AnalyticsMonitor {
     userId?: string,
     sessionId?: string
   ): string {
-    return this.track('user_action', {
-      action,
-      category,
-      label,
-      value,
-    }, userId, sessionId);
+    return this.track(
+      'user_action',
+      {
+        action,
+        category,
+        label,
+        value,
+      },
+      userId,
+      sessionId
+    );
   }
 
   /**
@@ -132,13 +155,17 @@ class AnalyticsMonitor {
     duration: number,
     userId?: string
   ): string {
-    return this.track('api_call', {
-      endpoint,
-      method,
-      statusCode,
-      duration,
-      success: statusCode >= 200 && statusCode < 400,
-    }, userId);
+    return this.track(
+      'api_call',
+      {
+        endpoint,
+        method,
+        statusCode,
+        duration,
+        success: statusCode >= 200 && statusCode < 400,
+      },
+      userId
+    );
   }
 
   /**
@@ -150,11 +177,15 @@ class AnalyticsMonitor {
     rowsAffected?: number,
     userId?: string
   ): string {
-    return this.track('database_query', {
-      query: query.substring(0, 100), // Truncate for privacy
+    return this.track(
+      'database_query',
+      {
+        query: query.substring(0, 100), // Truncate for privacy
         duration,
-      rowsAffected,
-    }, userId);
+        rowsAffected,
+      },
+      userId
+    );
   }
 
   /**
@@ -166,12 +197,17 @@ class AnalyticsMonitor {
     userId?: string,
     sessionId?: string
   ): string {
-    return this.track('error', {
-      message: error.message,
-      type: error.constructor.name,
-      stack: error.stack?.substring(0, 500), // Truncate for privacy
-      ...context,
-    }, userId, sessionId);
+    return this.track(
+      'error',
+      {
+        message: error.message,
+        type: error.constructor.name,
+        stack: error.stack?.substring(0, 500), // Truncate for privacy
+        ...context,
+      },
+      userId,
+      sessionId
+    );
   }
 
   /**
@@ -195,7 +231,9 @@ class AnalyticsMonitor {
     }
 
     if (filters?.sessionId) {
-      filtered = filtered.filter(event => event.sessionId === filters.sessionId);
+      filtered = filtered.filter(
+        event => event.sessionId === filters.sessionId
+      );
     }
 
     if (filters?.since) {
@@ -225,8 +263,11 @@ class AnalyticsMonitor {
     const since = Date.now() - timeframe;
     const recentEvents = this.events.filter(event => event.timestamp >= since);
 
-    const uniqueUsers = new Set(recentEvents.map(e => e.userId).filter(Boolean)).size;
-    const uniqueSessions = new Set(recentEvents.map(e => e.sessionId).filter(Boolean)).size;
+    const uniqueUsers = new Set(recentEvents.map(e => e.userId).filter(Boolean))
+      .size;
+    const uniqueSessions = new Set(
+      recentEvents.map(e => e.sessionId).filter(Boolean)
+    ).size;
 
     const eventsByType: Record<string, number> = {};
     const pageViews: Record<string, number> = {};
@@ -272,8 +313,10 @@ class AnalyticsMonitor {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    const errorRate = recentEvents.length > 0 ? (errorCount / recentEvents.length) * 100 : 0;
-    const avgResponseTime = responseTimeCount > 0 ? totalResponseTime / responseTimeCount : 0;
+    const errorRate =
+      recentEvents.length > 0 ? (errorCount / recentEvents.length) * 100 : 0;
+    const avgResponseTime =
+      responseTimeCount > 0 ? totalResponseTime / responseTimeCount : 0;
 
     return {
       totalEvents: recentEvents.length,
@@ -351,7 +394,7 @@ class AnalyticsMonitor {
       // In a real implementation, you would send events to your analytics service
       // For now, we'll just log them
       console.log(`[AnalyticsMonitor] Flushing ${this.events.length} events`);
-      
+
       // Clear events after flushing
       this.events = [];
     } catch (error) {

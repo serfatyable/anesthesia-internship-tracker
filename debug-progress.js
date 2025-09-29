@@ -30,7 +30,7 @@ async function debugProgress() {
     console.log('\nRotations from database:');
     rotations.forEach((rotation, index) => {
       console.log(
-        `${index + 1}. ${rotation.name} (State: ${rotation.state}, Requirements: ${rotation.requirements.length})`,
+        `${index + 1}. ${rotation.name} (State: ${rotation.state}, Requirements: ${rotation.requirements.length})`
       );
     });
 

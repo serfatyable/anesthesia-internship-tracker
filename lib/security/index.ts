@@ -1,10 +1,39 @@
 // lib/security/index.ts
 
-export { securityHeaders, addSecurityHeaders, createSecureResponse, isSecureRequest, getClientIP, getUserAgent, isBot, isSuspiciousRequest } from './headers';
-export { rateLimiters, withRateLimit, createRateLimitResponse, RateLimiter } from './rate-limiting';
-export { commonSchemas, sanitizers, validateInput, sanitizeInput, securityValidators, validateSecurity } from './validation';
-export { encryptionService, cryptoUtils, EncryptionService } from './encryption';
-export { securityMiddleware, securityUtils, SecurityMiddleware } from './middleware';
+export {
+  securityHeaders,
+  addSecurityHeaders,
+  createSecureResponse,
+  isSecureRequest,
+  getClientIP,
+  getUserAgent,
+  isBot,
+  isSuspiciousRequest,
+} from './headers';
+export {
+  rateLimiters,
+  withRateLimit,
+  createRateLimitResponse,
+  RateLimiter,
+} from './rate-limiting';
+export {
+  commonSchemas,
+  sanitizers,
+  validateInput,
+  sanitizeInput,
+  securityValidators,
+  validateSecurity,
+} from './validation';
+export {
+  encryptionService,
+  cryptoUtils,
+  EncryptionService,
+} from './encryption';
+export {
+  securityMiddleware,
+  securityUtils,
+  SecurityMiddleware,
+} from './middleware';
 
 // Re-export types
 export type { SecurityHeaders } from './headers';
@@ -42,11 +71,17 @@ export const securityConfig = {
   headers: {
     contentSecurityPolicy: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://api.example.com"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        'https://cdn.jsdelivr.net',
+        'https://unpkg.com',
+      ],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      connectSrc: ["'self'", 'https://api.example.com'],
       frameSrc: ["'none'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
@@ -76,7 +111,7 @@ export const securityConfig = {
   encryption: {
     algorithm: 'aes-256-gcm',
     keyLength: 32, // 256 bits
-    ivLength: 16,  // 128 bits
+    ivLength: 16, // 128 bits
     saltLength: 32, // 256 bits
     iterations: 100000, // PBKDF2 iterations
   },
@@ -86,7 +121,16 @@ export const securityConfig = {
     maxStringLength: 10000,
     maxArrayLength: 1000,
     maxObjectDepth: 10,
-    allowedFileTypes: ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx', '.txt'],
+    allowedFileTypes: [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.pdf',
+      '.doc',
+      '.docx',
+      '.txt',
+    ],
     maxFileSize: 10 * 1024 * 1024, // 10MB
   },
 
@@ -107,10 +151,10 @@ export const security = {
   init: (config?: Partial<typeof securityConfig>) => {
     // Merge with default config
     const mergedConfig = { ...securityConfig, ...config };
-    
+
     // Initialize rate limiters with new config
     // This would be done in the actual implementation
-    
+
     return mergedConfig;
   },
 
@@ -119,11 +163,7 @@ export const security = {
    */
   isConfigured: (): boolean => {
     // Check if required environment variables are set
-    const requiredEnvVars = [
-      'NEXTAUTH_SECRET',
-      'NEXTAUTH_URL',
-      'DATABASE_URL',
-    ];
+    const requiredEnvVars = ['NEXTAUTH_SECRET', 'NEXTAUTH_URL', 'DATABASE_URL'];
 
     return requiredEnvVars.every(envVar => process.env[envVar]);
   },

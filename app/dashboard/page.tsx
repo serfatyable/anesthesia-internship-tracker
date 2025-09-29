@@ -20,7 +20,9 @@ interface DashboardPageProps {
   }>;
 }
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -69,14 +71,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <Suspense
       fallback={
-        <main className="max-w-5xl mx-auto p-4">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <main className='max-w-5xl mx-auto p-4'>
+          <div className='flex items-center justify-center h-64'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
           </div>
         </main>
       }
     >
-      <main className="max-w-7xl mx-auto p-4">
+      <main className='max-w-7xl mx-auto p-4'>
         <DashboardClient
           isTutor={isTutor}
           interns={interns}

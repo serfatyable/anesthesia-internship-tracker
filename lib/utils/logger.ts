@@ -74,11 +74,12 @@ interface LogEntry {
 
 class Logger {
   private minLevel: LogLevel;
-  private isDevelopment: boolean;
+  // private _isDevelopment: boolean;
 
   constructor() {
-    this.minLevel = process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO;
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.minLevel =
+      process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO;
+    // this._isDevelopment = process.env.NODE_ENV === 'development';
   }
 
   private shouldLog(level: LogLevel): boolean {
@@ -89,7 +90,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context: LogContext = {},
-    error?: Error,
+    error?: Error
   ): LogEntry {
     return {
       level,
@@ -114,7 +115,8 @@ class Logger {
         stack: entry.stack,
       });
     } else {
-      const logMethod = entry.level <= LogLevel.WARN ? console.warn : console.log;
+      const logMethod =
+        entry.level <= LogLevel.WARN ? console.warn : console.log;
       logMethod(`${prefix} ${entry.message}`, entry.context);
     }
 
@@ -165,21 +167,29 @@ class Logger {
     path: string,
     statusCode: number,
     duration: number,
-    context: LogContext = {},
+    context: LogContext = {}
   ): void {
     const level = statusCode >= 400 ? LogLevel.ERROR : LogLevel.INFO;
-    const entry = this.formatLog(level, `API Response: ${method} ${path} ${statusCode}`, {
-      ...context,
-      operation: 'api_response',
-      method,
-      path,
-      statusCode,
-      duration,
-    });
+    const entry = this.formatLog(
+      level,
+      `API Response: ${method} ${path} ${statusCode}`,
+      {
+        ...context,
+        operation: 'api_response',
+        method,
+        path,
+        statusCode,
+        duration,
+      }
+    );
     this.writeLog(entry);
   }
 
-  databaseQuery(query: string, duration: number, context: LogContext = {}): void {
+  databaseQuery(
+    query: string,
+    duration: number,
+    context: LogContext = {}
+  ): void {
     this.debug(`Database Query: ${query}`, {
       ...context,
       operation: 'database_query',
@@ -205,7 +215,11 @@ class Logger {
     });
   }
 
-  performanceMetric(metric: string, value: number, context: LogContext = {}): void {
+  performanceMetric(
+    metric: string,
+    value: number,
+    context: LogContext = {}
+  ): void {
     this.debug(`Performance: ${metric} = ${value}ms`, {
       ...context,
       operation: 'performance_metric',
@@ -215,7 +229,12 @@ class Logger {
   }
 
   // Additional logging methods for API routes
-  request(method: string, path: string, duration: number, context: LogContext = {}): void {
+  request(
+    method: string,
+    path: string,
+    duration: number,
+    context: LogContext = {}
+  ): void {
     this.info(`API Request: ${method} ${path}`, {
       ...context,
       method,
@@ -228,7 +247,7 @@ class Logger {
     action: string,
     logEntryId: string,
     reason?: string,
-    context: LogContext = {},
+    context: LogContext = {}
   ): void {
     this.info(`Verification ${action}: ${logEntryId}`, {
       ...context,
@@ -239,7 +258,9 @@ class Logger {
   }
 
   // Batch logging for high-volume operations
-  batchLog(entries: Array<{ level: LogLevel; message: string; context?: LogContext }>): void {
+  batchLog(
+    entries: Array<{ level: LogLevel; message: string; context?: LogContext }>
+  ): void {
     entries.forEach(({ level, message, context = {} }) => {
       const entry = this.formatLog(level, message, context);
       this.writeLog(entry);
@@ -265,17 +286,26 @@ class Logger {
 export const logger = new Logger();
 
 // Convenience functions
-export const logError = (message: string, context?: LogContext, error?: Error) =>
-  logger.error(message, context, error);
+export const logError = (
+  message: string,
+  context?: LogContext,
+  error?: Error
+) => logger.error(message, context, error);
 
-export const logWarn = (message: string, context?: LogContext) => logger.warn(message, context);
+export const logWarn = (message: string, context?: LogContext) =>
+  logger.warn(message, context);
 
-export const logInfo = (message: string, context?: LogContext) => logger.info(message, context);
+export const logInfo = (message: string, context?: LogContext) =>
+  logger.info(message, context);
 
-export const logDebug = (message: string, context?: LogContext) => logger.debug(message, context);
+export const logDebug = (message: string, context?: LogContext) =>
+  logger.debug(message, context);
 
 // Request-scoped logger
-export function createRequestLogger(requestId: string, userId?: string): Logger {
+export function createRequestLogger(
+  requestId: string,
+  userId?: string
+): Logger {
   return logger.child({ requestId, userId });
 }
 
@@ -283,7 +313,7 @@ export function createRequestLogger(requestId: string, userId?: string): Logger 
 export function logPerformance<T extends (...args: unknown[]) => unknown>(
   fn: T,
   operationName: string,
-  loggerInstance: Logger = logger,
+  loggerInstance: Logger = logger
 ): T {
   return ((...args: Parameters<T>) => {
     const start = performance.now();
@@ -293,14 +323,18 @@ export function logPerformance<T extends (...args: unknown[]) => unknown>(
 
       if (result instanceof Promise) {
         return result
-          .then((resolved) => {
+          .then(resolved => {
             const duration = performance.now() - start;
             loggerInstance.performanceMetric(operationName, duration);
             return resolved;
           })
-          .catch((error) => {
+          .catch(error => {
             const duration = performance.now() - start;
-            loggerInstance.error(`${operationName} failed`, { duration }, error);
+            loggerInstance.error(
+              `${operationName} failed`,
+              { duration },
+              error
+            );
             throw error;
           });
       }
@@ -310,7 +344,11 @@ export function logPerformance<T extends (...args: unknown[]) => unknown>(
       return result;
     } catch (error) {
       const duration = performance.now() - start;
-      loggerInstance.error(`${operationName} failed`, { duration }, error as Error);
+      loggerInstance.error(
+        `${operationName} failed`,
+        { duration },
+        error as Error
+      );
       throw error;
     }
   }) as T;

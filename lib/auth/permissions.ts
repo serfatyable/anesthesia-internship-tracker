@@ -25,7 +25,10 @@ export function canExportData(user: Pick<User, 'role' | 'id'>): boolean {
   );
 }
 
-export function canModifyUser(user: Pick<User, 'role' | 'id'>, targetUserId: string): boolean {
+export function canModifyUser(
+  user: Pick<User, 'role' | 'id'>,
+  targetUserId: string
+): boolean {
   // Users can modify their own profile, admins can modify anyone
   return user.id === targetUserId || user.role === USER_ROLES.ADMIN;
 }

@@ -151,7 +151,9 @@ describe('Auth API', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      (prisma.user.findUnique as any).mockRejectedValue(new Error('Database connection failed'));
+      (prisma.user.findUnique as any).mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       const request = new NextRequest('http://localhost:3000/api/auth/signup', {
         method: 'POST',

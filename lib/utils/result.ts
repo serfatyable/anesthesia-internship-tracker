@@ -1,7 +1,9 @@
 /**
  * Result type for better error handling without exceptions
  */
-export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
+export type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E };
 
 /**
  * Create a successful result
@@ -20,7 +22,9 @@ export function err<E>(error: E): Result<never, E> {
 /**
  * Wrap an async function to return a Result instead of throwing
  */
-export async function tryCatch<T>(fn: () => Promise<T>): Promise<Result<T, Error>> {
+export async function tryCatch<T>(
+  fn: () => Promise<T>
+): Promise<Result<T, Error>> {
   try {
     const data = await fn();
     return ok(data);

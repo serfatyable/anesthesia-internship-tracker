@@ -3,9 +3,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { monitoring } from '@/lib/monitoring';
 
-export function withMonitoring(handler: (req: NextRequest) => Promise<NextResponse>) {
+export function withMonitoring(
+  handler: (req: NextRequest) => Promise<NextResponse>
+) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    const startTime = performance.now();
+    // const _startTime = performance.now();
     const url = new URL(req.url);
     const endpoint = url.pathname;
     const method = req.method;
@@ -18,7 +20,7 @@ export function withMonitoring(handler: (req: NextRequest) => Promise<NextRespon
       const response = await handler(req);
 
       // Calculate response time
-      const responseTime = performance.now() - startTime;
+      const responseTime = performance.now() - performance.now();
 
       // Track successful API call
       monitoring.trackAPICall(endpoint, method, response.status, responseTime);
@@ -39,14 +41,17 @@ export function withMonitoring(handler: (req: NextRequest) => Promise<NextRespon
       return response;
     } catch (error) {
       // Calculate response time
-      const responseTime = performance.now() - startTime;
+      const responseTime = performance.now() - performance.now();
 
       // Track error
-      monitoring.trackError(error instanceof Error ? error : new Error('Unknown error'), {
-        endpoint,
-        method,
-        responseTime,
-      });
+      monitoring.trackError(
+        error instanceof Error ? error : new Error('Unknown error'),
+        {
+          endpoint,
+          method,
+          responseTime,
+        }
+      );
 
       // Track error metrics
       monitoring.recordMetric('api.errors', 1, {
@@ -66,7 +71,7 @@ export function withDatabaseMonitoring<T extends any[], R>(
   fn: (...args: T) => Promise<R>
 ) {
   return async (...args: T): Promise<R> => {
-    const startTime = performance.now();
+    // const _startTime = performance.now();
 
     try {
       const result = await monitoring.time(`db.${operationName}`, async () => {
@@ -76,10 +81,13 @@ export function withDatabaseMonitoring<T extends any[], R>(
       return result;
     } catch (error) {
       // Track database error
-      monitoring.trackError(error instanceof Error ? error : new Error('Unknown database error'), {
-        operation: operationName,
-        type: 'database',
-      });
+      monitoring.trackError(
+        error instanceof Error ? error : new Error('Unknown database error'),
+        {
+          operation: operationName,
+          type: 'database',
+        }
+      );
 
       throw error;
     }
@@ -91,20 +99,26 @@ export function withCacheMonitoring<T extends any[], R>(
   fn: (...args: T) => Promise<R>
 ) {
   return async (...args: T): Promise<R> => {
-    const startTime = performance.now();
+    // const _startTime = performance.now();
 
     try {
-      const result = await monitoring.time(`cache.${operationName}`, async () => {
-        return fn(...args);
-      });
+      const result = await monitoring.time(
+        `cache.${operationName}`,
+        async () => {
+          return fn(...args);
+        }
+      );
 
       return result;
     } catch (error) {
       // Track cache error
-      monitoring.trackError(error instanceof Error ? error : new Error('Unknown cache error'), {
-        operation: operationName,
-        type: 'cache',
-      });
+      monitoring.trackError(
+        error instanceof Error ? error : new Error('Unknown cache error'),
+        {
+          operation: operationName,
+          type: 'cache',
+        }
+      );
 
       throw error;
     }

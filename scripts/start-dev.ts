@@ -24,7 +24,10 @@ async function checkAndSetupDatabase() {
     const caseCount = await prisma.case.count();
     console.log(`📊 Database status: ${userCount} users, ${caseCount} cases\n`);
   } catch (error) {
-    console.log('❌ Database check failed:', error instanceof Error ? error.message : error);
+    console.log(
+      '❌ Database check failed:',
+      error instanceof Error ? error.message : error
+    );
     console.log('🛠️  Attempting to fix...');
 
     try {
@@ -50,12 +53,12 @@ async function startDevServer() {
     detached: false,
   });
 
-  devProcess.on('error', (error) => {
+  devProcess.on('error', error => {
     console.error('❌ Failed to start dev server:', error);
     process.exit(1);
   });
 
-  devProcess.on('exit', (code) => {
+  devProcess.on('exit', code => {
     if (code !== 0) {
       console.log(`\n⚠️  Dev server exited with code ${code}`);
     }
@@ -67,7 +70,7 @@ async function main() {
   await startDevServer();
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('❌ Startup failed:', error);
   process.exit(1);
 });

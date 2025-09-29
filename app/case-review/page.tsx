@@ -86,7 +86,7 @@ export default function CaseReviewPage() {
         if (reset) {
           setCases(data.cases);
         } else {
-          setCases((prev) => [...prev, ...data.cases]);
+          setCases(prev => [...prev, ...data.cases]);
         }
 
         setHasMore(data.pagination.hasMore);
@@ -94,7 +94,7 @@ export default function CaseReviewPage() {
         console.error('Error fetching cases:', error);
       }
     },
-    [category, search],
+    [category, search]
   );
 
   const fetchFavorites = useCallback(async () => {
@@ -132,14 +132,16 @@ export default function CaseReviewPage() {
       setLoading(true);
       fetchCases(1, true).finally(() => setLoading(false));
     },
-    [fetchCases],
+    [fetchCases]
   );
 
   // Initial load
   useEffect(() => {
     if (session) {
       setLoading(true);
-      Promise.all([fetchCases(1, true), fetchFavorites()]).finally(() => setLoading(false));
+      Promise.all([fetchCases(1, true), fetchFavorites()]).finally(() =>
+        setLoading(false)
+      );
     }
   }, [session, fetchCases, fetchFavorites]);
 
@@ -154,19 +156,21 @@ export default function CaseReviewPage() {
 
   const handleFavoriteToggle = (caseId: string, favorited: boolean) => {
     // Update local state immediately for better UX
-    setCases((prev) =>
-      prev.map((c) =>
+    setCases(prev =>
+      prev.map(c =>
         c.id === caseId
           ? {
               ...c,
               _count: {
                 ...c._count,
-                favorites: favorited ? c._count.favorites + 1 : c._count.favorites - 1,
+                favorites: favorited
+                  ? c._count.favorites + 1
+                  : c._count.favorites - 1,
               },
               favorites: favorited ? [{ id: 'temp' }] : [],
             }
-          : c,
-      ),
+          : c
+      )
     );
 
     // Refresh favorites list
@@ -176,9 +180,9 @@ export default function CaseReviewPage() {
   // Show loading state until component is mounted
   if (!mounted || status === 'loading' || loading) {
     return (
-      <main className="max-w-6xl mx-auto p-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <main className='max-w-6xl mx-auto p-4'>
+        <div className='flex items-center justify-center h-64'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
         </div>
       </main>
     );
@@ -189,15 +193,15 @@ export default function CaseReviewPage() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto p-4">
-      <div className="space-y-6">
+    <main className='max-w-6xl mx-auto p-4'>
+      <div className='space-y-6'>
         {/* Back Button */}
         <BackButton />
 
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Case Review</h1>
-          <p className="text-gray-600">
+        <div className='text-center'>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>Case Review</h1>
+          <p className='text-gray-600'>
             Share and explore interesting anesthesia and critical care cases
           </p>
         </div>
@@ -215,7 +219,10 @@ export default function CaseReviewPage() {
 
         {/* Favorites Card */}
         {favorites.length > 0 && (
-          <FavoritesCard favorites={favorites} onFavoriteToggle={handleFavoriteToggle} />
+          <FavoritesCard
+            favorites={favorites}
+            onFavoriteToggle={handleFavoriteToggle}
+          />
         )}
 
         {/* Cases List */}

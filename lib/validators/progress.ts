@@ -29,7 +29,7 @@ export const DateRangeSchema = z
     to: z.date().optional(),
   })
   .refine(
-    (data) => {
+    data => {
       if (data.from && data.to) {
         return data.from <= data.to;
       }
@@ -38,7 +38,7 @@ export const DateRangeSchema = z
     {
       message: 'From date must be before or equal to to date',
       path: ['from'],
-    },
+    }
   );
 
 export type DateRange = z.infer<typeof DateRangeSchema>;
@@ -51,7 +51,7 @@ export const ProgressAccessSchema = z
     requesterId: z.string(),
   })
   .refine(
-    (data) => {
+    data => {
       // INTERN can only access their own data
       if (data.requesterRole === 'INTERN') {
         return data.userId === data.requesterId;
@@ -62,7 +62,7 @@ export const ProgressAccessSchema = z
     {
       message: 'Access denied: insufficient permissions',
       path: ['userId'],
-    },
+    }
   );
 
 export type ProgressAccess = z.infer<typeof ProgressAccessSchema>;

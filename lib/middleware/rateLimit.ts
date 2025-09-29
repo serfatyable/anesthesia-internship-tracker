@@ -36,7 +36,7 @@ function getClientIP(request: NextRequest | Request): string {
 function cleanupExpiredEntries(now: number) {
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
 
-  Object.keys(store).forEach((key) => {
+  Object.keys(store).forEach(key => {
     const entry = store[key];
     if (entry && entry.resetTime < now) {
       delete store[key];
@@ -91,7 +91,7 @@ export function createRateLimit(config: RateLimitConfig) {
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': entry.resetTime.toString(),
           },
-        },
+        }
       );
     }
 

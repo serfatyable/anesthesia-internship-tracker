@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { progressService } from '@/lib/services/progressService';
-import { ExportQuerySchema, ProgressAccessSchema } from '@/lib/validators/progress';
+import {
+  ExportQuerySchema,
+  ProgressAccessSchema,
+} from '@/lib/validators/progress';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,8 +13,11 @@ export async function GET(request: NextRequest) {
   try {
     // Auth
     const rawSession = await getServerSession(authOptions);
-    const user = (rawSession as unknown as { user?: { id?: string; role?: string | null } } | null)
-      ?.user;
+    const user = (
+      rawSession as unknown as {
+        user?: { id?: string; role?: string | null };
+      } | null
+    )?.user;
     if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -27,8 +33,11 @@ export async function GET(request: NextRequest) {
     const parsedQuery = ExportQuerySchema.safeParse(queryParams);
     if (!parsedQuery.success) {
       return NextResponse.json(
-        { error: 'Invalid query parameters', details: parsedQuery.error.flatten() },
-        { status: 400 },
+        {
+          error: 'Invalid query parameters',
+          details: parsedQuery.error.flatten(),
+        },
+        { status: 400 }
       );
     }
 
@@ -43,7 +52,7 @@ export async function GET(request: NextRequest) {
     if (!accessValidation.success) {
       return NextResponse.json(
         { error: 'Access denied', details: accessValidation.error.flatten() },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -76,6 +85,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     console.error('Export logs failed', err);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }

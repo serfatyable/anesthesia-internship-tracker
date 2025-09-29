@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
     const { internId, isFavorite } = await request.json();
 
     if (!internId) {
-      return NextResponse.json({ error: 'Intern ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Intern ID is required' },
+        { status: 400 }
+      );
     }
 
     // Verify the intern exists
@@ -54,6 +57,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error managing favorite intern:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

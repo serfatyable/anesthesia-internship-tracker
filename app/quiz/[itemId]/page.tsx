@@ -22,15 +22,22 @@ const mockQuizzes: Record<string, QuizQuestion[]> = {
   intubation: [
     {
       id: '1',
-      question: 'What is the most common complication during endotracheal intubation?',
-      options: ['Hypotension', 'Esophageal intubation', 'Bradycardia', 'Hypertension'],
+      question:
+        'What is the most common complication during endotracheal intubation?',
+      options: [
+        'Hypotension',
+        'Esophageal intubation',
+        'Bradycardia',
+        'Hypertension',
+      ],
       correctAnswer: 1,
       explanation:
         'Esophageal intubation is the most common complication, occurring in 1-2% of cases.',
     },
     {
       id: '2',
-      question: 'Which of the following is NOT a sign of correct endotracheal tube placement?',
+      question:
+        'Which of the following is NOT a sign of correct endotracheal tube placement?',
       options: [
         'Bilateral chest rise',
         'End-tidal CO2 detection',
@@ -38,16 +45,24 @@ const mockQuizzes: Record<string, QuizQuestion[]> = {
         'Bilateral breath sounds',
       ],
       correctAnswer: 2,
-      explanation: 'Gastric distension indicates esophageal intubation, not correct placement.',
+      explanation:
+        'Gastric distension indicates esophageal intubation, not correct placement.',
     },
   ],
   bronchospasm: [
     {
       id: '1',
-      question: 'What is the first-line treatment for intraoperative bronchospasm?',
-      options: ['Epinephrine', 'Albuterol', 'Corticosteroids', 'Antihistamines'],
+      question:
+        'What is the first-line treatment for intraoperative bronchospasm?',
+      options: [
+        'Epinephrine',
+        'Albuterol',
+        'Corticosteroids',
+        'Antihistamines',
+      ],
       correctAnswer: 1,
-      explanation: 'Albuterol (beta-2 agonist) is the first-line treatment for bronchospasm.',
+      explanation:
+        'Albuterol (beta-2 agonist) is the first-line treatment for bronchospasm.',
     },
   ],
 };
@@ -56,7 +71,7 @@ export default function QuizPage({ params }: QuizPageProps) {
   const [itemId, setItemId] = useState<string>('');
 
   useEffect(() => {
-    params.then((resolvedParams) => {
+    params.then(resolvedParams => {
       setItemId(resolvedParams.itemId);
     });
   }, [params]);
@@ -130,7 +145,9 @@ export default function QuizPage({ params }: QuizPageProps) {
       });
 
       if (response.ok) {
-        alert(`Quiz ${passed ? 'passed' : 'failed'}! Score: ${correct}/${total}`);
+        alert(
+          `Quiz ${passed ? 'passed' : 'failed'}! Score: ${correct}/${total}`
+        );
         window.close(); // Close the quiz window
       } else {
         alert('Error saving quiz results');
@@ -143,22 +160,24 @@ export default function QuizPage({ params }: QuizPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
       </div>
     );
   }
 
   if (quizData.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <BackButton className="mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Quiz Not Found</h1>
-          <p className="text-gray-600 mb-4">No quiz available for this item.</p>
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center p-4'>
+        <div className='text-center max-w-md'>
+          <BackButton className='mb-4' />
+          <h1 className='text-2xl font-bold text-gray-900 mb-4'>
+            Quiz Not Found
+          </h1>
+          <p className='text-gray-600 mb-4'>No quiz available for this item.</p>
           <button
             onClick={() => window.close()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
           >
             Close
           </button>
@@ -172,9 +191,9 @@ export default function QuizPage({ params }: QuizPageProps) {
     const passed = percentage >= 70;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center">
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center p-4'>
+        <div className='max-w-2xl w-full bg-white rounded-lg shadow-lg p-8'>
+          <div className='text-center'>
             <div
               className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
                 passed ? 'bg-green-100' : 'bg-red-100'
@@ -182,36 +201,38 @@ export default function QuizPage({ params }: QuizPageProps) {
             >
               <svg
                 className={`w-8 h-8 ${passed ? 'text-green-600' : 'text-red-600'}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
               >
                 {passed ? (
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
+                    d='M5 13l4 4L19 7'
                   />
                 ) : (
                   <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                     strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
+                    d='M6 18L18 6M6 6l12 12'
                   />
                 )}
               </svg>
             </div>
-            <h1 className={`text-3xl font-bold mb-2 ${passed ? 'text-green-600' : 'text-red-600'}`}>
+            <h1
+              className={`text-3xl font-bold mb-2 ${passed ? 'text-green-600' : 'text-red-600'}`}
+            >
               {passed ? 'Quiz Passed!' : 'Quiz Failed'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className='text-gray-600 mb-6'>
               You scored {correct} out of {total} questions ({percentage}%)
             </p>
             <button
               onClick={handleSubmitQuiz}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
             >
               Submit Results
             </button>
@@ -225,31 +246,37 @@ export default function QuizPage({ params }: QuizPageProps) {
   if (!question) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
+    <div className='min-h-screen bg-gray-50 flex items-center justify-center p-4'>
+      <div className='max-w-2xl w-full bg-white rounded-lg shadow-lg p-8'>
         {/* Back Button */}
-        <BackButton className="mb-6" />
+        <BackButton className='mb-6' />
 
         {/* Progress */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className='mb-6'>
+          <div className='flex justify-between text-sm text-gray-600 mb-2'>
             <span>
               Question {currentQuestion + 1} of {quizData.length}
             </span>
-            <span>{Math.round(((currentQuestion + 1) / quizData.length) * 100)}%</span>
+            <span>
+              {Math.round(((currentQuestion + 1) / quizData.length) * 100)}%
+            </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className='w-full bg-gray-200 rounded-full h-2'>
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestion + 1) / quizData.length) * 100}%` }}
+              className='bg-blue-600 h-2 rounded-full transition-all duration-300'
+              style={{
+                width: `${((currentQuestion + 1) / quizData.length) * 100}%`,
+              }}
             />
           </div>
         </div>
 
         {/* Question */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">{question.question}</h2>
-          <div className="space-y-3">
+        <div className='mb-8'>
+          <h2 className='text-xl font-semibold text-gray-900 mb-6'>
+            {question.question}
+          </h2>
+          <div className='space-y-3'>
             {question.options.map((option, index) => (
               <button
                 key={index}
@@ -260,7 +287,7 @@ export default function QuizPage({ params }: QuizPageProps) {
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                <div className="flex items-center">
+                <div className='flex items-center'>
                   <div
                     className={`w-4 h-4 rounded-full border-2 mr-3 ${
                       selectedAnswers[currentQuestion] === index
@@ -269,7 +296,7 @@ export default function QuizPage({ params }: QuizPageProps) {
                     }`}
                   >
                     {selectedAnswers[currentQuestion] === index && (
-                      <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                      <div className='w-2 h-2 bg-white rounded-full mx-auto mt-0.5' />
                     )}
                   </div>
                   <span>{option}</span>
@@ -280,18 +307,18 @@ export default function QuizPage({ params }: QuizPageProps) {
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between">
+        <div className='flex justify-between'>
           <button
             onClick={handlePrevious}
             disabled={currentQuestion === 0}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className='px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
           >
             Previous
           </button>
           <button
             onClick={handleNext}
             disabled={selectedAnswers[currentQuestion] === -1}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className='px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
           >
             {currentQuestion === quizData.length - 1 ? 'Finish Quiz' : 'Next'}
           </button>

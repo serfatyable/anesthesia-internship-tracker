@@ -1,10 +1,15 @@
 // Common validation utilities for API endpoints
 
-export const isValidItemType = (type: string): type is 'PROCEDURE' | 'KNOWLEDGE' => {
+export const isValidItemType = (
+  type: string
+): type is 'PROCEDURE' | 'KNOWLEDGE' => {
   return ['PROCEDURE', 'KNOWLEDGE'].includes(type);
 };
 
-export const validateString = (value: string | null, fieldName: string): string => {
+export const validateString = (
+  value: string | null,
+  fieldName: string
+): string => {
   if (!value || typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`${fieldName} is required`);
   }

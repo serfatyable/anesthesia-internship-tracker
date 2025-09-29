@@ -53,7 +53,9 @@ async function optimizeFavoritesFeature() {
       });
     }
     let avgTime = (Date.now() - startTime) / iterations;
-    console.log(`   📊 Basic query: ${avgTime.toFixed(2)}ms average (${iterations} iterations)`);
+    console.log(
+      `   📊 Basic query: ${avgTime.toFixed(2)}ms average (${iterations} iterations)`
+    );
 
     // Test with limit (pagination simulation)
     startTime = Date.now();
@@ -66,7 +68,7 @@ async function optimizeFavoritesFeature() {
     }
     avgTime = (Date.now() - startTime) / iterations;
     console.log(
-      `   📊 Paginated query: ${avgTime.toFixed(2)}ms average (${iterations} iterations)`,
+      `   📊 Paginated query: ${avgTime.toFixed(2)}ms average (${iterations} iterations)`
     );
 
     // Test 3: Concurrent access simulation
@@ -81,13 +83,15 @@ async function optimizeFavoritesFeature() {
         prisma.procedureKnowledgeFavorite.findMany({
           where: { userId: testUser.id },
           orderBy: { createdAt: 'desc' },
-        }),
+        })
       );
     }
 
     await Promise.all(promises);
     const concurrentTime = Date.now() - startTime;
-    console.log(`   📊 Concurrent requests (${concurrentRequests}): ${concurrentTime}ms total`);
+    console.log(
+      `   📊 Concurrent requests (${concurrentRequests}): ${concurrentTime}ms total`
+    );
 
     // Test 4: Memory usage with larger dataset
     console.log('\n4. 💾 Memory Usage Testing');
@@ -119,7 +123,9 @@ async function optimizeFavoritesFeature() {
       orderBy: { createdAt: 'desc' },
     });
     const largeQueryTime = Date.now() - startTime;
-    console.log(`   📊 Large dataset query: ${largeQueryTime}ms (${largeResult.length} records)`);
+    console.log(
+      `   📊 Large dataset query: ${largeQueryTime}ms (${largeResult.length} records)`
+    );
 
     if (largeQueryTime > 500) {
       console.log('   ⚠️  Large dataset query is slow - consider pagination');
@@ -139,7 +145,7 @@ async function optimizeFavoritesFeature() {
         prisma.procedureKnowledgeFavorite.findMany({
           where: { userId: testUser.id },
           take: 1,
-        }),
+        })
       );
     }
 

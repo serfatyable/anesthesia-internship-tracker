@@ -10,10 +10,10 @@ export const RtlToggle = memo(function RtlToggle() {
 
   return (
     <button
-      className="text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 "
-      onClick={() => setRtl((v) => !v)}
+      className='text-xs rounded-full border px-3 py-1 hover:bg-zinc-50 '
+      onClick={() => setRtl(v => !v)}
       aria-pressed={rtl}
-      title="Toggle RTL/LTR"
+      title='Toggle RTL/LTR'
     >
       {rtl ? 'RTL' : 'LTR'}
     </button>

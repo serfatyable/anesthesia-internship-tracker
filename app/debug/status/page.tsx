@@ -5,7 +5,15 @@ import { prisma } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth'; // use relative path to avoid alias issues
 
-function Row({ label, ok, detail }: { label: string; ok: boolean; detail?: string }) {
+function Row({
+  label,
+  ok,
+  detail,
+}: {
+  label: string;
+  ok: boolean;
+  detail?: string;
+}) {
   return (
     <div
       style={{
@@ -18,7 +26,8 @@ function Row({ label, ok, detail }: { label: string; ok: boolean; detail?: strin
     >
       <span>{label}</span>
       <span>
-        {ok ? '✅' : '❌'} {detail ? <em style={{ opacity: 0.75 }}>— {detail}</em> : null}
+        {ok ? '✅' : '❌'}{' '}
+        {detail ? <em style={{ opacity: 0.75 }}>— {detail}</em> : null}
       </span>
     </div>
   );
@@ -29,7 +38,8 @@ export const dynamic = 'force-dynamic';
 export default async function StatusPage() {
   // Env
   const hasDB = !!process.env.DATABASE_URL;
-  const dbIsPostgres = hasDB && process.env.DATABASE_URL!.startsWith('postgresql://');
+  const dbIsPostgres =
+    hasDB && process.env.DATABASE_URL!.startsWith('postgresql://');
   const hasNAUrl = !!process.env.NEXTAUTH_URL;
   const hasSecret = !!process.env.NEXTAUTH_SECRET;
 
@@ -54,7 +64,7 @@ export default async function StatusPage() {
     migDetail: string | undefined;
   try {
     const items = fs.readdirSync(migDir, { withFileTypes: true });
-    hasMigrations = items.some((d) => d.isDirectory());
+    hasMigrations = items.some(d => d.isDirectory());
     migDetail = hasMigrations ? undefined : 'No migration folders';
   } catch {
     hasMigrations = false;
@@ -96,40 +106,42 @@ export default async function StatusPage() {
 
       <h2>Environment</h2>
       <Row
-        label="DATABASE_URL set"
+        label='DATABASE_URL set'
         ok={hasDB}
         {...(hasDB ? {} : { detail: 'Missing in .env.local' })}
       />
       <Row
-        label="DATABASE_URL is PostgreSQL"
+        label='DATABASE_URL is PostgreSQL'
         ok={dbIsPostgres}
         {...(dbIsPostgres ? {} : { detail: 'Expected postgresql://' })}
       />
-      <Row label="NEXTAUTH_URL set" ok={hasNAUrl} />
-      <Row label="NEXTAUTH_SECRET set" ok={hasSecret} />
+      <Row label='NEXTAUTH_URL set' ok={hasNAUrl} />
+      <Row label='NEXTAUTH_SECRET set' ok={hasSecret} />
 
       <h2>Database / Prisma</h2>
       <Row
-        label="Prisma query OK"
+        label='Prisma query OK'
         ok={dbOK}
-        {...(dbOK ? { detail: `Users: ${userCount}` } : { detail: dbError ?? 'Unknown error' })}
+        {...(dbOK
+          ? { detail: `Users: ${userCount}` }
+          : { detail: dbError ?? 'Unknown error' })}
       />
       <Row
-        label="Migrations folder exists"
+        label='Migrations folder exists'
         ok={hasMigrations}
         {...(migDetail ? { detail: migDetail } : {})}
       />
 
       <h2>Auth</h2>
       <Row
-        label="NextAuth session endpoint"
+        label='NextAuth session endpoint'
         ok={sessionOK}
         {...(sessionState ? { detail: sessionState } : {})}
       />
 
       <h2>Quick links</h2>
       <ul style={{ lineHeight: 1.9 }}>
-        {routes.map((r) => (
+        {routes.map(r => (
           <li key={r.href}>
             <a style={{ textDecoration: 'underline' }} href={r.href}>
               {r.label}
@@ -139,8 +151,8 @@ export default async function StatusPage() {
       </ul>
 
       <p style={{ marginTop: 24, opacity: 0.7 }}>
-        Tip: If you rotated NEXTAUTH_SECRET, clear cookies (DevTools → Application → Clear storage)
-        to fix JWT errors.
+        Tip: If you rotated NEXTAUTH_SECRET, clear cookies (DevTools →
+        Application → Clear storage) to fix JWT errors.
       </p>
     </main>
   );

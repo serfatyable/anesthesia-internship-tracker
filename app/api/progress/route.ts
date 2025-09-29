@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { progressService } from '@/lib/services/progressService';
-import { ProgressQuerySchema, ProgressAccessSchema } from '@/lib/validators/progress';
+import {
+  ProgressQuerySchema,
+  ProgressAccessSchema,
+} from '@/lib/validators/progress';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +27,11 @@ export async function GET(request: NextRequest) {
     const parsedQuery = ProgressQuerySchema.safeParse(queryParams);
     if (!parsedQuery.success) {
       return NextResponse.json(
-        { error: 'Invalid query parameters', details: parsedQuery.error.flatten() },
-        { status: 400 },
+        {
+          error: 'Invalid query parameters',
+          details: parsedQuery.error.flatten(),
+        },
+        { status: 400 }
       );
     }
 
@@ -41,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (!accessValidation.success) {
       return NextResponse.json(
         { error: 'Access denied', details: accessValidation.error.flatten() },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -51,7 +57,7 @@ export async function GET(request: NextRequest) {
       if (session.user.role !== 'TUTOR' && session.user.role !== 'ADMIN') {
         return NextResponse.json(
           { error: 'Access denied: overview tab requires TUTOR or ADMIN role' },
-          { status: 403 },
+          { status: 403 }
         );
       }
 
@@ -69,7 +75,7 @@ export async function GET(request: NextRequest) {
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

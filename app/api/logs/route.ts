@@ -25,11 +25,14 @@ export async function GET() {
     if (error instanceof Error) {
       return NextResponse.json(
         { error: 'Failed to load logs', details: error.message },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -48,7 +51,10 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch (error) {
-      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
     }
 
     // Sanitize notes if provided
@@ -60,7 +66,7 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -69,7 +75,10 @@ export async function POST(req: Request) {
 
     // Validate date is not in the future
     if (when > new Date()) {
-      return NextResponse.json({ error: 'Date cannot be in the future' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Date cannot be in the future' },
+        { status: 400 }
+      );
     }
 
     const created = await prisma.logEntry.create({
@@ -91,10 +100,13 @@ export async function POST(req: Request) {
     if (error instanceof Error) {
       return NextResponse.json(
         { error: 'Failed to create log', details: error.message },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

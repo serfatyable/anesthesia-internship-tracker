@@ -33,19 +33,20 @@ export interface ErrorRecoveryStrategy {
 export const errorRecoveryStrategies: ErrorRecoveryStrategy[] = [
   {
     name: 'network_retry',
-    canRecover: (error) =>
+    canRecover: error =>
       error.message.includes('network') ||
       error.message.includes('fetch') ||
       error.message.includes('timeout'),
     recover: async () => {
       console.log('Attempting network retry...');
       // Implement retry logic
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     },
   },
   {
     name: 'cache_clear',
-    canRecover: (error) => error.message.includes('cache') || error.message.includes('stale'),
+    canRecover: error =>
+      error.message.includes('cache') || error.message.includes('stale'),
     recover: () => {
       console.log('Clearing caches...');
       // Clear relevant caches
@@ -57,7 +58,7 @@ export const errorRecoveryStrategies: ErrorRecoveryStrategy[] = [
   },
   {
     name: 'auth_refresh',
-    canRecover: (error) =>
+    canRecover: error =>
       error.message.includes('unauthorized') || error.message.includes('token'),
     recover: async () => {
       console.log('Refreshing authentication...');
@@ -78,12 +79,22 @@ export function classifyError(error: Error): {
   const message = error.message.toLowerCase();
   // const stack = error.stack?.toLowerCase() || ''; // Unused variable removed
 
-  let type: 'network' | 'validation' | 'auth' | 'server' | 'client' | 'unknown' = 'unknown';
+  let type:
+    | 'network'
+    | 'validation'
+    | 'auth'
+    | 'server'
+    | 'client'
+    | 'unknown' = 'unknown';
   let severity: 'low' | 'medium' | 'high' | 'critical' = 'low';
   let recoverable = false;
 
   // Classify by type
-  if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
+  if (
+    message.includes('network') ||
+    message.includes('fetch') ||
+    message.includes('timeout')
+  ) {
     type = 'network';
     severity = 'medium';
     recoverable = true;
@@ -124,7 +135,11 @@ export function classifyError(error: Error): {
 }
 
 // Error reporting
-export function reportError(error: Error, errorInfo?: ErrorInfo, context?: string): void {
+export function reportError(
+  error: Error,
+  errorInfo?: ErrorInfo,
+  context?: string
+): void {
   const classification = classifyError(error);
   const errorId = generateErrorId();
 
@@ -139,7 +154,8 @@ export function reportError(error: Error, errorInfo?: ErrorInfo, context?: strin
     classification,
     context,
     timestamp: new Date().toISOString(),
-    userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+    userAgent:
+      typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
     url: typeof window !== 'undefined' ? window.location.href : 'server',
   });
 
@@ -192,10 +208,15 @@ export async function attemptErrorRecovery(error: Error): Promise<boolean> {
     if (strategy.canRecover(error)) {
       try {
         await strategy.recover(error);
-        console.log(`Error recovery successful using strategy: ${strategy.name}`);
+        console.log(
+          `Error recovery successful using strategy: ${strategy.name}`
+        );
         return true;
       } catch (recoveryError) {
-        console.error(`Error recovery failed for strategy ${strategy.name}:`, recoveryError);
+        console.error(
+          `Error recovery failed for strategy ${strategy.name}:`,
+          recoveryError
+        );
       }
     }
   }
@@ -224,20 +245,27 @@ export function setupGlobalErrorHandlers(): void {
   if (typeof window === 'undefined') return;
 
   // Unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
-    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+  window.addEventListener('unhandledrejection', event => {
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason));
     reportError(error, undefined, 'unhandled_promise_rejection');
   });
 
   // Uncaught errors
-  window.addEventListener('error', (event) => {
-    const error = event.error instanceof Error ? event.error : new Error(event.message);
+  window.addEventListener('error', event => {
+    const error =
+      event.error instanceof Error ? event.error : new Error(event.message);
     reportError(error, undefined, 'uncaught_error');
   });
 }
 
 // Error boundary component
-export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class AdvancedErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   private retryTimeout?: NodeJS.Timeout;
 
   constructor(props: ErrorBoundaryProps) {
@@ -314,7 +342,8 @@ export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
         React.createElement(
           'div',
           {
-            className: 'max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center',
+            className:
+              'max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center',
           },
           React.createElement(
             'div',
@@ -326,29 +355,30 @@ export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
               {
                 className: 'text-2xl font-bold text-red-600 mb-2',
               },
-              'Something went wrong',
+              'Something went wrong'
             ),
             React.createElement(
               'p',
               {
                 className: 'text-gray-600',
               },
-              'We encountered an unexpected error. Please try again.',
-            ),
+              'We encountered an unexpected error. Please try again.'
+            )
           ),
           process.env.NODE_ENV === 'development' &&
             this.state.error &&
             React.createElement(
               'div',
               {
-                className: 'mb-4 p-3 bg-red-50 border border-red-200 rounded text-left',
+                className:
+                  'mb-4 p-3 bg-red-50 border border-red-200 rounded text-left',
               },
               React.createElement(
                 'p',
                 {
                   className: 'text-sm text-red-800 font-mono',
                 },
-                this.state.error.message,
+                this.state.error.message
               ),
               this.state.errorId &&
                 React.createElement(
@@ -356,8 +386,8 @@ export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                   {
                     className: 'text-xs text-gray-500 mt-1',
                   },
-                  `Error ID: ${this.state.errorId}`,
-                ),
+                  `Error ID: ${this.state.errorId}`
+                )
             ),
           React.createElement(
             'div',
@@ -371,7 +401,7 @@ export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                 className:
                   'bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors',
               },
-              'Try Again',
+              'Try Again'
             ),
             React.createElement(
               'button',
@@ -380,10 +410,10 @@ export class AdvancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                 className:
                   'bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors',
               },
-              'Reload Page',
-            ),
-          ),
-        ),
+              'Reload Page'
+            )
+          )
+        )
       );
     }
 

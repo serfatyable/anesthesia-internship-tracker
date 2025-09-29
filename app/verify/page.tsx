@@ -44,37 +44,41 @@ export default function VerifyQueuePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <BackButton className="mb-4" />
-      <h1 className="text-2xl font-semibold mb-4">Pending Verifications</h1>
-      <div className="space-y-3">
-        {items.map((it) => (
-          <div key={it.id} className="border rounded p-3">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">{it.procedure.name}</div>
-              <div className="text-sm text-gray-700">{new Date(it.date).toLocaleString()}</div>
+    <div className='max-w-4xl mx-auto p-6'>
+      <BackButton className='mb-4' />
+      <h1 className='text-2xl font-semibold mb-4'>Pending Verifications</h1>
+      <div className='space-y-3'>
+        {items.map(it => (
+          <div key={it.id} className='border rounded p-3'>
+            <div className='flex items-center justify-between'>
+              <div className='font-medium'>{it.procedure.name}</div>
+              <div className='text-sm text-gray-700'>
+                {new Date(it.date).toLocaleString()}
+              </div>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className='text-sm text-gray-600'>
               {it.intern.name || it.intern.email} · count: {it.count}
             </div>
-            {it.notes && <div className="text-sm mt-1">{it.notes}</div>}
-            <div className="flex gap-2 mt-2">
+            {it.notes && <div className='text-sm mt-1'>{it.notes}</div>}
+            <div className='flex gap-2 mt-2'>
               <button
                 onClick={() => review(it.id, 'APPROVED')}
-                className="bg-black text-white px-3 py-1 rounded"
+                className='bg-black text-white px-3 py-1 rounded'
               >
                 Approve
               </button>
               <button
                 onClick={() => review(it.id, 'REJECTED')}
-                className="border px-3 py-1 rounded"
+                className='border px-3 py-1 rounded'
               >
                 Reject
               </button>
             </div>
           </div>
         ))}
-        {items.length === 0 && <p className="text-sm text-gray-600">No pending items.</p>}
+        {items.length === 0 && (
+          <p className='text-sm text-gray-600'>No pending items.</p>
+        )}
       </div>
     </div>
   );

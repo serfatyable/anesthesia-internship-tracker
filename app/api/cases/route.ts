@@ -4,7 +4,11 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { apiRateLimit } from '@/lib/middleware/rateLimit';
-import { sanitizeString, sanitizeHtml, sanitizeUrl } from '@/lib/utils/validation';
+import {
+  sanitizeString,
+  sanitizeHtml,
+  sanitizeUrl,
+} from '@/lib/utils/validation';
 import { withErrorHandling } from '@/lib/middleware/errorHandler';
 import { AppError } from '@/lib/utils/error-handler';
 import { monitoring } from '@/lib/utils/monitoring';
@@ -33,7 +37,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')));
+  const limit = Math.min(
+    100,
+    Math.max(1, parseInt(searchParams.get('limit') || '10'))
+  );
   const category = searchParams.get('category');
   const search = searchParams.get('search');
 
@@ -113,7 +120,10 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   // Enhanced sanitization
   const sanitizedBody = {
     ...body,
-    title: sanitizeString(body.title || '', 200).replace(/<script[^>]*>|<\/script>/gi, ''),
+    title: sanitizeString(body.title || '', 200).replace(
+      /<script[^>]*>|<\/script>/gi,
+      ''
+    ),
     description: sanitizeHtml(body.description || ''),
     category: sanitizeString(body.category || '', 100),
     image1Url: body.image1Url ? sanitizeUrl(body.image1Url) : undefined,
@@ -123,7 +133,12 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   const parseResult = createCaseSchema.safeParse(sanitizedBody);
   if (!parseResult.success) {
-    throw new AppError('Validation failed', 400, true, parseResult.error.issues);
+    throw new AppError(
+      'Validation failed',
+      400,
+      true,
+      parseResult.error.issues
+    );
   }
   const validatedData = parseResult.data;
 

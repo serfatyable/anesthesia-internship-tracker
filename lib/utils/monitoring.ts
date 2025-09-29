@@ -23,7 +23,11 @@ class MonitoringSystem {
   private enabled = process.env.DISABLE_MONITORING !== 'true';
 
   // Register a metric
-  recordMetric(key: string, value: number, tags?: Record<string, string>): void {
+  recordMetric(
+    key: string,
+    value: number,
+    tags?: Record<string, string>
+  ): void {
     if (!this.enabled) {
       return;
     }
@@ -51,11 +55,16 @@ class MonitoringSystem {
   }
 
   // Get metrics for a specific key
-  getMetrics(key: string, timeRange?: { start: number; end: number }): MetricData[] {
+  getMetrics(
+    key: string,
+    timeRange?: { start: number; end: number }
+  ): MetricData[] {
     const metrics = this.metrics.get(key) || [];
 
     if (timeRange) {
-      return metrics.filter((m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end);
+      return metrics.filter(
+        m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end
+      );
     }
 
     return [...metrics];
@@ -64,7 +73,7 @@ class MonitoringSystem {
   // Get aggregated statistics
   getStats(
     key: string,
-    timeRange?: { start: number; end: number },
+    timeRange?: { start: number; end: number }
   ): {
     count: number;
     min: number;
@@ -78,7 +87,7 @@ class MonitoringSystem {
       return { count: 0, min: 0, max: 0, avg: 0, p95: 0, p99: 0 };
     }
 
-    const values = metrics.map((m) => m.value).sort((a, b) => a - b);
+    const values = metrics.map(m => m.value).sort((a, b) => a - b);
     const count = values.length;
     const min = values[0];
     const max = values[count - 1];
@@ -103,7 +112,7 @@ class MonitoringSystem {
 
   // Check alerts for a metric
   private checkAlerts(key: string, value: number): void {
-    this.alerts.forEach((alert) => {
+    this.alerts.forEach(alert => {
       if (alert.condition(value)) {
         this.triggerAlert(alert, key, value);
       }
@@ -134,7 +143,7 @@ class MonitoringSystem {
     const cutoff = Date.now() - maxAge;
 
     this.metrics.forEach((metrics, key) => {
-      const filtered = metrics.filter((m) => m.timestamp > cutoff);
+      const filtered = metrics.filter(m => m.timestamp > cutoff);
       if (filtered.length === 0) {
         this.metrics.delete(key);
       } else {
@@ -158,21 +167,21 @@ export const monitoring = new MonitoringSystem();
 // Predefined alert rules
 monitoring.addAlert({
   name: 'high_response_time',
-  condition: (value) => value > 2000, // 2 seconds
+  condition: value => value > 2000, // 2 seconds
   severity: 'high',
   message: 'High response time detected',
 });
 
 monitoring.addAlert({
   name: 'high_memory_usage',
-  condition: (value) => value > 100 * 1024 * 1024, // 100MB
+  condition: value => value > 100 * 1024 * 1024, // 100MB
   severity: 'medium',
   message: 'High memory usage detected',
 });
 
 monitoring.addAlert({
   name: 'high_error_rate',
-  condition: (value) => value > 0.1, // 10%
+  condition: value => value > 0.1, // 10%
   severity: 'critical',
   message: 'High error rate detected',
 });
@@ -180,7 +189,7 @@ monitoring.addAlert({
 // Performance monitoring decorators
 export function monitorPerformance<T extends (...args: any[]) => any>(
   fn: T,
-  operationName: string,
+  operationName: string
 ): T {
   return ((...args: Parameters<T>) => {
     const start = performance.now();
@@ -191,14 +200,17 @@ export function monitorPerformance<T extends (...args: any[]) => any>(
       // Handle promises
       if (result instanceof Promise) {
         return result
-          .then((resolved) => {
+          .then(resolved => {
             const duration = performance.now() - start;
             monitoring.recordMetric(`performance.${operationName}`, duration);
             return resolved;
           })
-          .catch((error) => {
+          .catch(error => {
             const duration = performance.now() - start;
-            monitoring.recordMetric(`performance.${operationName}.error`, duration);
+            monitoring.recordMetric(
+              `performance.${operationName}.error`,
+              duration
+            );
             monitoring.recordMetric('error_rate', 1);
             throw error;
           });
@@ -217,14 +229,17 @@ export function monitorPerformance<T extends (...args: any[]) => any>(
 }
 
 // Database query monitoring
-export function monitorDatabaseQuery<T>(queryName: string, queryFn: () => Promise<T>): Promise<T> {
+export function monitorDatabaseQuery<T>(
+  queryName: string,
+  queryFn: () => Promise<T>
+): Promise<T> {
   return monitorPerformance(queryFn, `db.${queryName}`)();
 }
 
 // API route monitoring
 export function monitorApiRoute<T extends (...args: any[]) => any>(
   routeName: string,
-  handler: T,
+  handler: T
 ): T {
   return monitorPerformance(handler, `api.${routeName}`);
 }
@@ -263,7 +278,7 @@ export function recordError(error: Error, context?: string): void {
 export function recordCustomMetric(
   key: string,
   value: number,
-  tags?: Record<string, string>,
+  tags?: Record<string, string>
 ): void {
   monitoring.recordMetric(key, value, tags);
 }
@@ -280,15 +295,30 @@ export function getMonitoringDashboard(): {
 
   return {
     performance: {
-      'api.response_time': monitoring.getStats('performance.api', { start: lastHour, end: now }),
-      'db.query_time': monitoring.getStats('performance.db', { start: lastHour, end: now }),
+      'api.response_time': monitoring.getStats('performance.api', {
+        start: lastHour,
+        end: now,
+      }),
+      'db.query_time': monitoring.getStats('performance.db', {
+        start: lastHour,
+        end: now,
+      }),
     },
     memory: {
-      heap_used: monitoring.getStats('memory.heap_used', { start: lastHour, end: now }),
-      heap_total: monitoring.getStats('memory.heap_total', { start: lastHour, end: now }),
+      heap_used: monitoring.getStats('memory.heap_used', {
+        start: lastHour,
+        end: now,
+      }),
+      heap_total: monitoring.getStats('memory.heap_total', {
+        start: lastHour,
+        end: now,
+      }),
     },
     errors: {
-      error_rate: monitoring.getStats('error_rate', { start: lastHour, end: now }),
+      error_rate: monitoring.getStats('error_rate', {
+        start: lastHour,
+        end: now,
+      }),
     },
     custom: {
       // Add any custom metrics here
@@ -301,7 +331,7 @@ setInterval(
   () => {
     monitoring.cleanup();
   },
-  60 * 60 * 1000,
+  60 * 60 * 1000
 ); // Clean up every hour
 
 // Record memory usage periodically

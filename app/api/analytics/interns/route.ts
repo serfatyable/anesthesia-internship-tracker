@@ -4,8 +4,16 @@ export async function GET(request: Request) {
   const limit = parseInt(searchParams.get('limit') || '2', 10);
 
   const allInterns = [
-    { id: 'i1', name: 'John Doe', progress: { Cardiology: 80, Surgery: 60, Anesthesiology: 100 } },
-    { id: 'i2', name: 'Jane Roe', progress: { Cardiology: 40, Surgery: 90, Anesthesiology: 70 } },
+    {
+      id: 'i1',
+      name: 'John Doe',
+      progress: { Cardiology: 80, Surgery: 60, Anesthesiology: 100 },
+    },
+    {
+      id: 'i2',
+      name: 'Jane Roe',
+      progress: { Cardiology: 40, Surgery: 90, Anesthesiology: 70 },
+    },
     {
       id: 'i3',
       name: 'Sam Patel',

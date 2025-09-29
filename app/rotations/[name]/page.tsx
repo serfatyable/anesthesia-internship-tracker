@@ -62,7 +62,7 @@ export default function RotationPage({ params }: RotationPageProps) {
   const [rotationName, setRotationName] = useState<string>('');
 
   useEffect(() => {
-    params.then((resolvedParams) => {
+    params.then(resolvedParams => {
       setRotationName(decodeURIComponent(resolvedParams.name));
     });
   }, [params]);
@@ -70,9 +70,15 @@ export default function RotationPage({ params }: RotationPageProps) {
   const [loading, setLoading] = useState(true);
   const [proceduresExpanded, setProceduresExpanded] = useState(false);
   const [knowledgeExpanded, setKnowledgeExpanded] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [expandedProcedures, setExpandedProcedures] = useState<Set<string>>(new Set());
-  const [expandedKnowledge, setExpandedKnowledge] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  const [expandedProcedures, setExpandedProcedures] = useState<Set<string>>(
+    new Set()
+  );
+  const [expandedKnowledge, setExpandedKnowledge] = useState<Set<string>>(
+    new Set()
+  );
   const [reflectionPanel, setReflectionPanel] = useState<{
     isOpen: boolean;
     itemId: string;
@@ -86,12 +92,16 @@ export default function RotationPage({ params }: RotationPageProps) {
     itemType: 'PROCEDURE',
     itemName: '',
   });
-  const [quizResults] = useState<Record<string, { passed: boolean; score: number }>>({});
+  const [quizResults] = useState<
+    Record<string, { passed: boolean; score: number }>
+  >({});
   const [reflections, setReflections] = useState<
     Record<string, { content: string; images: string[] }>
   >({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [feedbackNotifications, setFeedbackNotifications] = useState<Record<string, number>>({});
+  const [feedbackNotifications, setFeedbackNotifications] = useState<
+    Record<string, number>
+  >({});
   const [feedbackModalOpen, setFeedbackModalOpen] = useState<{
     isOpen: boolean;
     itemId: string;
@@ -110,28 +120,32 @@ export default function RotationPage({ params }: RotationPageProps) {
             name: 'Endotracheal Intubation',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Airway Management",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Airway Management",
           },
           {
             id: 'lma',
             name: 'LMA Insertion',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Supraglottic Airways",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Supraglottic Airways",
           },
           {
             id: 'mask-ventilation',
             name: 'Mask Ventilation',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Mask Ventilation",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Mask Ventilation",
           },
           {
             id: 'bag-mask',
             name: 'Bag-Mask Ventilation',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Bag-Mask Ventilation",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Bag-Mask Ventilation",
           },
         ],
       },
@@ -160,7 +174,8 @@ export default function RotationPage({ params }: RotationPageProps) {
             name: 'Arterial Line Placement',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 20, Arterial Access",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 20, Arterial Access",
           },
         ],
       },
@@ -217,7 +232,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         ],
       },
     ],
-    [],
+    []
   );
 
   const mockKnowledge: KnowledgeCategory[] = useMemo(
@@ -239,7 +254,8 @@ export default function RotationPage({ params }: RotationPageProps) {
             name: 'Asthma Attack Treatment',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 19, Asthma and COPD",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 19, Asthma and COPD",
           },
           {
             id: 'pneumonia',
@@ -276,7 +292,8 @@ export default function RotationPage({ params }: RotationPageProps) {
             name: 'Arrhythmia Recognition',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiac Arrhythmias",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 18, Cardiac Arrhythmias",
           },
           {
             id: 'shock',
@@ -313,7 +330,8 @@ export default function RotationPage({ params }: RotationPageProps) {
             name: 'Post-operative Analgesics',
             completed: true,
             pending: false,
-            textbookResource: "Miller's Anesthesia, 10th Edition, Chapter 11, Opioid Analgesics",
+            textbookResource:
+              "Miller's Anesthesia, 10th Edition, Chapter 11, Opioid Analgesics",
           },
         ],
       },
@@ -348,7 +366,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         ],
       },
     ],
-    [],
+    []
   );
 
   const mockRotation = useMemo(
@@ -360,7 +378,7 @@ export default function RotationPage({ params }: RotationPageProps) {
       total: 15,
       state: 'ACTIVE' as const,
     }),
-    [rotationName],
+    [rotationName]
   );
 
   // Load favorites on component mount
@@ -373,7 +391,9 @@ export default function RotationPage({ params }: RotationPageProps) {
             itemId: string;
             itemType: string;
           }>;
-          const favoritesSet = new Set(favoritesData.map((fav) => `${fav.itemId}-${fav.itemType}`));
+          const favoritesSet = new Set(
+            favoritesData.map(fav => `${fav.itemId}-${fav.itemType}`)
+          );
           setFavorites(favoritesSet);
         } else {
           console.error('Error loading favorites:', response.status);
@@ -395,13 +415,21 @@ export default function RotationPage({ params }: RotationPageProps) {
           const notificationsData = await response.json();
           const notificationsMap: Record<string, number> = {};
           notificationsData.itemNotifications.forEach(
-            (item: { itemId: string; itemType: string; unreadCount: number }) => {
-              notificationsMap[`${item.itemId}-${item.itemType}`] = item.unreadCount;
-            },
+            (item: {
+              itemId: string;
+              itemType: string;
+              unreadCount: number;
+            }) => {
+              notificationsMap[`${item.itemId}-${item.itemType}`] =
+                item.unreadCount;
+            }
           );
           setFeedbackNotifications(notificationsMap);
         } else {
-          console.error('Error loading feedback notifications:', response.status);
+          console.error(
+            'Error loading feedback notifications:',
+            response.status
+          );
         }
       } catch (error) {
         console.error('Error loading feedback notifications:', error);
@@ -430,10 +458,13 @@ export default function RotationPage({ params }: RotationPageProps) {
 
   // Removed unused handleProcedureClick function
 
-  const handleQuizClick = useCallback((itemId: string, itemType: 'PROCEDURE' | 'KNOWLEDGE') => {
-    // Open quiz in new tab
-    window.open(`/quiz/${itemId}?type=${itemType}`, '_blank');
-  }, []);
+  const handleQuizClick = useCallback(
+    (itemId: string, itemType: 'PROCEDURE' | 'KNOWLEDGE') => {
+      // Open quiz in new tab
+      window.open(`/quiz/${itemId}?type=${itemType}`, '_blank');
+    },
+    []
+  );
 
   const handleReflectionClick = useCallback(
     (itemId: string, itemType: 'PROCEDURE' | 'KNOWLEDGE', itemName: string) => {
@@ -447,7 +478,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         initialImages: existingReflection?.images || [],
       });
     },
-    [reflections],
+    [reflections]
   );
 
   const handleSaveReflection = useCallback(
@@ -468,7 +499,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         });
 
         if (response.ok) {
-          setReflections((prev) => ({
+          setReflections(prev => ({
             ...prev,
             [reflectionPanel.itemId]: { content, images },
           }));
@@ -480,7 +511,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         alert('Error saving reflection');
       }
     },
-    [reflectionPanel.itemId, reflectionPanel.itemType],
+    [reflectionPanel.itemId, reflectionPanel.itemType]
   );
 
   const getQuizStatus = useCallback(
@@ -489,7 +520,7 @@ export default function RotationPage({ params }: RotationPageProps) {
       if (!result) return 'not-attempted';
       return result.passed ? 'passed' : 'failed';
     },
-    [quizResults],
+    [quizResults]
   );
 
   const getReflectionStatus = useCallback(
@@ -497,13 +528,13 @@ export default function RotationPage({ params }: RotationPageProps) {
       const reflection = reflections[itemId];
       return reflection?.content ? 'submitted' : 'not-submitted';
     },
-    [reflections],
+    [reflections]
   );
 
   // Removed unused handleKnowledgeClick function
 
   const toggleRotationState = useCallback(() => {
-    setRotationData((prev) => {
+    setRotationData(prev => {
       if (!prev) return null;
 
       const states = ['NOT_STARTED', 'ACTIVE', 'FINISHED'] as const;
@@ -521,7 +552,7 @@ export default function RotationPage({ params }: RotationPageProps) {
   }, []);
 
   const toggleCategory = useCallback((categoryId: string) => {
-    setExpandedCategories((prev) => {
+    setExpandedCategories(prev => {
       const newSet = new Set(prev);
       if (newSet.has(categoryId)) {
         newSet.delete(categoryId);
@@ -533,7 +564,7 @@ export default function RotationPage({ params }: RotationPageProps) {
   }, []);
 
   const toggleProcedure = useCallback((procedureId: string) => {
-    setExpandedProcedures((prev) => {
+    setExpandedProcedures(prev => {
       const newSet = new Set(prev);
       if (newSet.has(procedureId)) {
         newSet.delete(procedureId);
@@ -545,7 +576,7 @@ export default function RotationPage({ params }: RotationPageProps) {
   }, []);
 
   const toggleKnowledge = useCallback((topicId: string) => {
-    setExpandedKnowledge((prev) => {
+    setExpandedKnowledge(prev => {
       const newSet = new Set(prev);
       if (newSet.has(topicId)) {
         newSet.delete(topicId);
@@ -556,7 +587,9 @@ export default function RotationPage({ params }: RotationPageProps) {
     });
   }, []);
 
-  const [favoriteLoading, setFavoriteLoading] = useState<Set<string>>(new Set());
+  const [favoriteLoading, setFavoriteLoading] = useState<Set<string>>(
+    new Set()
+  );
 
   const handleFavoriteToggle = useCallback(
     async (itemId: string, itemType: 'PROCEDURE' | 'KNOWLEDGE') => {
@@ -567,7 +600,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         return;
       }
 
-      setFavoriteLoading((prev) => new Set(prev).add(favoriteKey));
+      setFavoriteLoading(prev => new Set(prev).add(favoriteKey));
 
       try {
         const isCurrentlyFavorited = favorites.has(favoriteKey);
@@ -582,7 +615,7 @@ export default function RotationPage({ params }: RotationPageProps) {
         });
 
         if (response.ok) {
-          setFavorites((prev) => {
+          setFavorites(prev => {
             const newSet = new Set(prev);
             if (isCurrentlyFavorited) {
               newSet.delete(favoriteKey);
@@ -594,42 +627,54 @@ export default function RotationPage({ params }: RotationPageProps) {
         } else {
           const errorData = await response.json().catch(() => ({}));
           console.error('Favorite toggle error:', errorData);
-          alert(`Error ${isCurrentlyFavorited ? 'removing from' : 'adding to'} favorites`);
+          alert(
+            `Error ${isCurrentlyFavorited ? 'removing from' : 'adding to'} favorites`
+          );
         }
       } catch (error) {
         console.error('Error toggling favorite:', error);
         alert('Network error - please try again');
       } finally {
-        setFavoriteLoading((prev) => {
+        setFavoriteLoading(prev => {
           const newSet = new Set(prev);
           newSet.delete(favoriteKey);
           return newSet;
         });
       }
     },
-    [favorites, favoriteLoading],
+    [favorites, favoriteLoading]
   );
 
-  const handleFeedbackClick = useCallback((itemId: string, itemType: string) => {
-    setFeedbackModalOpen({
-      isOpen: true,
-      itemId,
-      itemType,
-    });
-  }, []);
+  const handleFeedbackClick = useCallback(
+    (itemId: string, itemType: string) => {
+      setFeedbackModalOpen({
+        isOpen: true,
+        itemId,
+        itemType,
+      });
+    },
+    []
+  );
 
   if (loading) {
-    return <LoadingPage text="Loading rotation..." />;
+    return <LoadingPage text='Loading rotation...' />;
   }
 
   if (!rotationData) {
     return (
-      <main className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Rotation Not Found</h2>
-            <p className="text-gray-600">The requested rotation could not be found.</p>
-            <Link href="/dashboard" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
+      <main className='min-h-screen bg-gray-50'>
+        <div className='max-w-7xl mx-auto px-4 py-6'>
+          <div className='text-center py-12'>
+            <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+              Rotation Not Found
+            </h2>
+            <p className='text-gray-600'>
+              The requested rotation could not be found.
+            </p>
+            <Link
+              href='/dashboard'
+              className='text-blue-600 hover:text-blue-700 mt-4 inline-block'
+            >
               ← Back to Dashboard
             </Link>
           </div>
@@ -641,28 +686,33 @@ export default function RotationPage({ params }: RotationPageProps) {
   const { rotation, procedures, knowledge } = rotationData;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="space-y-6">
+    <main className='min-h-screen bg-gray-50'>
+      <div className='max-w-7xl mx-auto px-4 py-6'>
+        <div className='space-y-6'>
           {/* Back Button */}
           <Link
-            href="/dashboard"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            href='/dashboard'
+            className='inline-flex items-center text-blue-600 hover:text-blue-700 font-medium'
           >
             ← Back to Dashboard
           </Link>
 
           {/* Rotation Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-bold text-gray-900">{rotation.name}</h1>
+          <div className='bg-white rounded-lg border border-gray-200 p-6'>
+            <div className='flex items-center justify-between mb-4'>
+              <h1 className='text-3xl font-bold text-gray-900'>
+                {rotation.name}
+              </h1>
               <button
                 onClick={toggleRotationState}
                 className={cn(
                   'px-4 py-2 rounded-lg font-medium transition-colors',
-                  rotation.state === 'ACTIVE' && 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-                  rotation.state === 'FINISHED' && 'bg-green-100 text-green-800 hover:bg-green-200',
-                  rotation.state === 'NOT_STARTED' && 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+                  rotation.state === 'ACTIVE' &&
+                    'bg-blue-100 text-blue-800 hover:bg-blue-200',
+                  rotation.state === 'FINISHED' &&
+                    'bg-green-100 text-green-800 hover:bg-green-200',
+                  rotation.state === 'NOT_STARTED' &&
+                    'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 )}
               >
                 {rotation.state === 'ACTIVE' && 'Active'}
@@ -672,71 +722,83 @@ export default function RotationPage({ params }: RotationPageProps) {
             </div>
 
             {/* Progress Information */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{rotation.progress}%</div>
-                <div className="text-sm text-gray-600">Overall Progress</div>
+            <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-6'>
+              <div className='text-center'>
+                <div className='text-2xl font-bold text-gray-900'>
+                  {rotation.progress}%
+                </div>
+                <div className='text-sm text-gray-600'>Overall Progress</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{rotation.completed}</div>
-                <div className="text-sm text-gray-600">Completed</div>
+              <div className='text-center'>
+                <div className='text-2xl font-bold text-green-600'>
+                  {rotation.completed}
+                </div>
+                <div className='text-sm text-gray-600'>Completed</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{rotation.pending}</div>
-                <div className="text-sm text-gray-600">Pending</div>
+              <div className='text-center'>
+                <div className='text-2xl font-bold text-yellow-600'>
+                  {rotation.pending}
+                </div>
+                <div className='text-sm text-gray-600'>Pending</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-600">{rotation.total}</div>
-                <div className="text-sm text-gray-600">Total Required</div>
+              <div className='text-center'>
+                <div className='text-2xl font-bold text-gray-600'>
+                  {rotation.total}
+                </div>
+                <div className='text-sm text-gray-600'>Total Required</div>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className='w-full bg-gray-200 rounded-full h-4'>
               <div
-                className="bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-300"
+                className='bg-gradient-to-r from-blue-500 to-green-500 h-4 rounded-full transition-all duration-300'
                 style={{ width: `${rotation.progress}%` }}
               />
             </div>
           </div>
 
           {/* Collapsible Cards Layout */}
-          <div className="space-y-6">
+          <div className='space-y-6'>
             {/* Procedures Card */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className='bg-white rounded-lg border border-gray-200 overflow-hidden'>
               <button
                 onClick={() => setProceduresExpanded(!proceduresExpanded)}
-                className="w-full p-6 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                className='w-full p-6 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <h2 className="text-xl font-semibold text-gray-900">Procedures</h2>
-                    <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center space-x-3'>
+                    <h2 className='text-xl font-semibold text-gray-900'>
+                      Procedures
+                    </h2>
+                    <span className='bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full'>
                       {procedures.reduce(
                         (total, category) => total + category.procedures.length,
-                        0,
+                        0
                       )}{' '}
                       items
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">
-                      {proceduresExpanded ? 'Click to collapse' : 'Click to expand'}
+                  <div className='flex items-center space-x-2'>
+                    <span className='text-sm text-gray-500'>
+                      {proceduresExpanded
+                        ? 'Click to collapse'
+                        : 'Click to expand'}
                     </span>
                     <svg
                       className={cn(
                         'w-5 h-5 text-gray-400 transition-transform duration-200',
-                        proceduresExpanded && 'rotate-180',
+                        proceduresExpanded && 'rotate-180'
                       )}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
                     >
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
                         strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
+                        d='M19 9l-7 7-7-7'
                       />
                     </svg>
                   </div>
@@ -744,44 +806,46 @@ export default function RotationPage({ params }: RotationPageProps) {
               </button>
 
               {proceduresExpanded && (
-                <div className="border-t border-gray-200 p-6">
-                  <div className="space-y-4">
-                    {procedures.map((category) => {
+                <div className='border-t border-gray-200 p-6'>
+                  <div className='space-y-4'>
+                    {procedures.map(category => {
                       const isExpanded = expandedCategories.has(category.id);
                       return (
                         <div
                           key={category.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden"
+                          className='border border-gray-200 rounded-lg overflow-hidden'
                         >
                           <button
                             onClick={() => toggleCategory(category.id)}
-                            className="w-full p-4 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                            className='w-full p-4 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <h3 className="font-medium text-gray-900">{category.name}</h3>
-                                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                            <div className='flex items-center justify-between'>
+                              <div className='flex items-center space-x-3'>
+                                <h3 className='font-medium text-gray-900'>
+                                  {category.name}
+                                </h3>
+                                <span className='bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full'>
                                   {category.procedures.length} procedures
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500">
+                              <div className='flex items-center space-x-2'>
+                                <span className='text-xs text-gray-500'>
                                   {isExpanded ? 'Collapse' : 'Expand'}
                                 </span>
                                 <svg
                                   className={cn(
                                     'w-4 h-4 text-gray-400 transition-transform duration-200',
-                                    isExpanded && 'rotate-180',
+                                    isExpanded && 'rotate-180'
                                   )}
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
+                                  fill='none'
+                                  stroke='currentColor'
+                                  viewBox='0 0 24 24'
                                 >
                                   <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
                                     strokeWidth={2}
-                                    d="M19 9l-7 7-7-7"
+                                    d='M19 9l-7 7-7-7'
                                   />
                                 </svg>
                               </div>
@@ -789,10 +853,12 @@ export default function RotationPage({ params }: RotationPageProps) {
                           </button>
 
                           {isExpanded && (
-                            <div className="border-t border-gray-200 p-4 bg-gray-50">
-                              <div className="space-y-2">
-                                {category.procedures.map((procedure) => {
-                                  const isExpanded = expandedProcedures.has(procedure.id);
+                            <div className='border-t border-gray-200 p-4 bg-gray-50'>
+                              <div className='space-y-2'>
+                                {category.procedures.map(procedure => {
+                                  const isExpanded = expandedProcedures.has(
+                                    procedure.id
+                                  );
                                   return (
                                     <div
                                       key={procedure.id}
@@ -805,99 +871,118 @@ export default function RotationPage({ params }: RotationPageProps) {
                                           !procedure.pending &&
                                           'bg-green-50 border-green-300 text-green-800',
                                         !procedure.completed &&
-                                          'bg-white border-gray-200 text-gray-700 hover:bg-gray-100',
+                                          'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
                                       )}
                                     >
                                       {/* Procedure Header */}
-                                      <div className="p-3 flex items-center justify-between">
+                                      <div className='p-3 flex items-center justify-between'>
                                         <button
-                                          onClick={() => toggleProcedure(procedure.id)}
-                                          className="flex-1 text-left"
+                                          onClick={() =>
+                                            toggleProcedure(procedure.id)
+                                          }
+                                          className='flex-1 text-left'
                                         >
-                                          <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                              <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium">
+                                          <div className='flex items-center justify-between'>
+                                            <div className='flex-1'>
+                                              <div className='flex items-center gap-2 mb-1'>
+                                                <span className='font-medium'>
                                                   {procedure.name}
                                                 </span>
                                                 <MillersReferenceButton
                                                   title={procedure.name}
-                                                  reference={procedure.textbookResource || null}
+                                                  reference={
+                                                    procedure.textbookResource ||
+                                                    null
+                                                  }
                                                 />
                                               </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                              <span className="text-sm">
+                                            <div className='flex items-center space-x-2'>
+                                              <span className='text-sm'>
                                                 {procedure.completed &&
                                                   procedure.pending &&
                                                   'Pending for approval'}
                                                 {procedure.completed &&
                                                   !procedure.pending &&
                                                   'Completed'}
-                                                {!procedure.completed && 'Click to complete'}
+                                                {!procedure.completed &&
+                                                  'Click to complete'}
                                               </span>
                                               <svg
                                                 className={cn(
                                                   'w-4 h-4 transition-transform duration-200',
-                                                  isExpanded ? 'rotate-180' : 'rotate-0',
+                                                  isExpanded
+                                                    ? 'rotate-180'
+                                                    : 'rotate-0'
                                                 )}
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                                fill='none'
+                                                stroke='currentColor'
+                                                viewBox='0 0 24 24'
                                               >
                                                 <path
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
+                                                  strokeLinecap='round'
+                                                  strokeLinejoin='round'
                                                   strokeWidth={2}
-                                                  d="M19 9l-7 7-7-7"
+                                                  d='M19 9l-7 7-7-7'
                                                 />
                                               </svg>
                                             </div>
                                           </div>
                                         </button>
                                         <button
-                                          onClick={(e) => {
+                                          onClick={e => {
                                             e.stopPropagation();
-                                            handleFavoriteToggle(procedure.id, 'PROCEDURE');
+                                            handleFavoriteToggle(
+                                              procedure.id,
+                                              'PROCEDURE'
+                                            );
                                           }}
                                           disabled={favoriteLoading.has(
-                                            `${procedure.id}-PROCEDURE`,
+                                            `${procedure.id}-PROCEDURE`
                                           )}
-                                          className="ml-2 p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                          className='ml-2 p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                           title={
-                                            favoriteLoading.has(`${procedure.id}-PROCEDURE`)
+                                            favoriteLoading.has(
+                                              `${procedure.id}-PROCEDURE`
+                                            )
                                               ? 'Updating...'
-                                              : favorites.has(`${procedure.id}-PROCEDURE`)
+                                              : favorites.has(
+                                                    `${procedure.id}-PROCEDURE`
+                                                  )
                                                 ? 'Remove from favorites'
                                                 : 'Add to favorites'
                                           }
                                         >
-                                          {favoriteLoading.has(`${procedure.id}-PROCEDURE`) ? (
+                                          {favoriteLoading.has(
+                                            `${procedure.id}-PROCEDURE`
+                                          ) ? (
                                             <svg
-                                              className="w-5 h-5 text-gray-400 animate-spin"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              viewBox="0 0 24 24"
+                                              className='w-5 h-5 text-gray-400 animate-spin'
+                                              fill='none'
+                                              stroke='currentColor'
+                                              viewBox='0 0 24 24'
                                             >
                                               <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
+                                                strokeLinecap='round'
+                                                strokeLinejoin='round'
                                                 strokeWidth={2}
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
                                               />
                                             </svg>
                                           ) : (
                                             <svg
                                               className={cn(
                                                 'w-5 h-5 transition-colors',
-                                                favorites.has(`${procedure.id}-PROCEDURE`)
+                                                favorites.has(
+                                                  `${procedure.id}-PROCEDURE`
+                                                )
                                                   ? 'text-yellow-500 fill-current'
-                                                  : 'text-gray-400 hover:text-yellow-500',
+                                                  : 'text-gray-400 hover:text-yellow-500'
                                               )}
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
+                                              fill='currentColor'
+                                              viewBox='0 0 20 20'
                                             >
-                                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                              <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
                                             </svg>
                                           )}
                                         </button>
@@ -905,68 +990,92 @@ export default function RotationPage({ params }: RotationPageProps) {
 
                                       {/* Procedure Options Cards */}
                                       {isExpanded && (
-                                        <div className="border-t border-gray-200 p-3 bg-gray-50">
-                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div className='border-t border-gray-200 p-3 bg-gray-50'>
+                                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
                                             {/* Quiz Card */}
                                             <button
                                               onClick={() =>
-                                                handleQuizClick(procedure.id, 'PROCEDURE')
+                                                handleQuizClick(
+                                                  procedure.id,
+                                                  'PROCEDURE'
+                                                )
                                               }
                                               className={cn(
                                                 'p-4 rounded-lg border-2 border-dashed transition-all duration-200 hover:scale-105',
-                                                getQuizStatus(procedure.id) === 'passed' &&
+                                                getQuizStatus(procedure.id) ===
+                                                  'passed' &&
                                                   'border-green-300 bg-green-50 hover:bg-green-100',
-                                                getQuizStatus(procedure.id) === 'failed' &&
+                                                getQuizStatus(procedure.id) ===
+                                                  'failed' &&
                                                   'border-red-300 bg-red-50 hover:bg-red-100',
-                                                getQuizStatus(procedure.id) === 'not-attempted' &&
-                                                  'border-gray-300 bg-white hover:bg-gray-50',
+                                                getQuizStatus(procedure.id) ===
+                                                  'not-attempted' &&
+                                                  'border-gray-300 bg-white hover:bg-gray-50'
                                               )}
                                             >
-                                              <div className="flex items-center space-x-3">
+                                              <div className='flex items-center space-x-3'>
                                                 <div
                                                   className={cn(
                                                     'w-10 h-10 rounded-full flex items-center justify-center',
-                                                    getQuizStatus(procedure.id) === 'passed' &&
+                                                    getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'passed' &&
                                                       'bg-green-100',
-                                                    getQuizStatus(procedure.id) === 'failed' &&
+                                                    getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'failed' &&
                                                       'bg-red-100',
-                                                    getQuizStatus(procedure.id) ===
-                                                      'not-attempted' && 'bg-gray-100',
+                                                    getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'not-attempted' &&
+                                                      'bg-gray-100'
                                                   )}
                                                 >
                                                   <svg
                                                     className={cn(
                                                       'w-5 h-5',
-                                                      getQuizStatus(procedure.id) === 'passed' &&
+                                                      getQuizStatus(
+                                                        procedure.id
+                                                      ) === 'passed' &&
                                                         'text-green-600',
-                                                      getQuizStatus(procedure.id) === 'failed' &&
+                                                      getQuizStatus(
+                                                        procedure.id
+                                                      ) === 'failed' &&
                                                         'text-red-600',
-                                                      getQuizStatus(procedure.id) ===
-                                                        'not-attempted' && 'text-gray-600',
+                                                      getQuizStatus(
+                                                        procedure.id
+                                                      ) === 'not-attempted' &&
+                                                        'text-gray-600'
                                                     )}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
+                                                    fill='none'
+                                                    stroke='currentColor'
+                                                    viewBox='0 0 24 24'
                                                   >
                                                     <path
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
+                                                      strokeLinecap='round'
+                                                      strokeLinejoin='round'
                                                       strokeWidth={2}
-                                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                      d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
                                                     />
                                                   </svg>
                                                 </div>
-                                                <div className="text-left">
-                                                  <h4 className="font-medium text-gray-900">
+                                                <div className='text-left'>
+                                                  <h4 className='font-medium text-gray-900'>
                                                     Take Quiz
                                                   </h4>
-                                                  <p className="text-sm text-gray-600">
-                                                    {getQuizStatus(procedure.id) === 'passed' &&
+                                                  <p className='text-sm text-gray-600'>
+                                                    {getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'passed' &&
                                                       'Quiz passed - Click to retake'}
-                                                    {getQuizStatus(procedure.id) === 'failed' &&
+                                                    {getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'failed' &&
                                                       'Quiz failed - Click to retake'}
-                                                    {getQuizStatus(procedure.id) ===
-                                                      'not-attempted' && 'Test your knowledge'}
+                                                    {getQuizStatus(
+                                                      procedure.id
+                                                    ) === 'not-attempted' &&
+                                                      'Test your knowledge'}
                                                   </p>
                                                 </div>
                                               </div>
@@ -978,58 +1087,71 @@ export default function RotationPage({ params }: RotationPageProps) {
                                                 handleReflectionClick(
                                                   procedure.id,
                                                   'PROCEDURE',
-                                                  procedure.name,
+                                                  procedure.name
                                                 )
                                               }
                                               className={cn(
                                                 'p-4 rounded-lg border-2 border-dashed transition-all duration-200 hover:scale-105',
-                                                getReflectionStatus(procedure.id) === 'submitted' &&
+                                                getReflectionStatus(
+                                                  procedure.id
+                                                ) === 'submitted' &&
                                                   'border-orange-300 bg-orange-50 hover:bg-orange-100',
-                                                getReflectionStatus(procedure.id) ===
-                                                  'not-submitted' &&
-                                                  'border-gray-300 bg-white hover:bg-gray-50',
+                                                getReflectionStatus(
+                                                  procedure.id
+                                                ) === 'not-submitted' &&
+                                                  'border-gray-300 bg-white hover:bg-gray-50'
                                               )}
                                             >
-                                              <div className="flex items-center space-x-3">
+                                              <div className='flex items-center space-x-3'>
                                                 <div
                                                   className={cn(
                                                     'w-10 h-10 rounded-full flex items-center justify-center',
-                                                    getReflectionStatus(procedure.id) ===
-                                                      'submitted' && 'bg-orange-100',
-                                                    getReflectionStatus(procedure.id) ===
-                                                      'not-submitted' && 'bg-gray-100',
+                                                    getReflectionStatus(
+                                                      procedure.id
+                                                    ) === 'submitted' &&
+                                                      'bg-orange-100',
+                                                    getReflectionStatus(
+                                                      procedure.id
+                                                    ) === 'not-submitted' &&
+                                                      'bg-gray-100'
                                                   )}
                                                 >
                                                   <svg
                                                     className={cn(
                                                       'w-5 h-5',
-                                                      getReflectionStatus(procedure.id) ===
-                                                        'submitted' && 'text-orange-600',
-                                                      getReflectionStatus(procedure.id) ===
-                                                        'not-submitted' && 'text-gray-600',
+                                                      getReflectionStatus(
+                                                        procedure.id
+                                                      ) === 'submitted' &&
+                                                        'text-orange-600',
+                                                      getReflectionStatus(
+                                                        procedure.id
+                                                      ) === 'not-submitted' &&
+                                                        'text-gray-600'
                                                     )}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
+                                                    fill='none'
+                                                    stroke='currentColor'
+                                                    viewBox='0 0 24 24'
                                                   >
                                                     <path
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
+                                                      strokeLinecap='round'
+                                                      strokeLinejoin='round'
                                                       strokeWidth={2}
-                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                      d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
                                                     />
                                                   </svg>
                                                 </div>
-                                                <div className="text-left">
-                                                  <h4 className="font-medium text-gray-900">
+                                                <div className='text-left'>
+                                                  <h4 className='font-medium text-gray-900'>
                                                     Write Reflection
                                                   </h4>
-                                                  <p className="text-sm text-gray-600">
-                                                    {getReflectionStatus(procedure.id) ===
-                                                      'submitted' &&
+                                                  <p className='text-sm text-gray-600'>
+                                                    {getReflectionStatus(
+                                                      procedure.id
+                                                    ) === 'submitted' &&
                                                       'Reflection submitted - Click to edit'}
-                                                    {getReflectionStatus(procedure.id) ===
-                                                      'not-submitted' &&
+                                                    {getReflectionStatus(
+                                                      procedure.id
+                                                    ) === 'not-submitted' &&
                                                       'Share your thoughts and learnings'}
                                                   </p>
                                                 </div>
@@ -1039,8 +1161,10 @@ export default function RotationPage({ params }: RotationPageProps) {
                                             {/* Feedback Card */}
                                             <FeedbackCard
                                               itemId={procedure.id}
-                                              itemType="PROCEDURE"
-                                              onFeedbackClick={handleFeedbackClick}
+                                              itemType='PROCEDURE'
+                                              onFeedbackClick={
+                                                handleFeedbackClick
+                                              }
                                               unreadCount={
                                                 feedbackNotifications[
                                                   `${procedure.id}-PROCEDURE`
@@ -1056,12 +1180,15 @@ export default function RotationPage({ params }: RotationPageProps) {
 
                                             {/* Resources Card */}
                                             <ResourcesCard
-                                              mode="item"
+                                              mode='item'
                                               itemId={procedure.id}
-                                              itemType="PROCEDURE"
+                                              itemType='PROCEDURE'
                                               itemName={procedure.name}
-                                              {...(process.env.NEXT_PUBLIC_GOOGLE_DRIVE_URL && {
-                                                driveUrl: process.env.NEXT_PUBLIC_GOOGLE_DRIVE_URL,
+                                              {...(process.env
+                                                .NEXT_PUBLIC_GOOGLE_DRIVE_URL && {
+                                                driveUrl:
+                                                  process.env
+                                                    .NEXT_PUBLIC_GOOGLE_DRIVE_URL,
                                               })}
                                             />
                                           </div>
@@ -1082,37 +1209,44 @@ export default function RotationPage({ params }: RotationPageProps) {
             </div>
 
             {/* Knowledge Card */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className='bg-white rounded-lg border border-gray-200 overflow-hidden'>
               <button
                 onClick={() => setKnowledgeExpanded(!knowledgeExpanded)}
-                className="w-full p-6 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                className='w-full p-6 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <h2 className="text-xl font-semibold text-gray-900">Knowledge</h2>
-                    <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">
-                      {knowledge.reduce((total, category) => total + category.topics.length, 0)}{' '}
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center space-x-3'>
+                    <h2 className='text-xl font-semibold text-gray-900'>
+                      Knowledge
+                    </h2>
+                    <span className='bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full'>
+                      {knowledge.reduce(
+                        (total, category) => total + category.topics.length,
+                        0
+                      )}{' '}
                       topics
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">
-                      {knowledgeExpanded ? 'Click to collapse' : 'Click to expand'}
+                  <div className='flex items-center space-x-2'>
+                    <span className='text-sm text-gray-500'>
+                      {knowledgeExpanded
+                        ? 'Click to collapse'
+                        : 'Click to expand'}
                     </span>
                     <svg
                       className={cn(
                         'w-5 h-5 text-gray-400 transition-transform duration-200',
-                        knowledgeExpanded && 'rotate-180',
+                        knowledgeExpanded && 'rotate-180'
                       )}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
                     >
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
                         strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
+                        d='M19 9l-7 7-7-7'
                       />
                     </svg>
                   </div>
@@ -1120,44 +1254,46 @@ export default function RotationPage({ params }: RotationPageProps) {
               </button>
 
               {knowledgeExpanded && (
-                <div className="border-t border-gray-200 p-6">
-                  <div className="space-y-4">
-                    {knowledge.map((category) => {
+                <div className='border-t border-gray-200 p-6'>
+                  <div className='space-y-4'>
+                    {knowledge.map(category => {
                       const isExpanded = expandedCategories.has(category.id);
                       return (
                         <div
                           key={category.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden"
+                          className='border border-gray-200 rounded-lg overflow-hidden'
                         >
                           <button
                             onClick={() => toggleCategory(category.id)}
-                            className="w-full p-4 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                            className='w-full p-4 text-left hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <h3 className="font-medium text-gray-900">{category.name}</h3>
-                                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                            <div className='flex items-center justify-between'>
+                              <div className='flex items-center space-x-3'>
+                                <h3 className='font-medium text-gray-900'>
+                                  {category.name}
+                                </h3>
+                                <span className='bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full'>
                                   {category.topics.length} topics
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-500">
+                              <div className='flex items-center space-x-2'>
+                                <span className='text-xs text-gray-500'>
                                   {isExpanded ? 'Collapse' : 'Expand'}
                                 </span>
                                 <svg
                                   className={cn(
                                     'w-4 h-4 text-gray-400 transition-transform duration-200',
-                                    isExpanded && 'rotate-180',
+                                    isExpanded && 'rotate-180'
                                   )}
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
+                                  fill='none'
+                                  stroke='currentColor'
+                                  viewBox='0 0 24 24'
                                 >
                                   <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+                                    strokeLinecap='round'
+                                    strokeLinejoin='round'
                                     strokeWidth={2}
-                                    d="M19 9l-7 7-7-7"
+                                    d='M19 9l-7 7-7-7'
                                   />
                                 </svg>
                               </div>
@@ -1165,10 +1301,12 @@ export default function RotationPage({ params }: RotationPageProps) {
                           </button>
 
                           {isExpanded && (
-                            <div className="border-t border-gray-200 p-4 bg-gray-50">
-                              <div className="space-y-2">
-                                {category.topics.map((topic) => {
-                                  const isExpanded = expandedKnowledge.has(topic.id);
+                            <div className='border-t border-gray-200 p-4 bg-gray-50'>
+                              <div className='space-y-2'>
+                                {category.topics.map(topic => {
+                                  const isExpanded = expandedKnowledge.has(
+                                    topic.id
+                                  );
                                   return (
                                     <div
                                       key={topic.id}
@@ -1181,93 +1319,118 @@ export default function RotationPage({ params }: RotationPageProps) {
                                           !topic.pending &&
                                           'bg-green-50 border-green-300 text-green-800',
                                         !topic.completed &&
-                                          'bg-white border-gray-200 text-gray-700 hover:bg-gray-100',
+                                          'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
                                       )}
                                     >
                                       {/* Knowledge Topic Header */}
-                                      <div className="p-3 flex items-center justify-between">
+                                      <div className='p-3 flex items-center justify-between'>
                                         <button
-                                          onClick={() => toggleKnowledge(topic.id)}
-                                          className="flex-1 text-left"
+                                          onClick={() =>
+                                            toggleKnowledge(topic.id)
+                                          }
+                                          className='flex-1 text-left'
                                         >
-                                          <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                              <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-medium">{topic.name}</span>
+                                          <div className='flex items-center justify-between'>
+                                            <div className='flex-1'>
+                                              <div className='flex items-center gap-2 mb-1'>
+                                                <span className='font-medium'>
+                                                  {topic.name}
+                                                </span>
                                                 <MillersReferenceButton
                                                   title={topic.name}
-                                                  reference={topic.textbookResource || null}
+                                                  reference={
+                                                    topic.textbookResource ||
+                                                    null
+                                                  }
                                                 />
                                               </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                              <span className="text-sm">
+                                            <div className='flex items-center space-x-2'>
+                                              <span className='text-sm'>
                                                 {topic.completed &&
                                                   topic.pending &&
                                                   'Pending for approval'}
-                                                {topic.completed && !topic.pending && 'Completed'}
-                                                {!topic.completed && 'Take test'}
+                                                {topic.completed &&
+                                                  !topic.pending &&
+                                                  'Completed'}
+                                                {!topic.completed &&
+                                                  'Take test'}
                                               </span>
                                               <svg
                                                 className={cn(
                                                   'w-4 h-4 transition-transform duration-200',
-                                                  isExpanded ? 'rotate-180' : 'rotate-0',
+                                                  isExpanded
+                                                    ? 'rotate-180'
+                                                    : 'rotate-0'
                                                 )}
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                                fill='none'
+                                                stroke='currentColor'
+                                                viewBox='0 0 24 24'
                                               >
                                                 <path
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
+                                                  strokeLinecap='round'
+                                                  strokeLinejoin='round'
                                                   strokeWidth={2}
-                                                  d="M19 9l-7 7-7-7"
+                                                  d='M19 9l-7 7-7-7'
                                                 />
                                               </svg>
                                             </div>
                                           </div>
                                         </button>
                                         <button
-                                          onClick={(e) => {
+                                          onClick={e => {
                                             e.stopPropagation();
-                                            handleFavoriteToggle(topic.id, 'KNOWLEDGE');
+                                            handleFavoriteToggle(
+                                              topic.id,
+                                              'KNOWLEDGE'
+                                            );
                                           }}
-                                          disabled={favoriteLoading.has(`${topic.id}-KNOWLEDGE`)}
-                                          className="ml-2 p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                          disabled={favoriteLoading.has(
+                                            `${topic.id}-KNOWLEDGE`
+                                          )}
+                                          className='ml-2 p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                                           title={
-                                            favoriteLoading.has(`${topic.id}-KNOWLEDGE`)
+                                            favoriteLoading.has(
+                                              `${topic.id}-KNOWLEDGE`
+                                            )
                                               ? 'Updating...'
-                                              : favorites.has(`${topic.id}-KNOWLEDGE`)
+                                              : favorites.has(
+                                                    `${topic.id}-KNOWLEDGE`
+                                                  )
                                                 ? 'Remove from favorites'
                                                 : 'Add to favorites'
                                           }
                                         >
-                                          {favoriteLoading.has(`${topic.id}-KNOWLEDGE`) ? (
+                                          {favoriteLoading.has(
+                                            `${topic.id}-KNOWLEDGE`
+                                          ) ? (
                                             <svg
-                                              className="w-5 h-5 text-gray-400 animate-spin"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              viewBox="0 0 24 24"
+                                              className='w-5 h-5 text-gray-400 animate-spin'
+                                              fill='none'
+                                              stroke='currentColor'
+                                              viewBox='0 0 24 24'
                                             >
                                               <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
+                                                strokeLinecap='round'
+                                                strokeLinejoin='round'
                                                 strokeWidth={2}
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
                                               />
                                             </svg>
                                           ) : (
                                             <svg
                                               className={cn(
                                                 'w-5 h-5 transition-colors',
-                                                favorites.has(`${topic.id}-KNOWLEDGE`)
+                                                favorites.has(
+                                                  `${topic.id}-KNOWLEDGE`
+                                                )
                                                   ? 'text-yellow-500 fill-current'
-                                                  : 'text-gray-400 hover:text-yellow-500',
+                                                  : 'text-gray-400 hover:text-yellow-500'
                                               )}
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
+                                              fill='currentColor'
+                                              viewBox='0 0 20 20'
                                             >
-                                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                              <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
                                             </svg>
                                           )}
                                         </button>
@@ -1275,65 +1438,84 @@ export default function RotationPage({ params }: RotationPageProps) {
 
                                       {/* Knowledge Topic Options Cards */}
                                       {isExpanded && (
-                                        <div className="border-t border-gray-200 p-3 bg-gray-50">
-                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div className='border-t border-gray-200 p-3 bg-gray-50'>
+                                          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3'>
                                             {/* Quiz Card */}
                                             <button
-                                              onClick={() => handleQuizClick(topic.id, 'KNOWLEDGE')}
+                                              onClick={() =>
+                                                handleQuizClick(
+                                                  topic.id,
+                                                  'KNOWLEDGE'
+                                                )
+                                              }
                                               className={cn(
                                                 'p-4 rounded-lg border-2 border-dashed transition-all duration-200 hover:scale-105',
-                                                getQuizStatus(topic.id) === 'passed' &&
+                                                getQuizStatus(topic.id) ===
+                                                  'passed' &&
                                                   'border-green-300 bg-green-50 hover:bg-green-100',
-                                                getQuizStatus(topic.id) === 'failed' &&
+                                                getQuizStatus(topic.id) ===
+                                                  'failed' &&
                                                   'border-red-300 bg-red-50 hover:bg-red-100',
-                                                getQuizStatus(topic.id) === 'not-attempted' &&
-                                                  'border-gray-300 bg-white hover:bg-gray-50',
+                                                getQuizStatus(topic.id) ===
+                                                  'not-attempted' &&
+                                                  'border-gray-300 bg-white hover:bg-gray-50'
                                               )}
                                             >
-                                              <div className="flex items-center space-x-3">
+                                              <div className='flex items-center space-x-3'>
                                                 <div
                                                   className={cn(
                                                     'w-10 h-10 rounded-full flex items-center justify-center',
-                                                    getQuizStatus(topic.id) === 'passed' &&
+                                                    getQuizStatus(topic.id) ===
+                                                      'passed' &&
                                                       'bg-green-100',
-                                                    getQuizStatus(topic.id) === 'failed' &&
-                                                      'bg-red-100',
-                                                    getQuizStatus(topic.id) === 'not-attempted' &&
-                                                      'bg-gray-100',
+                                                    getQuizStatus(topic.id) ===
+                                                      'failed' && 'bg-red-100',
+                                                    getQuizStatus(topic.id) ===
+                                                      'not-attempted' &&
+                                                      'bg-gray-100'
                                                   )}
                                                 >
                                                   <svg
                                                     className={cn(
                                                       'w-5 h-5',
-                                                      getQuizStatus(topic.id) === 'passed' &&
+                                                      getQuizStatus(
+                                                        topic.id
+                                                      ) === 'passed' &&
                                                         'text-green-600',
-                                                      getQuizStatus(topic.id) === 'failed' &&
+                                                      getQuizStatus(
+                                                        topic.id
+                                                      ) === 'failed' &&
                                                         'text-red-600',
-                                                      getQuizStatus(topic.id) === 'not-attempted' &&
-                                                        'text-gray-600',
+                                                      getQuizStatus(
+                                                        topic.id
+                                                      ) === 'not-attempted' &&
+                                                        'text-gray-600'
                                                     )}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
+                                                    fill='none'
+                                                    stroke='currentColor'
+                                                    viewBox='0 0 24 24'
                                                   >
                                                     <path
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
+                                                      strokeLinecap='round'
+                                                      strokeLinejoin='round'
                                                       strokeWidth={2}
-                                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                      d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
                                                     />
                                                   </svg>
                                                 </div>
-                                                <div className="text-left">
-                                                  <h4 className="font-medium text-gray-900">
+                                                <div className='text-left'>
+                                                  <h4 className='font-medium text-gray-900'>
                                                     Take Quiz
                                                   </h4>
-                                                  <p className="text-sm text-gray-600">
-                                                    {getQuizStatus(topic.id) === 'passed' &&
+                                                  <p className='text-sm text-gray-600'>
+                                                    {getQuizStatus(topic.id) ===
+                                                      'passed' &&
                                                       'Quiz passed - Click to retake'}
-                                                    {getQuizStatus(topic.id) === 'failed' &&
+                                                    {getQuizStatus(topic.id) ===
+                                                      'failed' &&
                                                       'Quiz failed - Click to retake'}
-                                                    {getQuizStatus(topic.id) === 'not-attempted' &&
+                                                    {getQuizStatus(topic.id) ===
+                                                      'not-attempted' &&
                                                       'Test your knowledge'}
                                                   </p>
                                                 </div>
@@ -1346,57 +1528,71 @@ export default function RotationPage({ params }: RotationPageProps) {
                                                 handleReflectionClick(
                                                   topic.id,
                                                   'KNOWLEDGE',
-                                                  topic.name,
+                                                  topic.name
                                                 )
                                               }
                                               className={cn(
                                                 'p-4 rounded-lg border-2 border-dashed transition-all duration-200 hover:scale-105',
-                                                getReflectionStatus(topic.id) === 'submitted' &&
+                                                getReflectionStatus(
+                                                  topic.id
+                                                ) === 'submitted' &&
                                                   'border-orange-300 bg-orange-50 hover:bg-orange-100',
-                                                getReflectionStatus(topic.id) === 'not-submitted' &&
-                                                  'border-gray-300 bg-white hover:bg-gray-50',
+                                                getReflectionStatus(
+                                                  topic.id
+                                                ) === 'not-submitted' &&
+                                                  'border-gray-300 bg-white hover:bg-gray-50'
                                               )}
                                             >
-                                              <div className="flex items-center space-x-3">
+                                              <div className='flex items-center space-x-3'>
                                                 <div
                                                   className={cn(
                                                     'w-10 h-10 rounded-full flex items-center justify-center',
-                                                    getReflectionStatus(topic.id) === 'submitted' &&
+                                                    getReflectionStatus(
+                                                      topic.id
+                                                    ) === 'submitted' &&
                                                       'bg-orange-100',
-                                                    getReflectionStatus(topic.id) ===
-                                                      'not-submitted' && 'bg-gray-100',
+                                                    getReflectionStatus(
+                                                      topic.id
+                                                    ) === 'not-submitted' &&
+                                                      'bg-gray-100'
                                                   )}
                                                 >
                                                   <svg
                                                     className={cn(
                                                       'w-5 h-5',
-                                                      getReflectionStatus(topic.id) ===
-                                                        'submitted' && 'text-orange-600',
-                                                      getReflectionStatus(topic.id) ===
-                                                        'not-submitted' && 'text-gray-600',
+                                                      getReflectionStatus(
+                                                        topic.id
+                                                      ) === 'submitted' &&
+                                                        'text-orange-600',
+                                                      getReflectionStatus(
+                                                        topic.id
+                                                      ) === 'not-submitted' &&
+                                                        'text-gray-600'
                                                     )}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
+                                                    fill='none'
+                                                    stroke='currentColor'
+                                                    viewBox='0 0 24 24'
                                                   >
                                                     <path
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
+                                                      strokeLinecap='round'
+                                                      strokeLinejoin='round'
                                                       strokeWidth={2}
-                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                      d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
                                                     />
                                                   </svg>
                                                 </div>
-                                                <div className="text-left">
-                                                  <h4 className="font-medium text-gray-900">
+                                                <div className='text-left'>
+                                                  <h4 className='font-medium text-gray-900'>
                                                     Write Reflection
                                                   </h4>
-                                                  <p className="text-sm text-gray-600">
-                                                    {getReflectionStatus(topic.id) ===
-                                                      'submitted' &&
+                                                  <p className='text-sm text-gray-600'>
+                                                    {getReflectionStatus(
+                                                      topic.id
+                                                    ) === 'submitted' &&
                                                       'Reflection submitted - Click to edit'}
-                                                    {getReflectionStatus(topic.id) ===
-                                                      'not-submitted' &&
+                                                    {getReflectionStatus(
+                                                      topic.id
+                                                    ) === 'not-submitted' &&
                                                       'Share your thoughts and learnings'}
                                                   </p>
                                                 </div>
@@ -1406,26 +1602,34 @@ export default function RotationPage({ params }: RotationPageProps) {
                                             {/* Feedback Card */}
                                             <FeedbackCard
                                               itemId={topic.id}
-                                              itemType="KNOWLEDGE"
-                                              onFeedbackClick={handleFeedbackClick}
+                                              itemType='KNOWLEDGE'
+                                              onFeedbackClick={
+                                                handleFeedbackClick
+                                              }
                                               unreadCount={
-                                                feedbackNotifications[`${topic.id}-KNOWLEDGE`] || 0
+                                                feedbackNotifications[
+                                                  `${topic.id}-KNOWLEDGE`
+                                                ] || 0
                                               }
                                               hasFeedback={
-                                                (feedbackNotifications[`${topic.id}-KNOWLEDGE`] ||
-                                                  0) > 0
+                                                (feedbackNotifications[
+                                                  `${topic.id}-KNOWLEDGE`
+                                                ] || 0) > 0
                                               }
                                               disabled={!topic.completed}
                                             />
 
                                             {/* Resources Card */}
                                             <ResourcesCard
-                                              mode="item"
+                                              mode='item'
                                               itemId={topic.id}
-                                              itemType="KNOWLEDGE"
+                                              itemType='KNOWLEDGE'
                                               itemName={topic.name}
-                                              {...(process.env.NEXT_PUBLIC_GOOGLE_DRIVE_URL && {
-                                                driveUrl: process.env.NEXT_PUBLIC_GOOGLE_DRIVE_URL,
+                                              {...(process.env
+                                                .NEXT_PUBLIC_GOOGLE_DRIVE_URL && {
+                                                driveUrl:
+                                                  process.env
+                                                    .NEXT_PUBLIC_GOOGLE_DRIVE_URL,
                                               })}
                                             />
                                           </div>
@@ -1451,7 +1655,7 @@ export default function RotationPage({ params }: RotationPageProps) {
       {/* Reflection Panel */}
       <ReflectionPanel
         isOpen={reflectionPanel.isOpen}
-        onClose={() => setReflectionPanel((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() => setReflectionPanel(prev => ({ ...prev, isOpen: false }))}
         itemName={reflectionPanel.itemName}
         initialContent={reflectionPanel.initialContent || ''}
         initialImages={reflectionPanel.initialImages || []}
@@ -1463,7 +1667,9 @@ export default function RotationPage({ params }: RotationPageProps) {
         isOpen={feedbackModalOpen.isOpen}
         itemId={feedbackModalOpen.itemId}
         itemType={feedbackModalOpen.itemType}
-        onClose={() => setFeedbackModalOpen({ isOpen: false, itemId: '', itemType: '' })}
+        onClose={() =>
+          setFeedbackModalOpen({ isOpen: false, itemId: '', itemType: '' })
+        }
       />
     </main>
   );
