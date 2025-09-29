@@ -4,6 +4,9 @@ import { hash } from 'bcryptjs';
 import { authRateLimit } from '@/lib/middleware/rateLimit';
 import { createUserSchema, validateInput } from '@/lib/utils/validation';
 import { AppError, createApiError } from '@/lib/utils/error-handler';
+import { z as zNamespace } from 'zod';
+// Ensure zod is retained in server bundle
+void zNamespace;
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,6 +64,8 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Signup error:', error);
+
+    // If validation utilities throw structured AppError, it's handled below
 
     if (error instanceof AppError) {
       return NextResponse.json(createApiError(error.message, error.statusCode, error.details), {
