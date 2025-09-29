@@ -3,9 +3,10 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    console.log('API: Getting intern data for ID:', params.id);
+    const { id } = await params;
+    console.log('API: Getting intern data for ID:', id);
 
     const session = await getServerSession(authOptions);
     console.log('API: Session:', !!session, session?.user?.role);
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const internId = params.id;
+    const internId = id;
     console.log('API: Processing intern ID:', internId);
 
     // Get intern information
@@ -148,13 +149,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // If no activity, get the first rotation
     if (!activeRotation && allProcedures.length > 0) {
-      const firstRotation = allProcedures[0].rotation;
-      activeRotation = {
-        id: firstRotation.id,
-        name: firstRotation.name,
-        logEntries: [],
-        verifications: [],
-      };
+      const firstRotation = allProcedures[0]?.rotation;
+      if (firstRotation) {
+        activeRotation = {
+          id: firstRotation.id,
+          name: firstRotation.name,
+          logEntries: [],
+          verifications: [],
+        };
+      }
     }
 
     if (!activeRotation) {

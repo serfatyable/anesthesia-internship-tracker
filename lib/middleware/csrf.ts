@@ -34,13 +34,13 @@ function getCSRFToken(request: NextRequest): string | null {
 }
 
 // Verify CSRF token
-function verifyCSRFToken(request: NextRequest): boolean {
+async function verifyCSRFToken(request: NextRequest): Promise<boolean> {
   const token = getCSRFToken(request);
   if (!token) {
     return false;
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const cookieToken = cookieStore.get(CSRF_TOKEN_COOKIE)?.value;
 
   if (!cookieToken) {
@@ -68,8 +68,9 @@ export function setCSRFToken(response: NextResponse): NextResponse {
 }
 
 // CSRF protection middleware
-export function csrfProtection(request: NextRequest): NextResponse | null {
-  const { pathname, method } = request.nextUrl;
+export async function csrfProtection(request: NextRequest): Promise<NextResponse | null> {
+  const { pathname } = request.nextUrl;
+  const method = request.method;
 
   // Skip CSRF protection for safe methods
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
@@ -104,7 +105,7 @@ export function csrfProtection(request: NextRequest): NextResponse | null {
       pathname.startsWith('/api/logs') ||
       pathname.startsWith('/api/verifications')
     ) {
-      if (!verifyCSRFToken(request)) {
+      if (!(await verifyCSRFToken(request))) {
         console.warn('CSRF token mismatch in development - allowing request');
         return null; // Allow in development
       }
@@ -113,7 +114,7 @@ export function csrfProtection(request: NextRequest): NextResponse | null {
   }
 
   // Verify CSRF token for state-changing requests in production
-  if (!verifyCSRFToken(request)) {
+  if (!(await verifyCSRFToken(request))) {
     return NextResponse.json(
       {
         error: 'CSRF token mismatch',
@@ -128,9 +129,9 @@ export function csrfProtection(request: NextRequest): NextResponse | null {
 }
 
 // Get CSRF token for client-side use (Edge Runtime compatible)
-export function getCSRFTokenForClient(): string {
+export async function getCSRFTokenForClient(): Promise<string> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get(CSRF_TOKEN_COOKIE)?.value;
 
     if (!token) {
@@ -162,20 +163,20 @@ export async function generateCSRFTokenEndpoint(): Promise<NextResponse> {
 }
 
 // CSRF token validation for API routes
-export function validateCSRFToken(request: NextRequest): boolean {
-  return verifyCSRFToken(request);
+export async function validateCSRFToken(request: NextRequest): Promise<boolean> {
+  return await verifyCSRFToken(request);
 }
 
 // Helper to add CSRF token to forms
-export function addCSRFTokenToForm(formData: FormData): FormData {
-  const token = getCSRFTokenForClient();
+export async function addCSRFTokenToForm(formData: FormData): Promise<FormData> {
+  const token = await getCSRFTokenForClient();
   formData.append('_csrf', token);
   return formData;
 }
 
 // Helper to add CSRF token to fetch requests
-export function addCSRFTokenToHeaders(headers: Headers): Headers {
-  const token = getCSRFTokenForClient();
+export async function addCSRFTokenToHeaders(headers: Headers): Promise<Headers> {
+  const token = await getCSRFTokenForClient();
   headers.set(CSRF_HEADER, token);
   return headers;
 }

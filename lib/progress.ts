@@ -305,6 +305,7 @@ export async function getInternProgressOld(userId: string): Promise<OldInternDas
       pending: r.pending,
       completionPercentage,
       state,
+      currentInterns: 0, // Default value for backward compatibility
     };
   });
 

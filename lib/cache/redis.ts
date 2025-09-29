@@ -30,7 +30,7 @@ class RedisCache {
           },
         });
 
-        this.client.on('error', (error) => {
+        this.client.on('error', (error: Error) => {
           logger.error('Redis connection error', { error: error.message });
           this.isConnected = false;
         });

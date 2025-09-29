@@ -108,6 +108,7 @@ export const RotationDetail = memo(function RotationDetail({
       pending: 0,
       completionPercentage: 100,
       state: 'FINISHED',
+      currentInterns: 5, // Mock value
     }),
     [rotationName],
   );

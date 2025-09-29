@@ -103,7 +103,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
     if (this.retryCount <= this.maxRetries) {
       console.log(`Retrying after error (attempt ${this.retryCount}/${this.maxRetries})`);
-      this.setState({ hasError: false, error: undefined, errorId: undefined });
+      this.setState({ hasError: false });
     } else {
       console.error('Max retries exceeded, keeping error state');
     }
@@ -116,7 +116,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         <FallbackComponent
           error={this.state.error}
           resetError={this.resetError}
-          errorId={this.state.errorId}
+          errorId={this.state.errorId || undefined}
         />
       );
     }

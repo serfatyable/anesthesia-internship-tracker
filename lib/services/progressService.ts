@@ -238,7 +238,7 @@ export class ProgressService {
             .reduce((sum, log) => sum + log.count, 0);
 
           // Calculate current interns in this rotation (based on recent activity)
-          const procedureIds = requirements.map((req) => req.procedure.id);
+          const procedureIds = requirements.map((req) => req.procedureId);
           const thirtyDaysAgo = new Date();
           thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
