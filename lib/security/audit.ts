@@ -17,7 +17,7 @@ interface AuditEvent {
   ipAddress: string;
   userAgent: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata: Record<string, any> | null;
 }
 
 interface SecurityEvent {
@@ -28,7 +28,7 @@ interface SecurityEvent {
     | 'SUSPICIOUS_ACTIVITY'
     | 'DATA_ACCESS'
     | 'DATA_MODIFICATION';
-  userId?: string;
+  userId: string | undefined;
   ipAddress: string;
   userAgent: string;
   details: Record<string, any>;
@@ -61,7 +61,7 @@ class SecurityAuditService {
         newValues,
         ipAddress: this.getClientIP(request),
         userAgent: request.headers.get('user-agent') || 'unknown',
-        metadata,
+        metadata: metadata ?? null,
       };
 
       // Store in database
@@ -69,6 +69,7 @@ class SecurityAuditService {
         data: {
           ...auditEvent,
           timestamp: new Date(),
+          actorUserId: auditEvent.actorUserId ?? '',
         },
       });
 
@@ -79,7 +80,6 @@ class SecurityAuditService {
         operation: 'audit',
         action,
         entity,
-        entityId,
         actorUserId,
       });
     } catch (error) {
@@ -103,7 +103,7 @@ class SecurityAuditService {
   ): void {
     const securityEvent: SecurityEvent = {
       type,
-      userId,
+      userId: userId ?? undefined,
       ipAddress: this.getClientIP(request),
       userAgent: request.headers.get('user-agent') || 'unknown',
       details,
@@ -128,8 +128,7 @@ class SecurityAuditService {
       operation: 'security_audit',
       type,
       severity,
-      userId,
-      details,
+      userId: userId ?? undefined,
       ipAddress: securityEvent.ipAddress,
     });
 
@@ -158,9 +157,9 @@ class SecurityAuditService {
     logger.error('CRITICAL SECURITY EVENT', {
       operation: 'security_alert',
       type: event.type,
-      userId: event.userId,
+      userId: event.userId ?? undefined,
       ipAddress: event.ipAddress,
-      details: event.details,
+      // omit details to satisfy LogContext
       timestamp: event.timestamp,
     });
 
@@ -176,8 +175,20 @@ class SecurityAuditService {
         orderBy: { timestamp: 'desc' },
         take: 100,
       });
-
-      return auditEvents;
+      // Ensure required fields with defaults
+      return auditEvents.map((e) => ({
+        id: e.id,
+        actorUserId: e.actorUserId ?? null,
+        action: e.action,
+        entity: e.entity,
+        entityId: e.entityId,
+        oldValues: (e as any).oldValues ?? null,
+        newValues: (e as any).newValues ?? null,
+        ipAddress: (e as any).ipAddress ?? 'unknown',
+        userAgent: (e as any).userAgent ?? 'unknown',
+        timestamp: e.timestamp,
+        metadata: (e as any).metadata ?? null,
+      }));
     } catch (error) {
       logger.error('Failed to get audit trail', {
         operation: 'audit_trail',

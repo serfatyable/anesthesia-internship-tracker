@@ -63,13 +63,13 @@ export async function POST(request: NextRequest) {
     console.error('Signup error:', error);
 
     if (error instanceof AppError) {
-      return NextResponse.json(createApiError(error.message, error.statusCode), {
+      return NextResponse.json(createApiError(error.message, error.statusCode, error.details), {
         status: error.statusCode,
       });
     }
 
     if (error instanceof Error) {
-      return NextResponse.json(createApiError(error.message, 400), { status: 400 });
+      return NextResponse.json(createApiError('Internal server error', 500), { status: 500 });
     }
 
     return NextResponse.json(createApiError('Internal server error', 500), { status: 500 });

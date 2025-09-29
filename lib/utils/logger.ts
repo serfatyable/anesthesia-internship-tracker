@@ -56,6 +56,11 @@ interface LogContext {
   retryCount?: number;
   url?: string;
   userAgent?: string;
+  // Allow additional ad-hoc context keys used by various modules
+  logEntryId?: string;
+  // generic index signature for optional context enrichment (kept narrow by usage)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 interface LogEntry {

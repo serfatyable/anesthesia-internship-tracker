@@ -3,6 +3,7 @@
  */
 
 export interface ApiError {
+  error?: string;
   message: string;
   statusCode: number;
   details?: unknown;
@@ -38,6 +39,7 @@ export function createApiError(
 ): ApiError {
   return {
     message,
+    error: message,
     statusCode,
     details,
     timestamp: new Date().toISOString(),

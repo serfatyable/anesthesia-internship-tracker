@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, POST } from '@/app/api/cases/route';
 import { prisma } from '@/lib/db';
+import * as NextAuthNext from 'next-auth/next';
 
 // Mock NextAuth
 vi.mock('next-auth/next', () => ({
@@ -26,6 +26,7 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/lib/utils/monitoring', () => ({
   monitoring: {
     recordMetric: vi.fn(),
+    recordError: vi.fn(),
   },
 }));
 
@@ -40,11 +41,12 @@ describe('Cases API', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (require('next-auth/next').getServerSession as any).mockResolvedValue(mockSession);
+    (NextAuthNext.getServerSession as any).mockResolvedValue(mockSession);
   });
 
   describe('GET /api/cases', () => {
     it('should return cases with pagination', async () => {
+      const { GET } = await import('../../app/api/cases/route');
       const mockCases = [
         {
           id: 'case_1',
@@ -73,6 +75,7 @@ describe('Cases API', () => {
     });
 
     it('should filter cases by category', async () => {
+      const { GET } = await import('../../app/api/cases/route');
       (prisma.case.findMany as any).mockResolvedValue([]);
       (prisma.case.count as any).mockResolvedValue(0);
 
@@ -90,6 +93,7 @@ describe('Cases API', () => {
     });
 
     it('should search cases by title and description', async () => {
+      const { GET } = await import('../../app/api/cases/route');
       (prisma.case.findMany as any).mockResolvedValue([]);
       (prisma.case.count as any).mockResolvedValue(0);
 
@@ -110,7 +114,8 @@ describe('Cases API', () => {
     });
 
     it('should return 401 for unauthenticated requests', async () => {
-      (require('next-auth/next').getServerSession as any).mockResolvedValue(null);
+      const { GET } = await import('../../app/api/cases/route');
+      (NextAuthNext.getServerSession as any).mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/cases');
       const response = await GET(request);
@@ -121,6 +126,7 @@ describe('Cases API', () => {
 
   describe('POST /api/cases', () => {
     it('should create a new case with valid data', async () => {
+      const { POST } = await import('../../app/api/cases/route');
       const mockCase = {
         id: 'case_123',
         title: 'Test Case',
@@ -155,6 +161,7 @@ describe('Cases API', () => {
     });
 
     it('should reject invalid data', async () => {
+      const { POST } = await import('../../app/api/cases/route');
       const request = new NextRequest('http://localhost:3000/api/cases', {
         method: 'POST',
         body: JSON.stringify({
@@ -173,6 +180,7 @@ describe('Cases API', () => {
     });
 
     it('should sanitize input data', async () => {
+      const { POST } = await import('../../app/api/cases/route');
       const mockCase = {
         id: 'case_123',
         title: 'Test Case',

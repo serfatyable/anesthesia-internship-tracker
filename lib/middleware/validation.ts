@@ -147,7 +147,7 @@ export function withValidation<T extends Record<string, unknown>>(
   handler: (validatedData: T, request: NextRequest) => Promise<NextResponse>,
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
-    const validatedData = {} as T;
+    const validatedDataMutable: Record<string, unknown> = {};
     const context = `${request.method} ${request.nextUrl.pathname}`;
 
     try {
@@ -160,7 +160,7 @@ export function withValidation<T extends Record<string, unknown>>(
           return createValidationErrorResponse(bodyResult.errors!, `${context} body`);
         }
 
-        Object.assign(validatedData, bodyResult.data);
+        Object.assign(validatedDataMutable, bodyResult.data as Record<string, unknown>);
       }
 
       // Validate query parameters
@@ -171,7 +171,7 @@ export function withValidation<T extends Record<string, unknown>>(
           return createValidationErrorResponse(queryResult.errors!, `${context} query`);
         }
 
-        Object.assign(validatedData, queryResult.data);
+        Object.assign(validatedDataMutable, queryResult.data as Record<string, unknown>);
       }
 
       // Validate route parameters
@@ -189,7 +189,7 @@ export function withValidation<T extends Record<string, unknown>>(
           return createValidationErrorResponse(paramsResult.errors!, `${context} params`);
         }
 
-        Object.assign(validatedData, paramsResult.data);
+        Object.assign(validatedDataMutable, paramsResult.data as Record<string, unknown>);
       }
 
       // Validate headers
@@ -200,11 +200,11 @@ export function withValidation<T extends Record<string, unknown>>(
           return createValidationErrorResponse(headersResult.errors!, `${context} headers`);
         }
 
-        Object.assign(validatedData, headersResult.data);
+        Object.assign(validatedDataMutable, headersResult.data as Record<string, unknown>);
       }
 
       // Call the handler with validated data
-      return await handler(validatedData, request);
+      return await handler(validatedDataMutable as T, request);
     } catch (error) {
       logger.error('Validation middleware error', {
         operation: 'validation_middleware',
@@ -248,8 +248,11 @@ export function sanitizeInput<T extends Record<string, unknown>>(
   const sanitized = { ...data };
 
   Object.entries(rules).forEach(([key, sanitizer]) => {
-    if (key in sanitized && sanitized[key] !== undefined) {
-      sanitized[key] = sanitizer(sanitized[key]);
+    if (key in sanitized && typeof sanitizer === 'function') {
+      const current = (sanitized as Record<string, unknown>)[key];
+      if (current !== undefined) {
+        (sanitized as Record<string, unknown>)[key] = sanitizer(current);
+      }
     }
   });
 

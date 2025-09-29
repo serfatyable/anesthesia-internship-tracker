@@ -62,12 +62,12 @@ class RedisCache {
     try {
       if (this.client && this.isConnected) {
         const value = await this.client.get(fullKey);
-        return value ? JSON.parse(value) : null;
+        return value ? (JSON.parse(value) as T) : null;
       } else {
         // Fallback to in-memory cache
         const entry = this.fallbackCache.get(fullKey);
         if (entry && entry.expires > Date.now()) {
-          return entry.value;
+          return (entry.value as T) ?? null;
         }
         if (entry) {
           this.fallbackCache.delete(fullKey);

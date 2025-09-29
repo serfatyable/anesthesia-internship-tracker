@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { apiRateLimit } from '@/lib/middleware/rateLimit';
 import { sanitizeString, sanitizeHtml, sanitizeUrl } from '@/lib/utils/validation';
 import { withErrorHandling } from '@/lib/middleware/errorHandler';
+import { AppError } from '@/lib/utils/error-handler';
 import { monitoring } from '@/lib/utils/monitoring';
 
 export const dynamic = 'force-dynamic';
@@ -112,7 +113,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   // Enhanced sanitization
   const sanitizedBody = {
     ...body,
-    title: sanitizeString(body.title || '', 200),
+    title: sanitizeString(body.title || '', 200).replace(/<script[^>]*>|<\/script>/gi, ''),
     description: sanitizeHtml(body.description || ''),
     category: sanitizeString(body.category || '', 100),
     image1Url: body.image1Url ? sanitizeUrl(body.image1Url) : undefined,
@@ -120,7 +121,11 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     image3Url: body.image3Url ? sanitizeUrl(body.image3Url) : undefined,
   };
 
-  const validatedData = createCaseSchema.parse(sanitizedBody);
+  const parseResult = createCaseSchema.safeParse(sanitizedBody);
+  if (!parseResult.success) {
+    throw new AppError('Validation failed', 400, true, parseResult.error.issues);
+  }
+  const validatedData = parseResult.data;
 
   const newCase = await prisma.case.create({
     data: {

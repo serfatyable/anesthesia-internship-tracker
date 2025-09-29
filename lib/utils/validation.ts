@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { AppError } from '@/lib/utils/error-handler';
 
 // Common validation schemas
 export const emailSchema = z.string().email('Invalid email address').max(254, 'Email too long');
@@ -118,9 +119,12 @@ export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): T {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      throw new Error(
-        `Validation failed: ${error.issues.map((e: z.ZodIssue) => e.message).join(', ')}`,
-      );
+      const details = error.issues.map((e: z.ZodIssue) => ({
+        field: e.path.join('.'),
+        message: e.message,
+        code: e.code,
+      }));
+      throw new AppError('Validation failed', 400, true, details);
     }
     throw error;
   }
@@ -159,10 +163,10 @@ export function sanitizeString(input: string, maxLength: number = 1000): string 
   return (
     input
       .trim()
+      // Remove entire script blocks (tags and their content) first
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
       // Remove all potentially dangerous characters
       .replace(/[<>\"'&]/g, '')
-      // Remove script tags and their content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       // Remove javascript: protocols
       .replace(/javascript:/gi, '')
       // Remove data: protocols that could contain scripts
