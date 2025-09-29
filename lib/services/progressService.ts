@@ -217,6 +217,34 @@ export class ProgressService {
         logsByRotation.get(rotationId)!.push(log);
       });
 
+      // Fetch all recent log entries for the last 30 days in one query
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const allRecentLogs = await prisma.logEntry.findMany({
+        where: {
+          date: { gte: thirtyDaysAgo },
+        },
+        select: {
+          internId: true,
+          procedureId: true,
+          procedure: {
+            select: {
+              rotationId: true,
+            },
+          },
+        },
+      });
+      // Map: rotationId -> Set of internIds
+      const recentInternsByRotation = new Map<string, Set<string>>();
+      allRecentLogs.forEach((log) => {
+        const rotationId = log.procedure?.rotationId;
+        if (!rotationId) return;
+        if (!recentInternsByRotation.has(rotationId)) {
+          recentInternsByRotation.set(rotationId, new Set());
+        }
+        recentInternsByRotation.get(rotationId)!.add(log.internId);
+      });
+
       // Calculate progress per rotation
       const rotationProgress: RotationProgress[] = await Promise.all(
         rotations.map(async (rotation) => {
@@ -237,21 +265,8 @@ export class ProgressService {
             .filter((log) => log.verification?.status === VERIFICATION_STATUS.PENDING)
             .reduce((sum, log) => sum + log.count, 0);
 
-          // Calculate current interns in this rotation (based on recent activity)
-          const procedureIds = requirements.map((req) => req.procedureId);
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-          const recentInterns = await prisma.logEntry.findMany({
-            where: {
-              procedureId: { in: procedureIds },
-              date: { gte: thirtyDaysAgo },
-            },
-            select: { internId: true },
-            distinct: ['internId'],
-          });
-
-          const currentInterns = recentInterns.length;
+          // Use precomputed recent interns
+          const currentInterns = recentInternsByRotation.get(rotation.id)?.size || 0;
 
           return {
             rotationId: rotation.id,

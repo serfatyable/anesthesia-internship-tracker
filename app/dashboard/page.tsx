@@ -3,10 +3,10 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { progressService } from '@/lib/services/progressService';
 import { prisma } from '@/lib/db';
-import { InternDashboard } from '@/components/site/dashboard/InternDashboard';
-import { TutorDashboard } from '@/components/site/dashboard/TutorDashboard';
-import { redirect } from 'next/navigation';
+import DashboardClient from './DashboardClient';
 import { InternDashboard as InternDashboardType } from '@/lib/domain/progress';
+
+// Remove useSearchParams import
 
 type ExtendedInternDashboard = InternDashboardType & {
   selectedInternId?: string;
@@ -16,80 +16,56 @@ type ExtendedInternDashboard = InternDashboardType & {
 interface DashboardPageProps {
   searchParams: Promise<{
     internId?: string;
+    internPage?: string;
   }>;
 }
 
-async function DashboardContent({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    redirect('/login');
+    return null;
   }
 
   const { user } = session;
-  await searchParams; // awaited to preserve contract; value unused
-
-  // Determine if user is a tutor/admin
+  const params = await searchParams;
+  // Pagination for tutors
   const isTutor = user.role === 'TUTOR' || user.role === 'ADMIN';
+  let page = 1;
+  const limit = 20;
+  if (params && params.internPage) {
+    const parsed = parseInt(params.internPage, 10);
+    if (!isNaN(parsed) && parsed > 0) page = parsed;
+  }
+  const offset = (page - 1) * limit;
 
-  try {
-    let dashboardData: ExtendedInternDashboard;
-    let interns: Array<{ id: string; name: string | null; email: string }> = [];
+  let dashboardData: ExtendedInternDashboard | undefined = undefined;
+  let interns: Array<{ id: string; name: string | null; email: string }> = [];
+  let totalInterns = 0;
 
-    // Get all interns for search functionality
-    if (process.env.NEXT_PHASE !== 'phase-production-build') {
-      interns = await prisma.user.findMany({
+  // Get paginated interns for tutors
+  if (isTutor && process.env.NEXT_PHASE !== 'phase-production-build') {
+    [interns, totalInterns] = await Promise.all([
+      prisma.user.findMany({
         where: { role: 'INTERN' },
         select: { id: true, name: true, email: true },
-      });
-    }
-
-    if (isTutor) {
-      // For tutors, we don't need specific intern data for the main dashboard
-      // The TutorDashboard component will handle displaying favorite interns
-      dashboardData = {} as ExtendedInternDashboard; // Empty object since we're not using it
-    } else {
-      // For interns, get their own progress
-      dashboardData = await progressService.getInternProgress(user.id);
-    }
-
-    return (
-      <main className="max-w-7xl mx-auto p-4">
-        <section className="space-y-6">
-          {isTutor ? (
-            /* New Tutor Dashboard */
-            <TutorDashboard interns={interns} />
-          ) : (
-            /* Intern Dashboard */
-            <InternDashboard dashboard={dashboardData} />
-          )}
-        </section>
-      </main>
-    );
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    return (
-      <main className="max-w-5xl mx-auto p-4">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
-          <p className="text-red-600">
-            {error instanceof Error
-              ? error.message
-              : 'An error occurred while loading the dashboard'}
-          </p>
-          <details className="mt-4">
-            <summary className="cursor-pointer text-sm font-medium">Error Details</summary>
-            <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto">
-              {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
-            </pre>
-          </details>
-        </div>
-      </main>
-    );
+        skip: offset,
+        take: limit,
+      }),
+      prisma.user.count({ where: { role: 'INTERN' } }),
+    ]);
+  } else if (process.env.NEXT_PHASE !== 'phase-production-build') {
+    interns = await prisma.user.findMany({
+      where: { role: 'INTERN' },
+      select: { id: true, name: true, email: true },
+    });
+    totalInterns = interns.length;
   }
-}
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  if (!isTutor) {
+    dashboardData = await progressService.getInternProgress(user.id);
+  }
+
   return (
     <Suspense
       fallback={
@@ -100,7 +76,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </main>
       }
     >
-      <DashboardContent searchParams={searchParams} />
+      <main className="max-w-7xl mx-auto p-4">
+        <DashboardClient
+          isTutor={isTutor}
+          interns={interns}
+          totalInterns={totalInterns}
+          page={page}
+          limit={limit}
+          dashboardData={dashboardData}
+        />
+      </main>
     </Suspense>
   );
 }

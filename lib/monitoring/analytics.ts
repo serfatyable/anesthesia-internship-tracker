@@ -1,407 +1,377 @@
-/**
- * Advanced analytics and monitoring system
- */
-import { monitoring } from '@/lib/utils/monitoring';
-import { logger } from '@/lib/utils/logger';
+// lib/monitoring/analytics.ts
 
 interface AnalyticsEvent {
+  id: string;
   name: string;
-  properties: Record<string, unknown>;
-  timestamp: number;
-  userId: string | undefined;
+  properties: Record<string, any>;
+  userId?: string;
   sessionId?: string;
-}
-
-interface PerformanceMetrics {
-  operation: string;
-  duration: number;
-  memoryUsage: number;
   timestamp: number;
-  metadata: Record<string, unknown> | undefined;
+  context: {
+    userAgent?: string;
+    ip?: string;
+    url?: string;
+    referrer?: string;
+  };
 }
 
-interface UserBehavior {
-  userId: string;
-  action: string;
-  page: string;
-  timestamp: number;
-  properties?: Record<string, unknown>;
+interface AnalyticsConfig {
+  enabled: boolean;
+  sampleRate: number;
+  maxEvents: number;
+  flushInterval: number;
+  batchSize: number;
 }
 
-class AnalyticsService {
+class AnalyticsMonitor {
   private events: AnalyticsEvent[] = [];
-  private performanceMetrics: PerformanceMetrics[] = [];
-  private userBehaviors: UserBehavior[] = [];
-  private maxEvents = 10000;
+  private config: AnalyticsConfig;
+  private flushTimer: NodeJS.Timeout | null = null;
 
-  // Track custom events
-  trackEvent(name: string, properties: Record<string, unknown> = {}, userId?: string): void {
+  constructor(config: Partial<AnalyticsConfig> = {}) {
+    this.config = {
+      enabled: process.env.NODE_ENV === 'production',
+      sampleRate: 1.0,
+      maxEvents: 10000,
+      flushInterval: 60000, // 1 minute
+      batchSize: 100,
+      ...config,
+    };
+
+    if (this.config.enabled) {
+      this.startFlushTimer();
+    }
+  }
+
+  /**
+   * Track an event
+   */
+  track(
+    name: string,
+    properties: Record<string, any> = {},
+    userId?: string,
+    sessionId?: string,
+    context: Partial<AnalyticsEvent['context']> = {}
+  ): string {
+    if (!this.config.enabled || Math.random() > this.config.sampleRate) {
+      return '';
+    }
+
+    const eventId = this.generateEventId();
+    const now = Date.now();
+
     const event: AnalyticsEvent = {
+      id: eventId,
       name,
-      properties,
-      timestamp: Date.now(),
+      properties: {
+        ...properties,
+        timestamp: now,
+      },
       userId,
+      sessionId,
+      timestamp: now,
+      context: {
+        userAgent: context.userAgent || this.getUserAgent(),
+        ip: context.ip || this.getClientIP(),
+        url: context.url || this.getCurrentURL(),
+        referrer: context.referrer || this.getReferrer(),
+      },
     };
 
     this.events.push(event);
 
-    // Keep only recent events
-    if (this.events.length > this.maxEvents) {
-      this.events = this.events.slice(-this.maxEvents);
+    // Keep only the most recent events
+    if (this.events.length > this.config.maxEvents) {
+      this.events = this.events.slice(-this.config.maxEvents);
     }
 
-    // Record in monitoring system
-    monitoring.recordMetric('analytics.event', 1, {
-      eventName: name,
-      userId: userId || 'anonymous',
-    });
-
-    logger.debug('Analytics event tracked', {
-      operation: 'analytics',
-      eventName: name,
-      userId: userId || undefined,
-    });
+    return eventId;
   }
 
-  // Track user behavior
-  trackUserBehavior(
-    userId: string,
-    action: string,
+  /**
+   * Track page view
+   */
+  trackPageView(
     page: string,
-    properties: Record<string, unknown> = {},
-  ): void {
-    const behavior: UserBehavior = {
-      userId,
-      action,
+    title?: string,
+    userId?: string,
+    sessionId?: string
+  ): string {
+    return this.track('page_view', {
       page,
-      timestamp: Date.now(),
-      properties,
-    };
-
-    this.userBehaviors.push(behavior);
-
-    // Keep only recent behaviors
-    if (this.userBehaviors.length > this.maxEvents) {
-      this.userBehaviors = this.userBehaviors.slice(-this.maxEvents);
-    }
-
-    // Record in monitoring system
-    monitoring.recordMetric('analytics.user_behavior', 1, {
-      action,
-      page,
-      userId,
-    });
-
-    logger.debug('User behavior tracked', {
-      operation: 'analytics',
-      userId,
-      action,
-      page,
-      properties,
-    });
+      title: title || page,
+    }, userId, sessionId);
   }
 
-  // Track performance metrics
-  trackPerformance(
-    operation: string,
+  /**
+   * Track user action
+   */
+  trackAction(
+    action: string,
+    category?: string,
+    label?: string,
+    value?: number,
+    userId?: string,
+    sessionId?: string
+  ): string {
+    return this.track('user_action', {
+      action,
+      category,
+      label,
+      value,
+    }, userId, sessionId);
+  }
+
+  /**
+   * Track API call
+   */
+  trackAPICall(
+    endpoint: string,
+    method: string,
+    statusCode: number,
     duration: number,
-    memoryUsage?: number,
-    metadata?: Record<string, unknown>,
-  ): void {
-    const metric: PerformanceMetrics = {
-      operation,
+    userId?: string
+  ): string {
+    return this.track('api_call', {
+      endpoint,
+      method,
+      statusCode,
       duration,
-      memoryUsage: memoryUsage || process.memoryUsage().heapUsed,
-      timestamp: Date.now(),
-      metadata,
-    };
+      success: statusCode >= 200 && statusCode < 400,
+    }, userId);
+  }
 
-    this.performanceMetrics.push(metric);
-
-    // Keep only recent metrics
-    if (this.performanceMetrics.length > this.maxEvents) {
-      this.performanceMetrics = this.performanceMetrics.slice(-this.maxEvents);
-    }
-
-    // Record in monitoring system
-    monitoring.recordMetric('analytics.performance', duration, {
-      operation,
-      memoryUsage: String(metric.memoryUsage),
-    });
-
-    // Log slow operations
-    if (duration > 1000) {
-      logger.warn('Slow operation detected', {
-        operation: 'analytics',
-        operationName: operation,
+  /**
+   * Track database query
+   */
+  trackDatabaseQuery(
+    query: string,
+    duration: number,
+    rowsAffected?: number,
+    userId?: string
+  ): string {
+    return this.track('database_query', {
+      query: query.substring(0, 100), // Truncate for privacy
         duration,
-        memoryUsage: metric.memoryUsage,
-        metadata,
-      });
-    }
+      rowsAffected,
+    }, userId);
   }
 
-  // Get analytics data
-  getAnalytics(timeRange?: { start: number; end: number }): {
-    events: AnalyticsEvent[];
-    performance: PerformanceMetrics[];
-    userBehaviors: UserBehavior[];
-  } {
-    const filter = <T extends { timestamp: number }>(items: T[]): T[] => {
-      if (!timeRange) return items;
-      return items.filter(
-        (item) => item.timestamp >= timeRange.start && item.timestamp <= timeRange.end,
-      );
-    };
-
-    return {
-      events: filter(this.events),
-      performance: filter(this.performanceMetrics),
-      userBehaviors: filter(this.userBehaviors),
-    };
+  /**
+   * Track error
+   */
+  trackError(
+    error: Error,
+    context: Record<string, any> = {},
+    userId?: string,
+    sessionId?: string
+  ): string {
+    return this.track('error', {
+      message: error.message,
+      type: error.constructor.name,
+      stack: error.stack?.substring(0, 500), // Truncate for privacy
+      ...context,
+    }, userId, sessionId);
   }
 
-  // Get event statistics
-  getEventStats(timeRange?: { start: number; end: number }): Record<string, number> {
-    const events = timeRange
-      ? this.events.filter((e) => e.timestamp >= timeRange.start && e.timestamp <= timeRange.end)
-      : this.events;
+  /**
+   * Get events
+   */
+  getEvents(filters?: {
+    name?: string;
+    userId?: string;
+    sessionId?: string;
+    limit?: number;
+    since?: number;
+  }): AnalyticsEvent[] {
+    let filtered = [...this.events];
 
-    const stats: Record<string, number> = {};
-    events.forEach((event) => {
-      stats[event.name] = (stats[event.name] || 0) + 1;
-    });
-
-    return stats;
-  }
-
-  // Get performance statistics
-  getPerformanceStats(timeRange?: { start: number; end: number }): Record<
-    string,
-    {
-      count: number;
-      avgDuration: number;
-      maxDuration: number;
-      minDuration: number;
-      avgMemoryUsage: number;
-    }
-  > {
-    const metrics = timeRange
-      ? this.performanceMetrics.filter(
-          (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
-        )
-      : this.performanceMetrics;
-
-    const stats: Record<
-      string,
-      {
-        count: number;
-        totalDuration: number;
-        maxDuration: number;
-        minDuration: number;
-        totalMemoryUsage: number;
-      }
-    > = {};
-
-    metrics.forEach((metric) => {
-      let stat = stats[metric.operation];
-      if (!stat) {
-        stat = {
-          count: 0,
-          totalDuration: 0,
-          maxDuration: 0,
-          minDuration: Infinity,
-          totalMemoryUsage: 0,
-        };
-        stats[metric.operation] = stat;
-      }
-
-      stat.count++;
-      stat.totalDuration += metric.duration;
-      stat.maxDuration = Math.max(stat.maxDuration, metric.duration);
-      stat.minDuration = Math.min(stat.minDuration, metric.duration);
-      stat.totalMemoryUsage += metric.memoryUsage;
-    });
-
-    // Build final stats with averages
-    const finalStats: Record<
-      string,
-      {
-        count: number;
-        avgDuration: number;
-        maxDuration: number;
-        minDuration: number;
-        avgMemoryUsage: number;
-      }
-    > = {};
-
-    for (const [operation, stat] of Object.entries(stats) as Array<
-      [
-        string,
-        {
-          count: number;
-          totalDuration: number;
-          maxDuration: number;
-          minDuration: number;
-          totalMemoryUsage: number;
-        },
-      ]
-    >) {
-      const avgDuration = stat.totalDuration / stat.count;
-      const avgMemoryUsage = stat.totalMemoryUsage / stat.count;
-      const min = stat.minDuration === Infinity ? 0 : stat.minDuration;
-      finalStats[operation] = {
-        count: stat.count,
-        avgDuration,
-        maxDuration: stat.maxDuration,
-        minDuration: min,
-        avgMemoryUsage,
-      };
+    if (filters?.name) {
+      filtered = filtered.filter(event => event.name === filters.name);
     }
 
-    return finalStats;
+    if (filters?.userId) {
+      filtered = filtered.filter(event => event.userId === filters.userId);
+    }
+
+    if (filters?.sessionId) {
+      filtered = filtered.filter(event => event.sessionId === filters.sessionId);
+    }
+
+    if (filters?.since) {
+      filtered = filtered.filter(event => event.timestamp >= filters.since!);
+    }
+
+    if (filters?.limit) {
+      filtered = filtered.slice(-filters.limit);
+    }
+
+    return filtered.sort((a, b) => b.timestamp - a.timestamp);
   }
 
-  // Get user behavior insights
-  getUserBehaviorInsights(timeRange?: { start: number; end: number }): {
+  /**
+   * Get analytics summary
+   */
+  getSummary(timeframe: number = 24 * 60 * 60 * 1000): {
+    totalEvents: number;
+    uniqueUsers: number;
+    uniqueSessions: number;
+    eventsByType: Record<string, number>;
+    topPages: Array<{ page: string; views: number }>;
     topActions: Array<{ action: string; count: number }>;
-    topPages: Array<{ page: string; count: number }>;
-    activeUsers: number;
-    averageActionsPerUser: number;
+    errorRate: number;
+    avgResponseTime: number;
   } {
-    const behaviors = timeRange
-      ? this.userBehaviors.filter(
-          (b) => b.timestamp >= timeRange.start && b.timestamp <= timeRange.end,
-        )
-      : this.userBehaviors;
+    const since = Date.now() - timeframe;
+    const recentEvents = this.events.filter(event => event.timestamp >= since);
 
-    const actionCounts: Record<string, number> = {};
-    const pageCounts: Record<string, number> = {};
-    const userActions: Record<string, number> = {};
+    const uniqueUsers = new Set(recentEvents.map(e => e.userId).filter(Boolean)).size;
+    const uniqueSessions = new Set(recentEvents.map(e => e.sessionId).filter(Boolean)).size;
 
-    behaviors.forEach((behavior) => {
-      actionCounts[behavior.action] = (actionCounts[behavior.action] || 0) + 1;
-      pageCounts[behavior.page] = (pageCounts[behavior.page] || 0) + 1;
-      userActions[behavior.userId] = (userActions[behavior.userId] || 0) + 1;
-    });
+    const eventsByType: Record<string, number> = {};
+    const pageViews: Record<string, number> = {};
+    const actions: Record<string, number> = {};
+    let errorCount = 0;
+    let totalResponseTime = 0;
+    let responseTimeCount = 0;
 
-    const topActions = Object.entries(actionCounts)
+    for (const event of recentEvents) {
+      eventsByType[event.name] = (eventsByType[event.name] || 0) + 1;
+
+      if (event.name === 'page_view') {
+        const page = event.properties.page;
+        if (page) {
+          pageViews[page] = (pageViews[page] || 0) + 1;
+        }
+      }
+
+      if (event.name === 'user_action') {
+        const action = event.properties.action;
+        if (action) {
+          actions[action] = (actions[action] || 0) + 1;
+        }
+      }
+
+      if (event.name === 'error') {
+        errorCount++;
+      }
+
+      if (event.name === 'api_call' && event.properties.duration) {
+        totalResponseTime += event.properties.duration;
+        responseTimeCount++;
+      }
+    }
+
+    const topPages = Object.entries(pageViews)
+      .map(([page, views]) => ({ page, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 10);
+
+    const topActions = Object.entries(actions)
       .map(([action, count]) => ({ action, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    const topPages = Object.entries(pageCounts)
-      .map(([page, count]) => ({ page, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    const activeUsers = Object.keys(userActions).length;
-    const averageActionsPerUser =
-      activeUsers > 0
-        ? Object.values(userActions).reduce((sum, count) => sum + count, 0) / activeUsers
-        : 0;
+    const errorRate = recentEvents.length > 0 ? (errorCount / recentEvents.length) * 100 : 0;
+    const avgResponseTime = responseTimeCount > 0 ? totalResponseTime / responseTimeCount : 0;
 
     return {
-      topActions,
+      totalEvents: recentEvents.length,
+      uniqueUsers,
+      uniqueSessions,
+      eventsByType,
       topPages,
-      activeUsers,
-      averageActionsPerUser: Math.round(averageActionsPerUser * 100) / 100,
+      topActions,
+      errorRate,
+      avgResponseTime,
     };
   }
 
-  // Clear old data
-  cleanup(maxAge: number = 24 * 60 * 60 * 1000): void {
-    const cutoff = Date.now() - maxAge;
-
-    this.events = this.events.filter((event) => event.timestamp > cutoff);
-    this.performanceMetrics = this.performanceMetrics.filter((metric) => metric.timestamp > cutoff);
-    this.userBehaviors = this.userBehaviors.filter((behavior) => behavior.timestamp > cutoff);
+  /**
+   * Generate unique event ID
+   */
+  private generateEventId(): string {
+    return `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Export data for external analysis
-  exportData(): {
-    events: AnalyticsEvent[];
-    performance: PerformanceMetrics[];
-    userBehaviors: UserBehavior[];
-    exportedAt: number;
-  } {
-    return {
-      events: [...this.events],
-      performance: [...this.performanceMetrics],
-      userBehaviors: [...this.userBehaviors],
-      exportedAt: Date.now(),
-    };
+  /**
+   * Get user agent from request
+   */
+  private getUserAgent(): string | undefined {
+    // In a real implementation, you would get this from the request headers
+    return undefined;
   }
-}
 
-// Global analytics instance
-export const analytics = new AnalyticsService();
+  /**
+   * Get client IP from request
+   */
+  private getClientIP(): string | undefined {
+    // In a real implementation, you would get this from the request
+    return undefined;
+  }
 
-// Convenience functions
-export const trackEvent = (name: string, properties?: Record<string, unknown>, userId?: string) =>
-  analytics.trackEvent(name, properties, userId);
+  /**
+   * Get current URL
+   */
+  private getCurrentURL(): string | undefined {
+    // In a real implementation, you would get this from the request
+    return undefined;
+  }
 
-export const trackUserBehavior = (
-  userId: string,
-  action: string,
-  page: string,
-  properties?: Record<string, unknown>,
-) => analytics.trackUserBehavior(userId, action, page, properties);
+  /**
+   * Get referrer
+   */
+  private getReferrer(): string | undefined {
+    // In a real implementation, you would get this from the request headers
+    return undefined;
+  }
 
-export const trackPerformanceMetric = (
-  operation: string,
-  duration: number,
-  memoryUsage?: number,
-  metadata?: Record<string, unknown>,
-) => analytics.trackPerformance(operation, duration, memoryUsage, metadata);
+  /**
+   * Start the flush timer
+   */
+  private startFlushTimer(): void {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer);
+    }
 
-// Performance tracking decorator
-export function withPerformanceTracking<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  operationName: string,
-): T {
-  return ((...args: Parameters<T>) => {
-    const start = performance.now();
-    const startMemory = process.memoryUsage().heapUsed;
+    this.flushTimer = setInterval(() => {
+      this.flush();
+    }, this.config.flushInterval);
+  }
+
+  /**
+   * Flush events to external service
+   */
+  private async flush(): Promise<void> {
+    if (this.events.length === 0) {
+      return;
+    }
 
     try {
-      const result = fn(...args);
-
-      if (result instanceof Promise) {
-        return result
-          .then((resolved) => {
-            const duration = performance.now() - start;
-            const endMemory = process.memoryUsage().heapUsed;
-            analytics.trackPerformance(operationName, duration, endMemory - startMemory);
-            return resolved;
-          })
-          .catch((error) => {
-            const duration = performance.now() - start;
-            const endMemory = process.memoryUsage().heapUsed;
-            analytics.trackPerformance(operationName, duration, endMemory - startMemory, {
-              error: true,
-            });
-            throw error;
-          });
-      }
-
-      const duration = performance.now() - start;
-      const endMemory = process.memoryUsage().heapUsed;
-      analytics.trackPerformance(operationName, duration, endMemory - startMemory);
-      return result;
+      // In a real implementation, you would send events to your analytics service
+      // For now, we'll just log them
+      console.log(`[AnalyticsMonitor] Flushing ${this.events.length} events`);
+      
+      // Clear events after flushing
+      this.events = [];
     } catch (error) {
-      const duration = performance.now() - start;
-      const endMemory = process.memoryUsage().heapUsed;
-      analytics.trackPerformance(operationName, duration, endMemory - startMemory, { error: true });
-      throw error;
+      console.error('[AnalyticsMonitor] Failed to flush events:', error);
     }
-  }) as T;
+  }
+
+  /**
+   * Stop the monitor
+   */
+  stop(): void {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer);
+      this.flushTimer = null;
+    }
+  }
 }
 
-// Cleanup old data periodically
-setInterval(
-  () => {
-    analytics.cleanup();
-  },
-  60 * 60 * 1000,
-); // Every hour
+// Export singleton instance
+export const analyticsMonitor = new AnalyticsMonitor();
+
+// Export types
+export type { AnalyticsEvent, AnalyticsConfig };

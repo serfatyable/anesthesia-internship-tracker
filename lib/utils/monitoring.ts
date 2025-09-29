@@ -20,9 +20,14 @@ class MonitoringSystem {
   private metrics = new Map<string, MetricData[]>();
   private alerts: AlertRule[] = [];
   private maxMetricsPerKey = 1000;
+  private enabled = process.env.DISABLE_MONITORING !== 'true';
 
   // Register a metric
   recordMetric(key: string, value: number, tags?: Record<string, string>): void {
+    if (!this.enabled) {
+      return;
+    }
+
     const metric: MetricData = {
       timestamp: Date.now(),
       value,

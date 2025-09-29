@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { FavoriteInternButton } from '@/components/site/dashboard/FavoriteInternButton';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 export default function InternPage() {
   const { data: session, status } = useSession();
@@ -189,9 +189,7 @@ export default function InternPage() {
     return (
       <main className="max-w-6xl mx-auto p-4">
         <div className="mb-6">
-          <BackButton href="/dashboard" className="mb-4">
-            Back to Dashboard
-          </BackButton>
+          <BackButton className="mb-4" />
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Intern Data</h2>
@@ -246,9 +244,7 @@ export default function InternPage() {
   return (
     <main className="max-w-6xl mx-auto p-4">
       <div className="mb-6">
-        <BackButton href="/dashboard" className="mb-4">
-          Back to Dashboard
-        </BackButton>
+        <BackButton className="mb-4" />
 
         {/* Intern Header */}
         <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-6">

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { getSession } from 'next-auth/react';
 
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -52,7 +53,14 @@ export function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
         throw new Error('Invalid email or password');
       }
 
-      router.push('/dashboard');
+      // Fetch session to get user role
+      const session = await getSession();
+      const role = session?.user?.role;
+      if (role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

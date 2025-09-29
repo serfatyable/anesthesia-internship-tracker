@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 type LogItem = {
   id: string;
@@ -24,9 +24,7 @@ export default function MyLogsPage() {
   }, []);
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <BackButton href="/dashboard" className="mb-4">
-        Back to Dashboard
-      </BackButton>
+      <BackButton className="mb-4" />
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">My Logs</h1>
         <a href="/logs/new" className="underline">

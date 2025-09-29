@@ -7,7 +7,32 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     coverage: {
-      reporter: ['text', 'lcov'],
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      include: [
+        'app/**/*.{ts,tsx}',
+        'components/**/*.{ts,tsx}',
+        'lib/**/*.{ts,tsx}',
+        'middleware.ts',
+      ],
+      exclude: [
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/node_modules/**',
+        '**/tests/**',
+        '**/coverage/**',
+        '**/.next/**',
+        '**/build/**',
+        '**/dist/**',
+      ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70,
+        },
+      },
     },
   },
   resolve: {

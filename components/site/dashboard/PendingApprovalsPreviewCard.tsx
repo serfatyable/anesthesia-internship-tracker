@@ -89,7 +89,7 @@ export const PendingApprovalsPreviewCard = memo(function PendingApprovalsPreview
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex min-h-0">
         {totalItems === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -98,7 +98,10 @@ export const PendingApprovalsPreviewCard = memo(function PendingApprovalsPreview
             </div>
           </div>
         ) : (
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto"
+            style={{ maxHeight: '11rem' }}
+          >
             {Object.entries(groupedItems)
               .slice(0, 6)
               .map(([internName, items]) => (

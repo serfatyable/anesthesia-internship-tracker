@@ -6,6 +6,7 @@ import { CaseReviewCard } from './CaseReviewCard';
 import { FavoriteInternCard } from './FavoriteInternCard';
 import { PendingApprovalsPreviewCard } from './PendingApprovalsPreviewCard';
 import { cn } from '@/lib/ui/cn';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Intern {
   id: string;
@@ -57,16 +58,24 @@ interface PendingItem {
 
 interface TutorDashboardProps {
   interns: Intern[];
+  totalInterns: number;
+  page: number;
+  limit: number;
   className?: string;
 }
 
 export const TutorDashboard = memo(function TutorDashboard({
   interns,
+  totalInterns,
+  page,
+  limit,
   className,
 }: TutorDashboardProps) {
   const [favoriteInterns, setFavoriteInterns] = useState<FavoriteIntern[]>([]);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const totalPages = Math.ceil(totalInterns / limit);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,6 +104,12 @@ export const TutorDashboard = memo(function TutorDashboard({
     fetchData();
   }, []);
 
+  const goToPage = (newPage: number) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('internPage', String(newPage));
+    router.push(`?${params.toString()}`);
+  };
+
   if (loading) {
     return (
       <div className={cn('space-y-6', className)}>
@@ -108,7 +123,7 @@ export const TutorDashboard = memo(function TutorDashboard({
   return (
     <div className={cn('space-y-6', className)}>
       {/* Search Bar */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
         <h2 className="text-lg font-medium mb-4">Search Interns</h2>
         <InternSearchBar interns={interns} />
       </div>
@@ -127,7 +142,7 @@ export const TutorDashboard = memo(function TutorDashboard({
       </div>
 
       {/* Grid Layout for Favorite Interns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {/* Favorite Interns Cards */}
         {favoriteInterns.map((favoriteIntern) => (
           <div key={favoriteIntern.intern.id} className="lg:col-span-1">
@@ -152,7 +167,7 @@ export const TutorDashboard = memo(function TutorDashboard({
         {/* Empty state for no favorites */}
         {favoriteInterns.length === 0 && (
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 text-center">
               <div className="text-gray-500 mb-2">No favorite interns yet</div>
               <p className="text-sm text-gray-400">
                 Search for an intern above and add them to your favorites to see their progress

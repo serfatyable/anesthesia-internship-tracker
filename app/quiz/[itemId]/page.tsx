@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 interface QuizPageProps {
   params: Promise<{
@@ -153,9 +153,7 @@ export default function QuizPage({ params }: QuizPageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <BackButton onClick={() => window.close()} className="mb-4" fallbackHref="/dashboard">
-            Close Quiz
-          </BackButton>
+          <BackButton className="mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Quiz Not Found</h1>
           <p className="text-gray-600 mb-4">No quiz available for this item.</p>
           <button
@@ -230,9 +228,7 @@ export default function QuizPage({ params }: QuizPageProps) {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
         {/* Back Button */}
-        <BackButton onClick={() => window.close()} className="mb-6" fallbackHref="/dashboard">
-          Close Quiz
-        </BackButton>
+        <BackButton className="mb-6" />
 
         {/* Progress */}
         <div className="mb-6">

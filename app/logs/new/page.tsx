@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CreateLogInput } from '@/lib/validators/logs';
 import { CreateLogSchema } from '@/lib/validators/logs';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 type ProcedureOption = { id: string; name: string };
 
@@ -50,9 +50,7 @@ export default function NewLogPage() {
 
   return (
     <div className="max-w-xl mx-auto p-6">
-      <BackButton href="/logs" className="mb-4">
-        Back to My Logs
-      </BackButton>
+      <BackButton className="mb-4" />
       <h1 className="text-2xl font-semibold mb-4">New Procedure Log</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>

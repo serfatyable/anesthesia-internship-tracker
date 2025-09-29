@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth/next';
+import NextAuth from 'next-auth';
 import { z as zNs } from 'zod';
 import { authOptions } from '@/lib/auth';
 // Touch namespace to ensure zod is included in the bundle if downstream modules use it

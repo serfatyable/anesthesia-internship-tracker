@@ -8,7 +8,7 @@ import { CasesList } from '@/components/site/case-review/CasesList';
 import { FavoritesCard } from '@/components/site/case-review/FavoritesCard';
 import { SearchAndFilter } from '@/components/site/case-review/SearchAndFilter';
 import { CASE_CATEGORIES } from '@/lib/constants/caseCategories';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 export interface Case {
   id: string;
@@ -192,7 +192,7 @@ export default function CaseReviewPage() {
     <main className="max-w-6xl mx-auto p-4">
       <div className="space-y-6">
         {/* Back Button */}
-        <BackButton href="/dashboard">Back to Dashboard</BackButton>
+        <BackButton />
 
         {/* Header */}
         <div className="text-center">

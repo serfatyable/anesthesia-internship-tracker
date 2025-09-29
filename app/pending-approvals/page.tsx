@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BackButton } from '@/components/ui/BackButton';
+import BackButton from '@/components/ui/BackButton';
 
 interface PendingItem {
   id: string;
@@ -114,9 +114,7 @@ export default function PendingApprovalsPage() {
   return (
     <main className="max-w-6xl mx-auto p-4">
       <div className="mb-6">
-        <BackButton href="/dashboard" className="mb-4">
-          Back to Dashboard
-        </BackButton>
+        <BackButton className="mb-4" />
 
         {/* Header */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">

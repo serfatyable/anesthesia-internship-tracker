@@ -25,14 +25,14 @@ export const InternDashboard = memo(function InternDashboard({
       <OverallProgressCard summary={summary} rotations={rotations} userInfo={userInfo} />
 
       {/* Rotation Progress Cards */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-7xl">
+      <div className="flex flex-col md:flex-row md:justify-center">
+        <div className="w-full max-w-7xl px-2 md:px-0">
           <RotationGroups rotations={rotations} />
         </div>
       </div>
 
       {/* Case Review, Favorites, Feedback, and Resources Cards - 2x2 grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 items-stretch">
         <CaseReviewCard />
         <ProcedureKnowledgeFavoritesCard />
         <FeedbackNotificationsCard />
