@@ -21,7 +21,7 @@ export const InternSearchBar = memo(function InternSearchBar({
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  // const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
+  const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
 
   // Filter interns based on search term
   const filteredInterns = useMemo(() => {

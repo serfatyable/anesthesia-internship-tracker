@@ -13,41 +13,43 @@ export default function InternPage() {
   const internId = params?.id as string;
 
   const [internData, setInternData] = useState<{
-    intern: { id: string; name: string; email: string };
-    summary: {
-      totalRequired: number;
-      totalVerified: number;
-      totalPending: number;
-      completionPercentage: number;
-    };
-    rotations: Array<{
-      rotationId: string;
-      rotationName: string;
+    intern: { id: string; name: string; email: string; createdAt: string };
+    isFavorite: boolean;
+    activeRotation: {
+      id: string;
+      name: string;
       required: number;
       verified: number;
       pending: number;
       completionPercentage: number;
-      state: string;
-      currentInterns: number;
-    }>;
-    pendingVerifications: Array<{
-      id: string;
-      logEntryId: string;
-      procedureName: string;
-      internName: string;
-      date: Date;
-      count: number;
-      notes?: string;
-      createdAt: Date;
-    }>;
-    recentActivity: Array<{
-      id: string;
-      type: string;
-      description: string;
-      timestamp: Date;
-      internName: string;
-      procedureName?: string;
-    }>;
+      procedures: {
+        pending: Array<{
+          id: string;
+          name: string;
+          logEntryId: string;
+          count: number;
+          date: string;
+          notes?: string;
+        }>;
+        completed: Array<{
+          id: string;
+          name: string;
+          count: number;
+          date: string;
+          notes?: string;
+        }>;
+        notStarted: Array<{
+          id: string;
+          name: string;
+          required: number;
+        }>;
+      };
+      knowledge: {
+        pending: Array<any>;
+        completed: Array<any>;
+        notStarted: Array<any>;
+      };
+    };
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -341,9 +343,10 @@ export default function InternPage() {
                   (item: {
                     id: string;
                     name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
+                    logEntryId: string;
+                    count: number;
+                    date: string;
+                    notes?: string;
                   }) => (
                     <div
                       key={item.id}
@@ -398,9 +401,9 @@ export default function InternPage() {
                   (item: {
                     id: string;
                     name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
+                    count: number;
+                    date: string;
+                    notes?: string;
                   }) => (
                     <div
                       key={item.id}
@@ -436,13 +439,7 @@ export default function InternPage() {
             >
               <div className="space-y-2">
                 {activeRotation.procedures.notStarted.map(
-                  (item: {
-                    id: string;
-                    name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
-                  }) => (
+                  (item: { id: string; name: string; required: number }) => (
                     <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                       <div className="font-medium text-gray-900">{item.name}</div>
                       <div className="text-sm text-gray-600">Required: {item.required}</div>
@@ -468,48 +465,40 @@ export default function InternPage() {
               colorClass="text-yellow-700"
             >
               <div className="space-y-3">
-                {activeRotation.knowledge.pending.map(
-                  (item: {
-                    id: string;
-                    name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
-                  }) => (
-                    <div
-                      key={item.id}
-                      className="border border-yellow-200 rounded-lg p-4 bg-yellow-50"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      {item.notes && (
-                        <div className="text-sm text-gray-600 mb-3">
-                          <strong>Notes:</strong> {item.notes}
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleApproval(item.logEntryId, 'APPROVED')}
-                          disabled={processing === item.logEntryId}
-                          className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {processing === item.logEntryId ? 'Processing...' : 'Approve'}
-                        </button>
-                        <button
-                          onClick={() => handleApproval(item.logEntryId, 'REJECTED')}
-                          disabled={processing === item.logEntryId}
-                          className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {processing === item.logEntryId ? 'Processing...' : 'Reject'}
-                        </button>
+                {activeRotation.knowledge.pending.map((item: any) => (
+                  <div
+                    key={item.id}
+                    className="border border-yellow-200 rounded-lg p-4 bg-yellow-50"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-600">
+                        {new Date(item.date).toLocaleDateString()}
                       </div>
                     </div>
-                  ),
-                )}
+                    {item.notes && (
+                      <div className="text-sm text-gray-600 mb-3">
+                        <strong>Notes:</strong> {item.notes}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApproval(item.logEntryId, 'APPROVED')}
+                        disabled={processing === item.logEntryId}
+                        className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {processing === item.logEntryId ? 'Processing...' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => handleApproval(item.logEntryId, 'REJECTED')}
+                        disabled={processing === item.logEntryId}
+                        className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {processing === item.logEntryId ? 'Processing...' : 'Reject'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CollapsibleSection>
           )}
@@ -524,32 +513,21 @@ export default function InternPage() {
               colorClass="text-green-700"
             >
               <div className="space-y-2">
-                {activeRotation.knowledge.completed.map(
-                  (item: {
-                    id: string;
-                    name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
-                  }) => (
-                    <div
-                      key={item.id}
-                      className="border border-green-200 rounded-lg p-3 bg-green-50"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
-                        </div>
+                {activeRotation.knowledge.completed.map((item: any) => (
+                  <div key={item.id} className="border border-green-200 rounded-lg p-3 bg-green-50">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-600">
+                        {new Date(item.date).toLocaleDateString()}
                       </div>
-                      {item.notes && (
-                        <div className="text-sm text-gray-600 mt-1">
-                          <strong>Notes:</strong> {item.notes}
-                        </div>
-                      )}
                     </div>
-                  ),
-                )}
+                    {item.notes && (
+                      <div className="text-sm text-gray-600 mt-1">
+                        <strong>Notes:</strong> {item.notes}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </CollapsibleSection>
           )}
@@ -564,19 +542,11 @@ export default function InternPage() {
               colorClass="text-gray-700"
             >
               <div className="space-y-2">
-                {activeRotation.knowledge.notStarted.map(
-                  (item: {
-                    id: string;
-                    name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
-                  }) => (
-                    <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                      <div className="font-medium text-gray-900">{item.name}</div>
-                    </div>
-                  ),
-                )}
+                {activeRotation.knowledge.notStarted.map((item: any) => (
+                  <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    <div className="font-medium text-gray-900">{item.name}</div>
+                  </div>
+                ))}
               </div>
             </CollapsibleSection>
           )}

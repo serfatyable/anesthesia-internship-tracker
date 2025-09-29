@@ -5,8 +5,8 @@ import { monitoring } from '@/lib/utils/monitoring';
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error;
-  errorId?: string;
+  error?: Error | undefined;
+  errorId?: string | undefined;
 }
 
 interface ErrorBoundaryProps {
@@ -14,7 +14,7 @@ interface ErrorBoundaryProps {
   fallback?: React.ComponentType<{
     error?: Error | undefined;
     resetError: () => void;
-    errorId?: string;
+    errorId?: string | undefined;
   }>;
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
   level?: 'page' | 'component';
@@ -132,7 +132,7 @@ function DefaultErrorFallback({
 }: {
   error?: Error | undefined;
   resetError: () => void;
-  errorId?: string;
+  errorId?: string | undefined;
 }) {
   const isDevelopment = process.env.NODE_ENV === 'development';
 

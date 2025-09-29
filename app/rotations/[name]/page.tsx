@@ -822,7 +822,7 @@ export default function RotationPage({ params }: RotationPageProps) {
                                                 </span>
                                                 <MillersReferenceButton
                                                   title={procedure.name}
-                                                  reference={procedure.textbookResource}
+                                                  reference={procedure.textbookResource || null}
                                                 />
                                               </div>
                                             </div>
@@ -1196,7 +1196,7 @@ export default function RotationPage({ params }: RotationPageProps) {
                                                 <span className="font-medium">{topic.name}</span>
                                                 <MillersReferenceButton
                                                   title={topic.name}
-                                                  reference={topic.textbookResource}
+                                                  reference={topic.textbookResource || null}
                                                 />
                                               </div>
                                             </div>

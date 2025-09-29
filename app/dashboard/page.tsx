@@ -19,7 +19,7 @@ interface DashboardPageProps {
   }>;
 }
 
-async function DashboardContent({ searchParams }: { searchParams: { internId?: string } }) {
+async function DashboardContent() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

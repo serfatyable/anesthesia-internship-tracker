@@ -137,6 +137,14 @@ class MonitoringSystem {
       }
     });
   }
+
+  // Record error for monitoring
+  recordError(error: Error, context?: string): void {
+    this.recordMetric('error_rate', 1, {
+      error_type: error.constructor.name,
+      context: context || 'unknown',
+    });
+  }
 }
 
 // Global monitoring instance

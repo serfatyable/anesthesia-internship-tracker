@@ -305,6 +305,7 @@ export async function getInternProgressOld(userId: string): Promise<OldInternDas
       pending: r.pending,
       completionPercentage,
       state,
+      currentInterns: (r as any).currentInterns || 0,
     };
   });
 

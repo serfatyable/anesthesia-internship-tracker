@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       message: errorReport.message,
       level: errorReport.level,
       retryCount: errorReport.retryCount,
-      userId: errorReport.userId,
+      userId: errorReport.userId || undefined,
       url: errorReport.url,
       userAgent: errorReport.userAgent,
       metadata: errorReport.metadata,

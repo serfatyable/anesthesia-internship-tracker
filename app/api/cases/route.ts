@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { apiRateLimit } from '@/lib/middleware/rateLimit';
-import { sanitizeString, sanitizeHtml } from '@/lib/utils/validation';
+import { sanitizeString, sanitizeHtml, sanitizeUrl } from '@/lib/utils/validation';
 import { withErrorHandling } from '@/lib/middleware/errorHandler';
 import { monitoring } from '@/lib/utils/monitoring';
 

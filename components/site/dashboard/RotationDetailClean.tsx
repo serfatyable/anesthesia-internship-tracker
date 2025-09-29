@@ -10,6 +10,7 @@ import type { ProcedureCategory } from '@/lib/data/mockProcedures';
 interface RotationDetailProps {
   rotationName: string;
   userId: string;
+  className?: string;
 }
 
 interface RotationData {
@@ -32,7 +33,10 @@ interface KnowledgeTopic {
   textbookResource?: string;
 }
 
-export const RotationDetail = memo(function RotationDetail({ rotationName }: RotationDetailProps) {
+export const RotationDetail = memo(function RotationDetail({
+  rotationName,
+  className,
+}: RotationDetailProps) {
   const [rotationData, setRotationData] = useState<RotationData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -104,6 +108,7 @@ export const RotationDetail = memo(function RotationDetail({ rotationName }: Rot
       pending: 3,
       completionPercentage: 53,
       state: 'ACTIVE',
+      currentInterns: 3,
     }),
     [rotationName],
   );

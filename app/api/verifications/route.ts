@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   if (rateLimitResponse) return rateLimitResponse;
 
   const startTime = Date.now();
-  logger.request('POST', '/api/verifications');
+  logger.request('POST', '/api/verifications', 0);
 
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
   const parsed = VerifyLogSchema.safeParse(body);
   if (!parsed.success) {
-    logger.warn('Invalid verification request', { errors: parsed.error.flatten() });
+    logger.warn('Invalid verification request', { errors: JSON.stringify(parsed.error.flatten()) });
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 

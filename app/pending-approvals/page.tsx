@@ -137,7 +137,7 @@ export default function PendingApprovalsPage() {
                 <p className="text-sm text-gray-600">{items.length} items pending</p>
               </div>
               <Link
-                href={`/intern/${items[0].internId}`}
+                href={`/intern/${items[0]?.internId || ''}`}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 View Intern Details →

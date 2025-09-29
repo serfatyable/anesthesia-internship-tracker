@@ -215,7 +215,11 @@ type RotationCacheData = Array<{
   id: string;
   name: string;
   state: string;
-  requirements: Array<{ minCount: number; procedureId: string }>;
+  requirements: Array<{
+    minCount: number;
+    procedureId: string;
+    procedure: { id: string; name: string };
+  }>;
 }>;
 type ProcedureCacheData = Array<{
   id: string;
