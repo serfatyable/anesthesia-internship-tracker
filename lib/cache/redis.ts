@@ -62,12 +62,12 @@ class RedisCache {
     try {
       if (this.client && this.isConnected) {
         const value = await this.client.get(fullKey);
-        return value ? JSON.parse(value) : null;
+        return value ? (JSON.parse(value) as T) : null;
       } else {
         // Fallback to in-memory cache
         const entry = this.fallbackCache.get(fullKey);
         if (entry && entry.expires > Date.now()) {
-          return entry.value;
+          return (entry.value as T) ?? null;
         }
         if (entry) {
           this.fallbackCache.delete(fullKey);
@@ -227,7 +227,7 @@ class RedisCache {
 export const redisCache = new RedisCache();
 
 // Cache decorator for functions
-export function cached<T extends (...args: any[]) => any>(
+export function cached<T extends (...args: unknown[]) => unknown>(
   fn: T,
   keyGenerator: (...args: Parameters<T>) => string,
   options: CacheOptions = {},
@@ -242,8 +242,8 @@ export function cached<T extends (...args: any[]) => any>(
     }
 
     // Execute function and cache result
-    const result = await fn(...args);
-    await redisCache.set(key, result, options);
+    const result = (await fn(...args)) as Awaited<ReturnType<T>>;
+    await redisCache.set<Awaited<ReturnType<T>>>(key, result, options);
 
     return result;
   }) as T;

@@ -1,9 +1,9 @@
 /**
  * Authentication API tests
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST as signupHandler } from '@/app/api/auth/signup/route';
+import { POST as signupHandler } from '../../app/api/auth/signup/route';
 import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
 
@@ -18,6 +18,7 @@ vi.mock('@/lib/db', () => ({
     user: {
       findUnique: vi.fn(),
       create: vi.fn(),
+      deleteMany: vi.fn(),
     },
   },
 }));

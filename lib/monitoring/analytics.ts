@@ -8,7 +8,7 @@ interface AnalyticsEvent {
   name: string;
   properties: Record<string, unknown>;
   timestamp: number;
-  userId?: string;
+  userId: string | undefined;
   sessionId?: string;
 }
 
@@ -17,7 +17,7 @@ interface PerformanceMetrics {
   duration: number;
   memoryUsage: number;
   timestamp: number;
-  metadata?: Record<string, unknown>;
+  metadata: Record<string, unknown> | undefined;
 }
 
 interface UserBehavior {
@@ -59,8 +59,7 @@ class AnalyticsService {
     logger.debug('Analytics event tracked', {
       operation: 'analytics',
       eventName: name,
-      userId,
-      properties,
+      userId: userId || undefined,
     });
   }
 
@@ -127,7 +126,7 @@ class AnalyticsService {
     // Record in monitoring system
     monitoring.recordMetric('analytics.performance', duration, {
       operation,
-      memoryUsage: metric.memoryUsage,
+      memoryUsage: String(metric.memoryUsage),
     });
 
     // Log slow operations
@@ -148,7 +147,7 @@ class AnalyticsService {
     performance: PerformanceMetrics[];
     userBehaviors: UserBehavior[];
   } {
-    const filter = (items: unknown[]) => {
+    const filter = <T extends { timestamp: number }>(items: T[]): T[] => {
       if (!timeRange) return items;
       return items.filter(
         (item) => item.timestamp >= timeRange.start && item.timestamp <= timeRange.end,
@@ -201,23 +200,22 @@ class AnalyticsService {
         maxDuration: number;
         minDuration: number;
         totalMemoryUsage: number;
-        avgDuration?: number;
-        avgMemoryUsage?: number;
       }
     > = {};
 
     metrics.forEach((metric) => {
-      if (!stats[metric.operation]) {
-        stats[metric.operation] = {
+      let stat = stats[metric.operation];
+      if (!stat) {
+        stat = {
           count: 0,
           totalDuration: 0,
           maxDuration: 0,
           minDuration: Infinity,
           totalMemoryUsage: 0,
         };
+        stats[metric.operation] = stat;
       }
 
-      const stat = stats[metric.operation];
       stat.count++;
       stat.totalDuration += metric.duration;
       stat.maxDuration = Math.max(stat.maxDuration, metric.duration);
@@ -225,17 +223,43 @@ class AnalyticsService {
       stat.totalMemoryUsage += metric.memoryUsage;
     });
 
-    // Calculate averages
-    Object.keys(stats).forEach((operation) => {
-      const stat = stats[operation]!;
-      stat.avgDuration = stat.totalDuration / stat.count;
-      stat.avgMemoryUsage = stat.totalMemoryUsage / stat.count;
-      stat.minDuration = stat.minDuration === Infinity ? 0 : stat.minDuration;
-      delete stat.totalDuration;
-      delete stat.totalMemoryUsage;
-    });
+    // Build final stats with averages
+    const finalStats: Record<
+      string,
+      {
+        count: number;
+        avgDuration: number;
+        maxDuration: number;
+        minDuration: number;
+        avgMemoryUsage: number;
+      }
+    > = {};
 
-    return stats;
+    for (const [operation, stat] of Object.entries(stats) as Array<
+      [
+        string,
+        {
+          count: number;
+          totalDuration: number;
+          maxDuration: number;
+          minDuration: number;
+          totalMemoryUsage: number;
+        },
+      ]
+    >) {
+      const avgDuration = stat.totalDuration / stat.count;
+      const avgMemoryUsage = stat.totalMemoryUsage / stat.count;
+      const min = stat.minDuration === Infinity ? 0 : stat.minDuration;
+      finalStats[operation] = {
+        count: stat.count,
+        avgDuration,
+        maxDuration: stat.maxDuration,
+        minDuration: min,
+        avgMemoryUsage,
+      };
+    }
+
+    return finalStats;
   }
 
   // Get user behavior insights
@@ -332,7 +356,7 @@ export const trackPerformanceMetric = (
 ) => analytics.trackPerformance(operation, duration, memoryUsage, metadata);
 
 // Performance tracking decorator
-export function trackPerformance<T extends (...args: unknown[]) => unknown>(
+export function withPerformanceTracking<T extends (...args: unknown[]) => unknown>(
   fn: T,
   operationName: string,
 ): T {
@@ -348,25 +372,27 @@ export function trackPerformance<T extends (...args: unknown[]) => unknown>(
           .then((resolved) => {
             const duration = performance.now() - start;
             const endMemory = process.memoryUsage().heapUsed;
-            trackPerformance(operationName, duration, endMemory - startMemory);
+            analytics.trackPerformance(operationName, duration, endMemory - startMemory);
             return resolved;
           })
           .catch((error) => {
             const duration = performance.now() - start;
             const endMemory = process.memoryUsage().heapUsed;
-            trackPerformance(operationName, duration, endMemory - startMemory, { error: true });
+            analytics.trackPerformance(operationName, duration, endMemory - startMemory, {
+              error: true,
+            });
             throw error;
           });
       }
 
       const duration = performance.now() - start;
       const endMemory = process.memoryUsage().heapUsed;
-      trackPerformance(operationName, duration, endMemory - startMemory);
+      analytics.trackPerformance(operationName, duration, endMemory - startMemory);
       return result;
     } catch (error) {
       const duration = performance.now() - start;
       const endMemory = process.memoryUsage().heapUsed;
-      trackPerformance(operationName, duration, endMemory - startMemory, { error: true });
+      analytics.trackPerformance(operationName, duration, endMemory - startMemory, { error: true });
       throw error;
     }
   }) as T;

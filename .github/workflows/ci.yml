@@ -1,43 +1,37 @@
 name: CI
-
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
-
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Install dependencies
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install
         run: pnpm install --frozen-lockfile
-
-      - name: Prisma generate
-        run: pnpm prisma:generate
-
-      - name: Prisma validate
-        run: pnpm prisma:validate
-
-      - name: Lint
-        run: pnpm lint
-
       - name: Typecheck
         run: pnpm typecheck
-
+      - name: Lint
+        run: pnpm lint
       - name: Test
+        env:
+          NODE_ENV: test
+          NEXTAUTH_SECRET: test-secret-key-test-secret-key-test
+          NEXTAUTH_URL: http://localhost:3000
+          DATABASE_URL: file:./prisma/test.db
         run: pnpm test
+      - name: Build
+        env:
+          NEXTAUTH_SECRET: test-secret-key-test-secret-key-test
+          NEXTAUTH_URL: http://localhost:3000
+          DATABASE_URL: file:./prisma/dev.db
+        run: pnpm build

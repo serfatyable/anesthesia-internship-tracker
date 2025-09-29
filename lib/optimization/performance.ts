@@ -1,9 +1,10 @@
 /**
  * Advanced performance optimization utilities
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
+// import { analytics } from '@/lib/monitoring/analytics';
 
 // Performance monitoring decorator
 export function measurePerformance<T extends (...args: unknown[]) => unknown>(
@@ -45,8 +46,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
                 operation: 'performance_monitoring',
                 operationName,
                 duration: Math.round(duration),
-                memoryDelta: Math.round(memoryDelta / 1024), // KB
-                threshold: slowThreshold,
+                memoryDelta: Math.round(memoryDelta / 1024),
               });
             }
 
@@ -62,13 +62,16 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
               monitoring.recordMetric(`memory.${operationName}_error`, memoryDelta);
             }
 
-            logger.error('Operation failed', {
-              operation: 'performance_monitoring',
-              operationName,
-              duration: Math.round(duration),
-              memoryDelta: Math.round(memoryDelta / 1024), // KB
-              error: error instanceof Error ? error.message : 'Unknown error',
-            });
+            logger.error(
+              'Operation failed',
+              {
+                operation: 'performance_monitoring',
+                operationName,
+                duration: Math.round(duration),
+                memoryDelta: Math.round(memoryDelta / 1024),
+              },
+              error as Error,
+            );
 
             throw error;
           });
@@ -88,8 +91,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
           operation: 'performance_monitoring',
           operationName,
           duration: Math.round(duration),
-          memoryDelta: Math.round(memoryDelta / 1024), // KB
-          threshold: slowThreshold,
+          memoryDelta: Math.round(memoryDelta / 1024),
         });
       }
 
@@ -104,13 +106,16 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
         monitoring.recordMetric(`memory.${operationName}_error`, memoryDelta);
       }
 
-      logger.error('Operation failed', {
-        operation: 'performance_monitoring',
-        operationName,
-        duration: Math.round(duration),
-        memoryDelta: Math.round(memoryDelta / 1024), // KB
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
+      logger.error(
+        'Operation failed',
+        {
+          operation: 'performance_monitoring',
+          operationName,
+          duration: Math.round(duration),
+          memoryDelta: Math.round(memoryDelta / 1024),
+        },
+        error as Error,
+      );
 
       throw error;
     }
@@ -127,15 +132,15 @@ export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
     selectFields?: string[];
   } = {},
 ): T {
-  const { cacheKey, maxResults = 1000, selectFields } = options;
+  const { cacheKey, maxResults = 1000 /*, selectFields*/ } = options;
 
   return measurePerformance(
-    async (...args: Parameters<T>) => {
+    (async (...args: unknown[]) => {
       // Add query optimization logic here
       const start = performance.now();
 
       try {
-        const result = await queryFn(...args);
+        const result = await (queryFn as (...args: unknown[]) => unknown)(...args);
 
         const duration = performance.now() - start;
 
@@ -144,22 +149,25 @@ export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
           logger.warn('Slow database query detected', {
             operation: 'database_query',
             duration: Math.round(duration),
-            cacheKey,
+            cacheKey: cacheKey ?? '',
             maxResults,
-            selectFields,
+            // omit selectFields from log context to satisfy typing
           });
         }
 
         return result;
       } catch (error) {
-        logger.error('Database query failed', {
-          operation: 'database_query',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          cacheKey,
-        });
+        logger.error(
+          'Database query failed',
+          {
+            operation: 'database_query',
+            cacheKey: cacheKey ?? '',
+          },
+          error as Error,
+        );
         throw error;
       }
-    },
+    }) as (...args: unknown[]) => Promise<unknown>,
     `database_query_${cacheKey || 'unknown'}`,
     { slowThreshold: 500 },
   ) as T;
@@ -211,10 +219,13 @@ export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
 
       return result;
     } catch (error) {
-      logger.error('Memory optimization error', {
-        operation: 'memory_optimization',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
+      logger.error(
+        'Memory optimization error',
+        {
+          operation: 'memory_optimization',
+        },
+        error as Error,
+      );
       throw error;
     }
   }) as T;
@@ -265,7 +276,7 @@ export function deduplicateRequests<T extends (...args: unknown[]) => unknown>(
     }
 
     if (result instanceof NextResponse) {
-      requestCache.set(key, { result, timestamp: now });
+      requestCache.set(key, { response: result, timestamp: now });
     }
 
     return result;
@@ -283,7 +294,7 @@ setInterval(() => {
 }, CACHE_TTL);
 
 // Performance monitoring middleware
-export function performanceMiddleware(request: NextRequest): NextResponse | null {
+export function performanceMiddleware(): NextResponse | null {
   const start = performance.now();
   const startMemory = process.memoryUsage();
 
@@ -325,7 +336,7 @@ export function analyzePerformance(metrics: Record<string, number[]>): {
   min: number;
   max: number;
 } {
-  const values = Object.values(metrics)
+  const values = Object.values(metrics as Record<string, number[]>)
     .flat()
     .sort((a, b) => a - b);
 
@@ -333,22 +344,24 @@ export function analyzePerformance(metrics: Record<string, number[]>): {
     return { average: 0, median: 0, p95: 0, p99: 0, min: 0, max: 0 };
   }
 
-  const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-  const median = values[Math.floor(values.length / 2)];
+  const average = values.reduce((sum, val) => sum + val, 0) / (values.length || 1);
+  const median = values[Math.floor(values.length / 2)] ?? 0;
   const p95Index = Math.floor(values.length * 0.95);
   const p99Index = Math.floor(values.length * 0.99);
 
   return {
     average: Math.round(average * 100) / 100,
     median: Math.round(median * 100) / 100,
-    p95: Math.round(values[p95Index] * 100) / 100,
-    p99: Math.round(values[p99Index] * 100) / 100,
-    min: Math.round(values[0] * 100) / 100,
-    max: Math.round(values[values.length - 1] * 100) / 100,
+    p95: Math.round((values[p95Index] ?? 0) * 100) / 100,
+    p99: Math.round((values[p99Index] ?? 0) * 100) / 100,
+    min: Math.round((values[0] ?? 0) * 100) / 100,
+    max: Math.round((values[values.length - 1] ?? 0) * 100) / 100,
   };
 }
 
 // Memory leak detection
+type MemorySnapshot = ReturnType<typeof process.memoryUsage> & { timestamp: number };
+
 export function detectMemoryLeaks(): {
   isLeaking: boolean;
   heapGrowth: number;
@@ -359,17 +372,19 @@ export function detectMemoryLeaks(): {
   const now = Date.now();
 
   // Store previous memory usage
-  if (!detectMemoryLeaks['previousMemory']) {
-    detectMemoryLeaks['previousMemory'] = memory;
-    detectMemoryLeaks['previousTime'] = now;
+  const state = detectMemoryLeaks as unknown as {
+    previous?: MemorySnapshot;
+  };
+
+  if (!state.previous) {
+    state.previous = { ...memory, timestamp: now } as MemorySnapshot;
     return { isLeaking: false, heapGrowth: 0, externalGrowth: 0, rssGrowth: 0 };
   }
 
-  const timeDelta = now - detectMemoryLeaks['previousTime'];
-  const heapGrowth = (memory.heapUsed - detectMemoryLeaks['previousMemory'].heapUsed) / timeDelta;
-  const externalGrowth =
-    (memory.external - detectMemoryLeaks['previousMemory'].external) / timeDelta;
-  const rssGrowth = (memory.rss - detectMemoryLeaks['previousMemory'].rss) / timeDelta;
+  const timeDelta = now - state.previous.timestamp;
+  const heapGrowth = (memory.heapUsed - state.previous.heapUsed) / timeDelta;
+  const externalGrowth = (memory.external - state.previous.external) / timeDelta;
+  const rssGrowth = (memory.rss - state.previous.rss) / timeDelta;
 
   const isLeaking = heapGrowth > 1024 * 1024; // 1MB per second
 
@@ -382,8 +397,7 @@ export function detectMemoryLeaks(): {
     });
   }
 
-  detectMemoryLeaks['previousMemory'] = memory;
-  detectMemoryLeaks['previousTime'] = now;
+  state.previous = { ...memory, timestamp: now } as MemorySnapshot;
 
   return {
     isLeaking,

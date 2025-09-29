@@ -20,7 +20,7 @@ const store: RateLimitStore = {};
 const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 let lastCleanup = Date.now();
 
-function getClientIP(request: NextRequest): string {
+function getClientIP(request: NextRequest | Request): string {
   // Try to get real IP from various headers
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
@@ -46,10 +46,13 @@ function cleanupExpiredEntries(now: number) {
 }
 
 export function createRateLimit(config: RateLimitConfig) {
-  return (request: NextRequest): NextResponse | null => {
+  return (request: NextRequest | Request): NextResponse | null => {
     const ip = getClientIP(request);
     const now = Date.now();
-    const key = `${ip}:${request.nextUrl.pathname}`;
+    const pathname = (request as NextRequest).nextUrl
+      ? (request as NextRequest).nextUrl.pathname
+      : new URL((request as Request).url).pathname;
+    const key = `${ip}:${pathname}`;
 
     // Clean up expired entries periodically
     cleanupExpiredEntries(now);

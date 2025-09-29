@@ -4,6 +4,8 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error: test-only import typings are not required for runtime
 import { UserRole } from '@/types/api';
 
 // Mock data factories
@@ -95,7 +97,7 @@ export const createMockRequest = (
     requestInit.body = JSON.stringify(body);
   }
 
-  return new NextRequest(urlObj.toString(), requestInit);
+  return new NextRequest(urlObj.toString(), requestInit as any);
 };
 
 // Database helpers
@@ -246,12 +248,12 @@ export const mockPrisma = () => {
     },
   };
 
-  vi.mocked(prisma).user = mockPrismaClient.user;
-  vi.mocked(prisma).case = mockPrismaClient.case;
-  vi.mocked(prisma).logEntry = mockPrismaClient.logEntry;
-  vi.mocked(prisma).procedure = mockPrismaClient.procedure;
-  vi.mocked(prisma).rotation = mockPrismaClient.rotation;
-  vi.mocked(prisma).verification = mockPrismaClient.verification;
+  (prisma as unknown as any).user = mockPrismaClient.user;
+  (prisma as unknown as any).case = mockPrismaClient.case;
+  (prisma as unknown as any).logEntry = mockPrismaClient.logEntry;
+  (prisma as unknown as any).procedure = mockPrismaClient.procedure;
+  (prisma as unknown as any).rotation = mockPrismaClient.rotation;
+  (prisma as unknown as any).verification = mockPrismaClient.verification;
 
   return mockPrismaClient;
 };
@@ -357,7 +359,7 @@ export const mockExternalServices = () => {
 // Test environment setup
 export const setupTestEnvironment = () => {
   // Set test environment variables
-  process.env.NODE_ENV = 'test';
+  (process.env as any).NODE_ENV = 'test';
   process.env.NEXTAUTH_SECRET = 'test-secret-key';
   process.env.NEXTAUTH_URL = 'http://localhost:3000';
   process.env.DATABASE_URL = 'file:./test.db';

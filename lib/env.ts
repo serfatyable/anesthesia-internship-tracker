@@ -25,8 +25,12 @@ function validateEnv() {
   try {
     return envSchema.parse(process.env);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const missingVars = error.issues.map((err) => `${err.path.join('.')}: ${err.message}`);
+    const castErr = error as unknown as {
+      issues?: Array<{ path: Array<string | number>; message: string }>;
+    };
+    const maybeIssues = castErr?.issues;
+    if (Array.isArray(maybeIssues)) {
+      const missingVars = maybeIssues.map((err) => `${err.path.join('.')}: ${err.message}`);
       throw new Error(
         `Environment validation failed:\n${missingVars.join('\n')}\n\n` +
           'Please check your .env file and ensure all required variables are set.',
@@ -36,11 +40,11 @@ function validateEnv() {
   }
 }
 
-// Only validate if not explicitly skipped
-const env =
-  process.env.SKIP_ENV_VALIDATION === 'true'
-    ? (process.env as z.infer<typeof envSchema>)
-    : validateEnv();
+// Only validate if not explicitly skipped; skip during production build phase
+const skipValidation =
+  process.env.SKIP_ENV_VALIDATION === 'true' || process.env.NEXT_PHASE === 'phase-production-build';
+
+const env = skipValidation ? (process.env as z.infer<typeof envSchema>) : validateEnv();
 
 export { env };
 export type Env = z.infer<typeof envSchema>;

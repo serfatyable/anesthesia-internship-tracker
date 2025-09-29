@@ -24,6 +24,8 @@ function Row({ label, ok, detail }: { label: string; ok: boolean; detail?: strin
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function StatusPage() {
   // Env
   const hasDB = !!process.env.DATABASE_URL;
@@ -35,11 +37,15 @@ export default async function StatusPage() {
   let dbOK = false,
     userCount: number | null = null,
     dbError: string | null = null;
-  try {
-    userCount = await prisma.user.count();
-    dbOK = true;
-  } catch (e: unknown) {
-    dbError = e instanceof Error ? e.message : String(e);
+  if (process.env.NEXT_PHASE !== 'phase-production-build') {
+    try {
+      userCount = await prisma.user.count();
+      dbOK = true;
+    } catch (e: unknown) {
+      dbError = e instanceof Error ? e.message : String(e);
+    }
+  } else {
+    dbError = 'Skipped during build';
   }
 
   // Migrations

@@ -37,10 +37,12 @@ async function DashboardContent({ searchParams }: DashboardPageProps) {
     let interns: Array<{ id: string; name: string | null; email: string }> = [];
 
     // Get all interns for search functionality
-    interns = await prisma.user.findMany({
-      where: { role: 'INTERN' },
-      select: { id: true, name: true, email: true },
-    });
+    if (process.env.NEXT_PHASE !== 'phase-production-build') {
+      interns = await prisma.user.findMany({
+        where: { role: 'INTERN' },
+        select: { id: true, name: true, email: true },
+      });
+    }
 
     if (isTutor) {
       // For tutors, we don't need specific intern data for the main dashboard

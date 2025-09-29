@@ -125,6 +125,12 @@ export function withErrorHandling<T extends unknown[], R>(handler: (...args: T) 
         ...(ip && { ip }),
       });
 
+      // Handle validation errors explicitly
+      const validationResponse = handleValidationError(error, requestId, path);
+      if (validationResponse) {
+        return validationResponse as R;
+      }
+
       // If it's already a NextResponse, return it
       if (error instanceof NextResponse) {
         return error as R;

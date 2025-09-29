@@ -44,7 +44,7 @@ interface LogContext {
   maxResults?: number;
   maxMemoryUsage?: number;
   age?: number;
-  result?: any;
+  result?: unknown;
   page?: string;
   eventName?: string;
   externalGrowth?: number;
@@ -56,6 +56,11 @@ interface LogContext {
   retryCount?: number;
   url?: string;
   userAgent?: string;
+  // Allow additional ad-hoc context keys used by various modules
+  logEntryId?: string;
+  // generic index signature for optional context enrichment
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: unknown;
 }
 
 interface LogEntry {
@@ -275,7 +280,7 @@ export function createRequestLogger(requestId: string, userId?: string): Logger 
 }
 
 // Performance logging decorator
-export function logPerformance<T extends (...args: any[]) => any>(
+export function logPerformance<T extends (...args: unknown[]) => unknown>(
   fn: T,
   operationName: string,
   loggerInstance: Logger = logger,
