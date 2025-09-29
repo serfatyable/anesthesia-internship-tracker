@@ -280,7 +280,7 @@ export function createRequestLogger(requestId: string, userId?: string): Logger 
 }
 
 // Performance logging decorator
-export function logPerformance<T extends (...args: any[]) => any>(
+export function logPerformance<T extends (...args: unknown[]) => unknown>(
   fn: T,
   operationName: string,
   loggerInstance: Logger = logger,
