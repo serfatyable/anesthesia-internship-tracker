@@ -37,7 +37,7 @@ A comprehensive web application for tracking anesthesia internship progress, bui
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/anesthesia-internship-tracker.git
+git clone https://github.com/serfatyable/anesthesia-internship-tracker.git
 cd anesthesia-internship-tracker
 ```
 
@@ -281,8 +281,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support and questions:
 
 1. Check the [documentation](./docs/)
-2. Search [existing issues](https://github.com/your-username/anesthesia-internship-tracker/issues)
-3. Create a [new issue](https://github.com/your-username/anesthesia-internship-tracker/issues/new)
+2. Search [existing issues](https://github.com/serfatyable/anesthesia-internship-tracker/issues)
+3. Create a [new issue](https://github.com/serfatyable/anesthesia-internship-tracker/issues/new)
 
 ## 🎯 Roadmap
 
