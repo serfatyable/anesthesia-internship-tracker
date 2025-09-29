@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
-import { analytics } from '@/lib/monitoring/analytics';
+// import { analytics } from '@/lib/monitoring/analytics';
 
 // Performance monitoring decorator
 export function measurePerformance<T extends (...args: unknown[]) => unknown>(
@@ -123,7 +123,7 @@ export function measurePerformance<T extends (...args: unknown[]) => unknown>(
 }
 
 // Database query optimization
-export function optimizeQuery<T extends (...args: any[]) => any>(
+export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
   queryFn: T,
   options: {
     cacheKey?: string;
@@ -132,15 +132,15 @@ export function optimizeQuery<T extends (...args: any[]) => any>(
     selectFields?: string[];
   } = {},
 ): T {
-  const { cacheKey, maxResults = 1000, selectFields } = options;
+  const { cacheKey, maxResults = 1000 /*, selectFields*/ } = options;
 
   return measurePerformance(
-    (async (...args: any[]) => {
+    (async (...args: unknown[]) => {
       // Add query optimization logic here
       const start = performance.now();
 
       try {
-        const result = await queryFn(...args);
+        const result = await (queryFn as (...args: unknown[]) => unknown)(...args);
 
         const duration = performance.now() - start;
 
@@ -167,7 +167,7 @@ export function optimizeQuery<T extends (...args: any[]) => any>(
         );
         throw error;
       }
-    }) as (...args: any[]) => Promise<any>,
+    }) as (...args: unknown[]) => Promise<unknown>,
     `database_query_${cacheKey || 'unknown'}`,
     { slowThreshold: 500 },
   ) as T;

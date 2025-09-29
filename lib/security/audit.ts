@@ -230,8 +230,8 @@ class SecurityAuditService {
     });
 
     const suspiciousIPs = Object.entries(ipCounts)
-      .filter(([_, count]) => count > 10) // More than 10 events from same IP
-      .map(([ip, _]) => ip);
+      .filter(([/* ip */ _ip, count]) => count > 10) // More than 10 events from same IP
+      .map(([ip /*, count*/]) => ip);
 
     return {
       totalEvents: events.length,

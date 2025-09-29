@@ -58,9 +58,9 @@ interface LogContext {
   userAgent?: string;
   // Allow additional ad-hoc context keys used by various modules
   logEntryId?: string;
-  // generic index signature for optional context enrichment (kept narrow by usage)
+  // generic index signature for optional context enrichment
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface LogEntry {
