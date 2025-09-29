@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // CSRF protection for state-changing requests
-  const csrfResponse = csrfProtection(req);
+  const csrfResponse = await csrfProtection(req);
   if (csrfResponse) {
     return csrfResponse;
   }

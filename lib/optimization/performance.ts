@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
 
 // Performance monitoring decorator
-export function measurePerformance<T extends (...args: any[]) => any>(
+export function measurePerformance<T extends (...args: unknown[]) => unknown>(
   fn: T,
   operationName: string,
   options: {
@@ -118,7 +118,7 @@ export function measurePerformance<T extends (...args: any[]) => any>(
 }
 
 // Database query optimization
-export function optimizeQuery<T extends (...args: any[]) => any>(
+export function optimizeQuery<T extends (...args: unknown[]) => unknown>(
   queryFn: T,
   options: {
     cacheKey?: string;
@@ -127,7 +127,7 @@ export function optimizeQuery<T extends (...args: any[]) => any>(
     selectFields?: string[];
   } = {},
 ): T {
-  const { cacheKey, ttl = 300, maxResults = 1000, selectFields } = options;
+  const { cacheKey, maxResults = 1000, selectFields } = options;
 
   return measurePerformance(
     async (...args: Parameters<T>) => {
@@ -166,14 +166,14 @@ export function optimizeQuery<T extends (...args: any[]) => any>(
 }
 
 // Memory optimization utilities
-export function optimizeMemory<T extends (...args: any[]) => any>(
+export function optimizeMemory<T extends (...args: unknown[]) => unknown>(
   fn: T,
   options: {
     maxMemoryUsage?: number; // MB
     cleanupInterval?: number; // ms
   } = {},
 ): T {
-  const { maxMemoryUsage = 100, cleanupInterval = 60000 } = options;
+  const { maxMemoryUsage = 100 /*, cleanupInterval = 60000 */ } = options;
 
   return ((...args: Parameters<T>) => {
     const startMemory = process.memoryUsage();
@@ -233,7 +233,7 @@ export function compressResponse(response: NextResponse): NextResponse {
 const requestCache = new Map<string, { response: NextResponse; timestamp: number }>();
 const CACHE_TTL = 5000; // 5 seconds
 
-export function deduplicateRequests<T extends (...args: any[]) => any>(
+export function deduplicateRequests<T extends (...args: unknown[]) => unknown>(
   fn: T,
   keyGenerator: (...args: Parameters<T>) => string,
 ): T {

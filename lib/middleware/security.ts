@@ -96,10 +96,10 @@ function handleSecurityEvent(
     operation: 'security_event',
     event,
     ip: getClientIP(request),
-    userAgent: request.headers.get('user-agent'),
     path: request.nextUrl.pathname,
     method: request.method,
-    referer: request.headers.get('referer'),
+    ...(request.headers.get('user-agent') && { userAgent: request.headers.get('user-agent')! }),
+    ...(request.headers.get('referer') && { referer: request.headers.get('referer')! }),
     ...details,
   };
 
@@ -130,7 +130,7 @@ function isValidOrigin(request: NextRequest): boolean {
     process.env.NEXTAUTH_URL,
   ].filter(Boolean);
 
-  return allowedOrigins.some((allowed) => origin.startsWith(allowed));
+  return allowedOrigins.some((allowed) => allowed && origin!.startsWith(allowed));
 }
 
 // Check for suspicious patterns
@@ -193,7 +193,8 @@ function applyCORSHeaders(response: NextResponse): NextResponse {
 
 // Main security middleware
 export function securityMiddleware(request: NextRequest): NextResponse | null {
-  const { pathname, method } = request.nextUrl;
+  const { pathname } = request.nextUrl;
+  const method = request.method;
 
   // Handle preflight requests
   if (method === 'OPTIONS') {
@@ -268,7 +269,7 @@ export function securityMiddleware(request: NextRequest): NextResponse | null {
 }
 
 // Enhanced response wrapper
-export function withSecurityHeaders<T extends (...args: any[]) => any>(
+export function withSecurityHeaders<T extends (...args: unknown[]) => unknown>(
   handler: T,
   isApiRoute: boolean = false,
 ): T {

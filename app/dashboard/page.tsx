@@ -19,7 +19,7 @@ interface DashboardPageProps {
   }>;
 }
 
-async function DashboardContent() {
+async function DashboardContent({ searchParams }: DashboardPageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -27,7 +27,7 @@ async function DashboardContent() {
   }
 
   const { user } = session;
-  // const { internId } = searchParams;
+  await searchParams; // awaited to preserve contract; value unused
 
   // Determine if user is a tutor/admin
   const isTutor = user.role === 'TUTOR' || user.role === 'ADMIN';
@@ -88,8 +88,6 @@ async function DashboardContent() {
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const resolvedSearchParams = await searchParams;
-
   return (
     <Suspense
       fallback={
@@ -100,7 +98,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </main>
       }
     >
-      <DashboardContent searchParams={resolvedSearchParams} />
+      <DashboardContent searchParams={searchParams} />
     </Suspense>
   );
 }

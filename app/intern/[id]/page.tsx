@@ -45,9 +45,23 @@ export default function InternPage() {
         }>;
       };
       knowledge: {
-        pending: Array<any>;
-        completed: Array<any>;
-        notStarted: Array<any>;
+        pending: Array<{
+          id: string;
+          name: string;
+          date: string;
+          notes?: string;
+          logEntryId: string;
+        }>;
+        completed: Array<{
+          id: string;
+          name: string;
+          date: string;
+          notes?: string;
+        }>;
+        notStarted: Array<{
+          id: string;
+          name: string;
+        }>;
       };
     };
   } | null>(null);
@@ -465,7 +479,7 @@ export default function InternPage() {
               colorClass="text-yellow-700"
             >
               <div className="space-y-3">
-                {activeRotation.knowledge.pending.map((item: any) => (
+                {activeRotation.knowledge.pending.map((item) => (
                   <div
                     key={item.id}
                     className="border border-yellow-200 rounded-lg p-4 bg-yellow-50"
@@ -513,7 +527,7 @@ export default function InternPage() {
               colorClass="text-green-700"
             >
               <div className="space-y-2">
-                {activeRotation.knowledge.completed.map((item: any) => (
+                {activeRotation.knowledge.completed.map((item) => (
                   <div key={item.id} className="border border-green-200 rounded-lg p-3 bg-green-50">
                     <div className="flex items-center justify-between">
                       <div className="font-medium text-gray-900">{item.name}</div>
@@ -542,7 +556,7 @@ export default function InternPage() {
               colorClass="text-gray-700"
             >
               <div className="space-y-2">
-                {activeRotation.knowledge.notStarted.map((item: any) => (
+                {activeRotation.knowledge.notStarted.map((item) => (
                   <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                     <div className="font-medium text-gray-900">{item.name}</div>
                   </div>

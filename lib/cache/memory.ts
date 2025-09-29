@@ -10,7 +10,7 @@ interface CacheOptions {
 }
 
 interface CacheEntry {
-  value: any;
+  value: unknown;
   expires: number;
 }
 
@@ -145,7 +145,6 @@ class MemoryCache {
   }> {
     try {
       // Clean up expired entries
-      const now = Date.now();
       for (const [key, entry] of this.cache.entries()) {
         if (this.isExpired(entry)) {
           this.cache.delete(key);
@@ -172,7 +171,6 @@ class MemoryCache {
 
   // Cleanup expired entries
   cleanup(): void {
-    const now = Date.now();
     for (const [key, entry] of this.cache.entries()) {
       if (this.isExpired(entry)) {
         this.cache.delete(key);

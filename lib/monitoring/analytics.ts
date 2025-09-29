@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger';
 
 interface AnalyticsEvent {
   name: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   timestamp: number;
   userId?: string;
   sessionId?: string;
@@ -17,7 +17,7 @@ interface PerformanceMetrics {
   duration: number;
   memoryUsage: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface UserBehavior {
@@ -25,7 +25,7 @@ interface UserBehavior {
   action: string;
   page: string;
   timestamp: number;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 class AnalyticsService {
@@ -35,7 +35,7 @@ class AnalyticsService {
   private maxEvents = 10000;
 
   // Track custom events
-  trackEvent(name: string, properties: Record<string, any> = {}, userId?: string): void {
+  trackEvent(name: string, properties: Record<string, unknown> = {}, userId?: string): void {
     const event: AnalyticsEvent = {
       name,
       properties,
@@ -107,7 +107,7 @@ class AnalyticsService {
     operation: string,
     duration: number,
     memoryUsage?: number,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void {
     const metric: PerformanceMetrics = {
       operation,
@@ -193,7 +193,18 @@ class AnalyticsService {
         )
       : this.performanceMetrics;
 
-    const stats: Record<string, any> = {};
+    const stats: Record<
+      string,
+      {
+        count: number;
+        totalDuration: number;
+        maxDuration: number;
+        minDuration: number;
+        totalMemoryUsage: number;
+        avgDuration?: number;
+        avgMemoryUsage?: number;
+      }
+    > = {};
 
     metrics.forEach((metric) => {
       if (!stats[metric.operation]) {
@@ -216,7 +227,7 @@ class AnalyticsService {
 
     // Calculate averages
     Object.keys(stats).forEach((operation) => {
-      const stat = stats[operation];
+      const stat = stats[operation]!;
       stat.avgDuration = stat.totalDuration / stat.count;
       stat.avgMemoryUsage = stat.totalMemoryUsage / stat.count;
       stat.minDuration = stat.minDuration === Infinity ? 0 : stat.minDuration;
@@ -303,21 +314,21 @@ class AnalyticsService {
 export const analytics = new AnalyticsService();
 
 // Convenience functions
-export const trackEvent = (name: string, properties?: Record<string, any>, userId?: string) =>
+export const trackEvent = (name: string, properties?: Record<string, unknown>, userId?: string) =>
   analytics.trackEvent(name, properties, userId);
 
 export const trackUserBehavior = (
   userId: string,
   action: string,
   page: string,
-  properties?: Record<string, any>,
+  properties?: Record<string, unknown>,
 ) => analytics.trackUserBehavior(userId, action, page, properties);
 
 export const trackPerformanceMetric = (
   operation: string,
   duration: number,
   memoryUsage?: number,
-  metadata?: Record<string, any>,
+  metadata?: Record<string, unknown>,
 ) => analytics.trackPerformance(operation, duration, memoryUsage, metadata);
 
 // Performance tracking decorator

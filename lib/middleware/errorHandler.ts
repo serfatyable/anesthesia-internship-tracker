@@ -121,8 +121,8 @@ export function withErrorHandling<T extends unknown[], R>(handler: (...args: T) 
         requestId,
         path,
         method,
-        userAgent,
-        ip,
+        ...(userAgent && { userAgent }),
+        ...(ip && { ip }),
       });
 
       // If it's already a NextResponse, return it

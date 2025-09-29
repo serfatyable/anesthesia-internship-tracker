@@ -16,7 +16,7 @@ interface LogContext {
   sessionId?: string;
   operation?: string;
   duration?: number;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> | undefined;
   // Additional context properties for different logging scenarios
   method?: string;
   path?: string;
@@ -56,7 +56,6 @@ interface LogContext {
   retryCount?: number;
   url?: string;
   userAgent?: string;
-  metadata?: Record<string, any>;
 }
 
 interface LogEntry {

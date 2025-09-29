@@ -120,8 +120,8 @@ function calculateErrorRate(metrics: Record<string, unknown[]>): number {
 
   if (totalMetrics === 0) return 0;
 
-  const totalErrors = errorMetrics.reduce(
-    (sum, metric: any) => sum + (Number(metric.value) || 0),
+  const totalErrors = (errorMetrics as Array<{ value?: unknown }>).reduce(
+    (sum: number, metric) => sum + (Number(metric.value) || 0),
     0,
   );
   return Math.round((totalErrors / totalMetrics) * 100 * 100) / 100; // Percentage with 2 decimal places
@@ -133,8 +133,8 @@ function calculateAverageResponseTime(metrics: Record<string, unknown[]>): numbe
 
   if (responseTimeMetrics.length === 0) return 0;
 
-  const totalTime = responseTimeMetrics.reduce(
-    (sum, metric: any) => sum + (Number(metric.value) || 0),
+  const totalTime = (responseTimeMetrics as Array<{ value?: unknown }>).reduce(
+    (sum: number, metric) => sum + (Number(metric.value) || 0),
     0,
   );
   return Math.round(totalTime / responseTimeMetrics.length);

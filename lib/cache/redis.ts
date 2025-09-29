@@ -13,7 +13,7 @@ interface CacheOptions {
 class RedisCache {
   private client: RedisClientType | null = null;
   private isConnected = false;
-  private fallbackCache = new Map<string, { value: any; expires: number }>();
+  private fallbackCache = new Map<string, { value: unknown; expires: number }>();
 
   constructor() {
     this.initializeRedis();
@@ -26,7 +26,6 @@ class RedisCache {
           url: process.env.REDIS_URL,
           socket: {
             connectTimeout: 5000,
-            lazyConnect: true,
           },
         });
 
@@ -168,7 +167,7 @@ class RedisCache {
       }
     } catch (error) {
       logger.error('Cache clear error', {
-        pattern,
+        pattern: pattern || 'unknown',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
@@ -187,9 +186,9 @@ class RedisCache {
 
         return {
           isConnected: true,
-          type: 'redis',
+          type: 'redis' as const,
           size: await this.client.dbSize(),
-          memoryUsage: memoryUsage ? parseInt(memoryUsage) : undefined,
+          ...(memoryUsage && { memoryUsage: parseInt(memoryUsage) }),
         };
       } else {
         return {

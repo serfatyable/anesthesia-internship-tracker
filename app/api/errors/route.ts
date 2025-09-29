@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       userId: errorReport.userId || undefined,
       url: errorReport.url,
       userAgent: errorReport.userAgent,
-      metadata: errorReport.metadata,
+      metadata: errorReport.metadata || {},
     });
 
     // Record error metrics

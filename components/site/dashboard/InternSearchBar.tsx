@@ -21,7 +21,7 @@ export const InternSearchBar = memo(function InternSearchBar({
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
+  // Track selection implicitly via searchTerm/router; no need to store selected intern
 
   // Filter interns based on search term
   const filteredInterns = useMemo(() => {
@@ -42,7 +42,6 @@ export const InternSearchBar = memo(function InternSearchBar({
 
   const handleInternSelect = useCallback(
     (intern: Intern) => {
-      setSelectedIntern(intern);
       setSearchTerm(intern.name || intern.email);
       setIsOpen(false);
       // Navigate to the individual intern page

@@ -127,7 +127,7 @@ function createValidationErrorResponse(errors: z.ZodError, context: string): Nex
   logger.warn('Validation failed', {
     operation: 'validation',
     context,
-    errors: formattedErrors,
+    errors: JSON.stringify(formattedErrors),
   });
 
   return NextResponse.json(
