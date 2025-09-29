@@ -14,40 +14,61 @@ export default function InternPage() {
 
   const [internData, setInternData] = useState<{
     intern: { id: string; name: string; email: string };
-    summary: {
-      totalRequired: number;
-      totalVerified: number;
-      totalPending: number;
-      completionPercentage: number;
-    };
-    rotations: Array<{
-      rotationId: string;
-      rotationName: string;
+    activeRotation: {
+      id: string;
+      name: string;
       required: number;
       verified: number;
       pending: number;
       completionPercentage: number;
-      state: string;
-      currentInterns: number;
-    }>;
-    pendingVerifications: Array<{
-      id: string;
-      logEntryId: string;
-      procedureName: string;
-      internName: string;
-      date: Date;
-      count: number;
-      notes?: string;
-      createdAt: Date;
-    }>;
-    recentActivity: Array<{
-      id: string;
-      type: string;
-      description: string;
-      timestamp: Date;
-      internName: string;
-      procedureName?: string;
-    }>;
+      procedures: {
+        pending: Array<{
+          id: string;
+          name: string;
+          logEntryId: string;
+          count: number;
+          date: string;
+          notes?: string;
+        }>;
+        completed: Array<{
+          id: string;
+          name: string;
+          logEntryId: string;
+          count: number;
+          date: string;
+          notes?: string;
+        }>;
+        notStarted: Array<{
+          id: string;
+          name: string;
+          required?: number;
+        }>;
+      };
+      knowledge: {
+        pending: Array<{
+          id: string;
+          name: string;
+          logEntryId?: string;
+          count?: number;
+          date?: string;
+          notes?: string;
+        }>;
+        completed: Array<{
+          id: string;
+          name: string;
+          logEntryId?: string;
+          count?: number;
+          date?: string;
+          notes?: string;
+        }>;
+        notStarted: Array<{
+          id: string;
+          name: string;
+          required?: number;
+        }>;
+      };
+    };
+    isFavorite: boolean;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -186,7 +207,7 @@ export default function InternPage() {
     );
   }
 
-  const { intern, isFavorite, activeRotation } = internData;
+  const { intern, activeRotation } = internData;
 
   // Collapsible section component
   const CollapsibleSection = ({
@@ -239,15 +260,9 @@ export default function InternPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{intern.name || 'Unknown Intern'}</h1>
             <p className="text-gray-600 mt-1">{intern.email}</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Intern since {new Date(intern.createdAt).toLocaleDateString()}
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Intern ID: {intern.id}</p>
           </div>
-          <FavoriteInternButton
-            internId={internId}
-            isFavorite={isFavorite}
-            tutorId={session.user.id}
-          />
+          <FavoriteInternButton internId={internId} isFavorite={false} tutorId={session.user.id} />
         </div>
       </div>
 
@@ -341,9 +356,10 @@ export default function InternPage() {
                   (item: {
                     id: string;
                     name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
+                    logEntryId: string;
+                    count: number;
+                    date: string;
+                    notes?: string;
                   }) => (
                     <div
                       key={item.id}
@@ -352,10 +368,10 @@ export default function InternPage() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-medium text-gray-900">{item.name}</div>
                         <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
+                          {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
                         </div>
                       </div>
-                      <div className="text-sm text-gray-600 mb-3">Count: {item.count}</div>
+                      <div className="text-sm text-gray-600 mb-3">Count: {item.count || 0}</div>
                       {item.notes && (
                         <div className="text-sm text-gray-600 mb-3">
                           <strong>Notes:</strong> {item.notes}
@@ -363,15 +379,15 @@ export default function InternPage() {
                       )}
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApproval(item.logEntryId, 'APPROVED')}
-                          disabled={processing === item.logEntryId}
+                          onClick={() => handleApproval(item.logEntryId || item.id, 'APPROVED')}
+                          disabled={processing === (item.logEntryId || item.id)}
                           className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {processing === item.logEntryId ? 'Processing...' : 'Approve'}
                         </button>
                         <button
-                          onClick={() => handleApproval(item.logEntryId, 'REJECTED')}
-                          disabled={processing === item.logEntryId}
+                          onClick={() => handleApproval(item.logEntryId || item.id, 'REJECTED')}
+                          disabled={processing === (item.logEntryId || item.id)}
                           className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {processing === item.logEntryId ? 'Processing...' : 'Reject'}
@@ -398,9 +414,10 @@ export default function InternPage() {
                   (item: {
                     id: string;
                     name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
+                    logEntryId: string;
+                    count: number;
+                    date: string;
+                    notes?: string;
                   }) => (
                     <div
                       key={item.id}
@@ -409,7 +426,7 @@ export default function InternPage() {
                       <div className="flex items-center justify-between">
                         <div className="font-medium text-gray-900">{item.name}</div>
                         <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
+                          {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
                         </div>
                       </div>
                       <div className="text-sm text-gray-600">Count: {item.count}</div>
@@ -436,16 +453,10 @@ export default function InternPage() {
             >
               <div className="space-y-2">
                 {activeRotation.procedures.notStarted.map(
-                  (item: {
-                    id: string;
-                    name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
-                  }) => (
+                  (item: { id: string; name: string; required?: number }) => (
                     <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
                       <div className="font-medium text-gray-900">{item.name}</div>
-                      <div className="text-sm text-gray-600">Required: {item.required}</div>
+                      <div className="text-sm text-gray-600">Required: {item.required || 1}</div>
                     </div>
                   ),
                 )}
@@ -472,9 +483,10 @@ export default function InternPage() {
                   (item: {
                     id: string;
                     name: string;
-                    completed: boolean;
-                    pending: boolean;
-                    textbookResource?: string;
+                    logEntryId?: string;
+                    count?: number;
+                    date?: string;
+                    notes?: string;
                   }) => (
                     <div
                       key={item.id}
@@ -483,7 +495,7 @@ export default function InternPage() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-medium text-gray-900">{item.name}</div>
                         <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
+                          {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
                         </div>
                       </div>
                       {item.notes && (
@@ -493,15 +505,15 @@ export default function InternPage() {
                       )}
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApproval(item.logEntryId, 'APPROVED')}
-                          disabled={processing === item.logEntryId}
+                          onClick={() => handleApproval(item.logEntryId || item.id, 'APPROVED')}
+                          disabled={processing === (item.logEntryId || item.id)}
                           className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {processing === item.logEntryId ? 'Processing...' : 'Approve'}
                         </button>
                         <button
-                          onClick={() => handleApproval(item.logEntryId, 'REJECTED')}
-                          disabled={processing === item.logEntryId}
+                          onClick={() => handleApproval(item.logEntryId || item.id, 'REJECTED')}
+                          disabled={processing === (item.logEntryId || item.id)}
                           className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {processing === item.logEntryId ? 'Processing...' : 'Reject'}
@@ -539,7 +551,7 @@ export default function InternPage() {
                       <div className="flex items-center justify-between">
                         <div className="font-medium text-gray-900">{item.name}</div>
                         <div className="text-sm text-gray-600">
-                          {new Date(item.date).toLocaleDateString()}
+                          {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
                         </div>
                       </div>
                       {item.notes && (

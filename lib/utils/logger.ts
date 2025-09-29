@@ -17,6 +17,48 @@ interface LogContext {
   operation?: string;
   duration?: number;
   metadata?: Record<string, unknown>;
+  // Additional context properties for specific logging scenarios
+  method?: string;
+  path?: string;
+  query?: string;
+  action?: string;
+  event?: string;
+  metric?: string;
+  value?: number;
+  key?: string;
+  pattern?: string;
+  error?: string;
+  context?: string;
+  type?: string;
+  operationName?: string;
+  cacheKey?: string;
+  memoryUsage?: number;
+  heapGrowth?: number;
+  externalGrowth?: number;
+  rssGrowth?: number;
+  statusCode?: number;
+  errorId?: string;
+  status?: string;
+  errors?: string;
+  message?: string;
+  responseTime?: number;
+  level?: string;
+  // Additional properties for specific use cases
+  memoryDelta?: number;
+  maxResults?: number;
+  maxMemoryUsage?: number;
+  age?: number;
+  result?: any;
+  entity?: string;
+  severity?: string;
+  ipAddress?: string;
+  logEntryId?: string;
+  eventName?: string;
+  page?: string;
+  reason?: string;
+  retryCount?: number;
+  url?: string;
+  userAgent?: string;
 }
 
 interface LogEntry {
@@ -24,8 +66,8 @@ interface LogEntry {
   message: string;
   timestamp: string;
   context: LogContext;
-  error?: Error;
-  stack?: string;
+  error?: Error | undefined;
+  stack?: string | undefined;
 }
 
 class Logger {
@@ -83,7 +125,7 @@ class Logger {
     // Record metrics for monitoring
     monitoring.recordMetric('logger.entries', 1, {
       level: levelName.toLowerCase(),
-      hasError: !!entry.error,
+      hasError: entry.error ? 'true' : 'false',
     });
   }
 
@@ -176,6 +218,32 @@ class Logger {
     });
   }
 
+  // Additional specialized logging methods
+  request(method: string, path: string, duration?: number, context: LogContext = {}): void {
+    this.info(`API Request: ${method} ${path}`, {
+      ...context,
+      operation: 'api_request',
+      method,
+      path,
+      ...(duration !== undefined && { duration }),
+    });
+  }
+
+  verificationDecision(
+    action: string,
+    logEntryId: string,
+    reason?: string,
+    context: LogContext = {},
+  ): void {
+    this.info(`Verification Decision: ${action}`, {
+      ...context,
+      operation: 'verification_decision',
+      action,
+      logEntryId,
+      reason,
+    });
+  }
+
   // Batch logging for high-volume operations
   batchLog(entries: Array<{ level: LogLevel; message: string; context?: LogContext }>): void {
     entries.forEach(({ level, message, context = {} }) => {
@@ -214,14 +282,14 @@ export const logDebug = (message: string, context?: LogContext) => logger.debug(
 
 // Request-scoped logger
 export function createRequestLogger(requestId: string, userId?: string): Logger {
-  return logger.child({ requestId, userId });
+  return logger.child({ requestId, ...(userId && { userId }) });
 }
 
 // Performance logging decorator
 export function logPerformance<T extends (...args: any[]) => any>(
   fn: T,
   operationName: string,
-  logger: Logger = logger,
+  loggerInstance: Logger = logger,
 ): T {
   return ((...args: Parameters<T>) => {
     const start = performance.now();
@@ -233,22 +301,22 @@ export function logPerformance<T extends (...args: any[]) => any>(
         return result
           .then((resolved) => {
             const duration = performance.now() - start;
-            logger.performanceMetric(operationName, duration);
+            loggerInstance.performanceMetric(operationName, duration);
             return resolved;
           })
           .catch((error) => {
             const duration = performance.now() - start;
-            logger.error(`${operationName} failed`, { duration }, error);
+            loggerInstance.error(`${operationName} failed`, { duration }, error);
             throw error;
           });
       }
 
       const duration = performance.now() - start;
-      logger.performanceMetric(operationName, duration);
+      loggerInstance.performanceMetric(operationName, duration);
       return result;
     } catch (error) {
       const duration = performance.now() - start;
-      logger.error(`${operationName} failed`, { duration }, error as Error);
+      loggerInstance.error(`${operationName} failed`, { duration }, error as Error);
       throw error;
     }
   }) as T;

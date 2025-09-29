@@ -13,13 +13,6 @@ export const prisma =
         url: env.DATABASE_URL,
       },
     },
-    // Connection pooling configuration
-    __internal: {
-      engine: {
-        connectTimeout: 60000, // 60 seconds
-        queryTimeout: 30000, // 30 seconds
-      },
-    },
   });
 
 if (env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

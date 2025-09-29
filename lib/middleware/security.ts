@@ -130,7 +130,7 @@ function isValidOrigin(request: NextRequest): boolean {
     process.env.NEXTAUTH_URL,
   ].filter(Boolean);
 
-  return allowedOrigins.some((allowed) => origin.startsWith(allowed));
+  return allowedOrigins.some((allowed) => origin?.startsWith(allowed) ?? false);
 }
 
 // Check for suspicious patterns
@@ -193,7 +193,8 @@ function applyCORSHeaders(response: NextResponse): NextResponse {
 
 // Main security middleware
 export function securityMiddleware(request: NextRequest): NextResponse | null {
-  const { pathname, method } = request.nextUrl;
+  const { pathname } = request.nextUrl;
+  const method = request.method;
 
   // Handle preflight requests
   if (method === 'OPTIONS') {

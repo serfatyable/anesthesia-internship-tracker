@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
   const parsed = VerifyLogSchema.safeParse(body);
   if (!parsed.success) {
-    logger.warn('Invalid verification request', { errors: parsed.error.flatten() });
+    logger.warn('Invalid verification request', { errors: JSON.stringify(parsed.error.flatten()) });
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 

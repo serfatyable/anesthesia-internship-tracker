@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
       message: errorReport.message,
       level: errorReport.level,
       retryCount: errorReport.retryCount,
-      userId: errorReport.userId,
+      ...(errorReport.userId && { userId: errorReport.userId }),
       url: errorReport.url,
       userAgent: errorReport.userAgent,
-      metadata: errorReport.metadata,
+      ...(errorReport.metadata && { metadata: errorReport.metadata }),
     });
 
     // Record error metrics
