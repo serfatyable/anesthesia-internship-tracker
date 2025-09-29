@@ -6,18 +6,20 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/utils/logger';
 import { monitoring } from '@/lib/utils/monitoring';
 
+type JsonRecord = Record<string, unknown>;
+
 interface AuditEvent {
   id: string;
   actorUserId: string | null;
   action: string;
   entity: string;
   entityId: string;
-  oldValues: Record<string, any> | null;
-  newValues: Record<string, any> | null;
+  oldValues: JsonRecord | null;
+  newValues: JsonRecord | null;
   ipAddress: string;
   userAgent: string;
   timestamp: Date;
-  metadata: Record<string, any> | null;
+  metadata: JsonRecord | null;
 }
 
 interface SecurityEvent {
@@ -31,7 +33,7 @@ interface SecurityEvent {
   userId: string | undefined;
   ipAddress: string;
   userAgent: string;
-  details: Record<string, any>;
+  details: JsonRecord;
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   timestamp: Date;
 }
@@ -46,10 +48,10 @@ class SecurityAuditService {
     action: string,
     entity: string,
     entityId: string,
-    oldValues: Record<string, any> | null = null,
-    newValues: Record<string, any> | null = null,
+    oldValues: JsonRecord | null = null,
+    newValues: JsonRecord | null = null,
     request: NextRequest,
-    metadata?: Record<string, any>,
+    metadata?: JsonRecord,
   ): Promise<void> {
     try {
       const auditEvent: Omit<AuditEvent, 'id' | 'timestamp'> = {
@@ -96,7 +98,7 @@ class SecurityAuditService {
   // Record security event
   recordSecurityEvent(
     type: SecurityEvent['type'],
-    details: Record<string, any>,
+    details: JsonRecord,
     request: NextRequest,
     severity: SecurityEvent['severity'] = 'MEDIUM',
     userId?: string,
@@ -182,12 +184,12 @@ class SecurityAuditService {
         action: e.action,
         entity: e.entity,
         entityId: e.entityId,
-        oldValues: (e as any).oldValues ?? null,
-        newValues: (e as any).newValues ?? null,
-        ipAddress: (e as any).ipAddress ?? 'unknown',
-        userAgent: (e as any).userAgent ?? 'unknown',
+        oldValues: (e as unknown as { oldValues?: JsonRecord }).oldValues ?? null,
+        newValues: (e as unknown as { newValues?: JsonRecord }).newValues ?? null,
+        ipAddress: (e as unknown as { ipAddress?: string }).ipAddress ?? 'unknown',
+        userAgent: (e as unknown as { userAgent?: string }).userAgent ?? 'unknown',
         timestamp: e.timestamp,
-        metadata: (e as any).metadata ?? null,
+        metadata: (e as unknown as { metadata?: JsonRecord }).metadata ?? null,
       }));
     } catch (error) {
       logger.error('Failed to get audit trail', {
@@ -230,8 +232,8 @@ class SecurityAuditService {
     });
 
     const suspiciousIPs = Object.entries(ipCounts)
-      .filter(([/* ip */ _ip, count]) => count > 10) // More than 10 events from same IP
-      .map(([ip /*, count*/]) => ip);
+      .filter(([ip, count]) => count > 10 && ip)
+      .map(([ip]) => ip);
 
     return {
       totalEvents: events.length,
@@ -306,10 +308,10 @@ export const recordAuditEvent = (
   action: string,
   entity: string,
   entityId: string,
-  oldValues: Record<string, any> | null = null,
-  newValues: Record<string, any> | null = null,
+  oldValues: JsonRecord | null = null,
+  newValues: JsonRecord | null = null,
   request: NextRequest,
-  metadata?: Record<string, any>,
+  metadata?: JsonRecord,
 ) =>
   securityAudit.recordAuditEvent(
     actorUserId,
@@ -324,7 +326,7 @@ export const recordAuditEvent = (
 
 export const recordSecurityEvent = (
   type: SecurityEvent['type'],
-  details: Record<string, any>,
+  details: JsonRecord,
   request: NextRequest,
   severity: SecurityEvent['severity'] = 'MEDIUM',
   userId?: string,

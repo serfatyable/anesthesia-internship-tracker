@@ -294,7 +294,7 @@ setInterval(() => {
 }, CACHE_TTL);
 
 // Performance monitoring middleware
-export function performanceMiddleware(request: NextRequest): NextResponse | null {
+export function performanceMiddleware(_request: NextRequest): NextResponse | null {
   const start = performance.now();
   const startMemory = process.memoryUsage();
 
@@ -360,6 +360,8 @@ export function analyzePerformance(metrics: Record<string, number[]>): {
 }
 
 // Memory leak detection
+type MemorySnapshot = ReturnType<typeof process.memoryUsage> & { timestamp: number };
+
 export function detectMemoryLeaks(): {
   isLeaking: boolean;
   heapGrowth: number;
@@ -370,18 +372,19 @@ export function detectMemoryLeaks(): {
   const now = Date.now();
 
   // Store previous memory usage
-  if (!(detectMemoryLeaks as any)['previousMemory']) {
-    (detectMemoryLeaks as any)['previousMemory'] = memory;
-    (detectMemoryLeaks as any)['previousTime'] = now;
+  const state = detectMemoryLeaks as unknown as {
+    previous?: MemorySnapshot;
+  };
+
+  if (!state.previous) {
+    state.previous = { ...memory, timestamp: now } as MemorySnapshot;
     return { isLeaking: false, heapGrowth: 0, externalGrowth: 0, rssGrowth: 0 };
   }
 
-  const timeDelta = now - (detectMemoryLeaks as any)['previousTime'];
-  const heapGrowth =
-    (memory.heapUsed - (detectMemoryLeaks as any)['previousMemory'].heapUsed) / timeDelta;
-  const externalGrowth =
-    (memory.external - (detectMemoryLeaks as any)['previousMemory'].external) / timeDelta;
-  const rssGrowth = (memory.rss - (detectMemoryLeaks as any)['previousMemory'].rss) / timeDelta;
+  const timeDelta = now - state.previous.timestamp;
+  const heapGrowth = (memory.heapUsed - state.previous.heapUsed) / timeDelta;
+  const externalGrowth = (memory.external - state.previous.external) / timeDelta;
+  const rssGrowth = (memory.rss - state.previous.rss) / timeDelta;
 
   const isLeaking = heapGrowth > 1024 * 1024; // 1MB per second
 
@@ -394,8 +397,7 @@ export function detectMemoryLeaks(): {
     });
   }
 
-  (detectMemoryLeaks as any)['previousMemory'] = memory;
-  (detectMemoryLeaks as any)['previousTime'] = now;
+  state.previous = { ...memory, timestamp: now } as MemorySnapshot;
 
   return {
     isLeaking,

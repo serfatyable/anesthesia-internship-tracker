@@ -44,7 +44,7 @@ interface LogContext {
   maxResults?: number;
   maxMemoryUsage?: number;
   age?: number;
-  result?: any;
+  result?: unknown;
   page?: string;
   eventName?: string;
   externalGrowth?: number;
