@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Align with existing Postgres enum in production
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                          String                       @id @default(cuid())
   name                        String?
@@ -92,14 +99,14 @@ model LogEntry {
 }
 
 model Verification {
-  id         String    @id @default(cuid())
-  logEntryId String    @unique
+  id         String             @id @default(cuid())
+  logEntryId String             @unique
   verifierId String?
   reason     String?
   timestamp  DateTime?
-  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  logEntry   LogEntry  @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
-  verifier   User?     @relation("VerifierVerifications", fields: [verifierId], references: [id])
+  status     VerificationStatus @default(PENDING)
+  logEntry   LogEntry           @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  verifier   User?              @relation("VerifierVerifications", fields: [verifierId], references: [id])
 
   @@index([status])
 }
