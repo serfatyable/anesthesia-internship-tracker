@@ -7,6 +7,16 @@ import { csrfProtection, setCSRFToken } from '@/lib/middleware/csrf';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Canonical host redirect
+  const canonicalHost = process.env.CANONICAL_HOST;
+  const requestHost = req.headers.get('host');
+  if (canonicalHost && requestHost && requestHost !== canonicalHost) {
+    const url = new URL(req.url);
+    url.host = canonicalHost;
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 308);
+  }
+
   // CSRF protection for state-changing requests
   const csrfResponse = await csrfProtection(req);
   if (csrfResponse) {
@@ -63,12 +73,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/verify/:path*',
-    '/tutor/:path*',
-    '/dashboard/:path*',
-    '/logs/:path*',
-    '/rotations/:path*',
-    '/api/((?!auth|session|health|errors).)*',
+    // Apply globally except static assets and Next image optimizer
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
