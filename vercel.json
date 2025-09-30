@@ -55,13 +55,6 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/admin",
-      "destination": "/admin/overview",
-      "permanent": false
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   }
