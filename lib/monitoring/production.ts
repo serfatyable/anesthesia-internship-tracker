@@ -66,10 +66,10 @@ class ProductionMonitor {
   isHealthy(): boolean {
     const metrics = this.getMetrics();
 
-    // Check memory usage (alert if over 80%)
+    // Check memory usage (alert if over 95%)
     const memoryUsagePercent =
       (metrics.memoryUsage.heapUsed / metrics.memoryUsage.heapTotal) * 100;
-    if (memoryUsagePercent > 80) {
+    if (memoryUsagePercent > 95) {
       logger.warn('High memory usage detected', {
         memoryUsagePercent,
         heapUsed: metrics.memoryUsage.heapUsed,
@@ -240,7 +240,7 @@ export class MemoryMonitor {
     const memoryUsagePercent =
       (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
 
-    if (memoryUsagePercent > 80) {
+    if (memoryUsagePercent > 95) {
       logger.warn('High memory usage detected', {
         memoryUsagePercent,
         heapUsed: memoryUsage.heapUsed,
@@ -277,7 +277,7 @@ export function initializeProductionMonitoring() {
   // Set up memory monitoring
   setInterval(() => {
     MemoryMonitor.checkMemoryUsage();
-  }, 30000); // Check every 30 seconds
+  }, 120000); // Check every 2 minutes
 
   // Set up health check logging
   setInterval(() => {

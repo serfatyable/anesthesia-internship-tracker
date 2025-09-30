@@ -38,9 +38,9 @@ class MonitoringService {
     this.config = {
       performance: {
         enabled: process.env.NODE_ENV === 'production' && !isMonitoringDisabled,
-        sampleRate: 1.0,
+        sampleRate: 0.1,
         maxMetrics: 1000,
-        flushInterval: 30000,
+        flushInterval: 120000,
         ...config.performance,
       },
       health: {
@@ -61,9 +61,9 @@ class MonitoringService {
       },
       analytics: {
         enabled: process.env.NODE_ENV === 'production' && !isMonitoringDisabled,
-        sampleRate: 1.0,
+        sampleRate: 0.1,
         maxEvents: 10000,
-        flushInterval: 60000,
+        flushInterval: 180000,
         ...config.analytics,
       },
     };

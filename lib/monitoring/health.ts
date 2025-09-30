@@ -151,7 +151,7 @@ class HealthMonitor {
       const usedMemory = memoryUsage.heapUsed + memoryUsage.external;
       const percentage = (usedMemory / totalMemory) * 100;
 
-      if (percentage > 90) {
+      if (percentage > 98) {
         return {
           name: 'memory',
           status: 'unhealthy',
@@ -159,7 +159,7 @@ class HealthMonitor {
           details: { percentage, used: usedMemory, total: totalMemory },
           timestamp: Date.now(),
         };
-      } else if (percentage > 80) {
+      } else if (percentage > 95) {
         return {
           name: 'memory',
           status: 'degraded',
