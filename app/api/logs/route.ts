@@ -9,15 +9,23 @@ import { sanitizeNotes } from '@/lib/utils/sanitize';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const logs = await listMyLogs(session.user.id);
-    return NextResponse.json({ logs });
+    const { searchParams } = new URL(request.url);
+    const pageParam = searchParams.get('page');
+    const limitParam = searchParams.get('limit');
+    const page = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1;
+    const limit = limitParam
+      ? Math.min(100, Math.max(1, parseInt(limitParam, 10) || 50))
+      : 50;
+
+    const result = await listMyLogs(session.user.id, { page, limit });
+    return NextResponse.json(result);
   } catch (error: unknown) {
     console.error('Logs API error:', error);
 

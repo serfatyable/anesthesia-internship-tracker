@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Silence monorepo/workspace root inference warnings
+  outputFileTracingRoot: process.cwd(),
   // Skip database operations during build
   env: {
     SKIP_ENV_VALIDATION: 'true',

@@ -40,22 +40,41 @@ export function clearProceduresCache() {
   proceduresCacheTimestamp = 0;
 }
 
-export async function listMyLogs(internId: string) {
-  return prisma.logEntry.findMany({
-    where: { internId },
-    orderBy: { date: 'desc' },
-    select: {
-      id: true,
-      date: true,
-      count: true,
-      notes: true,
-      procedure: { select: { id: true, name: true } },
-      verification: { select: { status: true, reason: true, timestamp: true } },
-    },
-  });
+export async function listMyLogs(
+  internId: string,
+  options?: { page?: number; limit?: number }
+) {
+  const page = Math.max(1, Math.floor(options?.page ?? 1));
+  const limit = Math.min(100, Math.max(1, Math.floor(options?.limit ?? 50)));
+  const skip = (page - 1) * limit;
+
+  const [logs, total] = await Promise.all([
+    prisma.logEntry.findMany({
+      where: { internId },
+      orderBy: { date: 'desc' },
+      select: {
+        id: true,
+        date: true,
+        count: true,
+        notes: true,
+        procedure: { select: { id: true, name: true } },
+        verification: {
+          select: { status: true, reason: true, timestamp: true },
+        },
+      },
+      take: limit,
+      skip,
+    }),
+    prisma.logEntry.count({ where: { internId } }),
+  ]);
+
+  return { logs, total, page, limit, hasMore: skip + logs.length < total };
 }
 
-export async function listPendingLogsForTutor() {
+export async function listPendingLogsForTutor(options?: {
+  skip?: number;
+  take?: number;
+}) {
   // List logs with PENDING verification
   return prisma.logEntry.findMany({
     where: { verification: { status: 'PENDING' } },
@@ -71,5 +90,7 @@ export async function listPendingLogsForTutor() {
         select: { id: true, status: true, reason: true, timestamp: true },
       },
     },
+    skip: options?.skip ?? 0,
+    take: options?.take ?? 50,
   });
 }
